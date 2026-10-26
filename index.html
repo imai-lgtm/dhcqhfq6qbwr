@@ -17,66 +17,92 @@
 html, body { margin: 0; overflow-x: clip; }
 body { min-height: 100vh; font-family: 'Maru', 'Hiragino Maru Gothic ProN', 'Meiryo', sans-serif; font-weight: 700; color: #efe9ff; background: var(--bg); overflow-x: hidden; }
 a { color: inherit; }
-/* 店内（夜のゲーセン） */
+button { font: inherit; color: inherit; border: 0; background: none; cursor: pointer; padding: 0; }
+body.out #inside, body.in #outside { display: none; }
+body.out { overflow: hidden; }
+
+/* ═════ 店の外（トップ） ═════ */
+#outside { position: fixed; inset: 0; overflow: hidden; background: #05030a; }
+.ext { position: absolute; left: 50%; top: 50%; translate: -50% -50%; transform-origin: 50% 72%; transition: transform 1.2s cubic-bezier(.6,0,.3,1), filter 1.2s; animation: extin 1.6s ease-out both; }
+@keyframes extin { from { opacity: 0; filter: brightness(.3) blur(6px); } }
+.ext img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+body.entering .ext { transform: scale(2.6); filter: brightness(1.6) blur(2px); }
+/* 看板（絵の中の看板の板に、ネオンの店名をはめ込む） */
+.slot { position: absolute; container-type: size; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+.slot::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 50%, rgba(255,61,127,.18), transparent 70%); }
+.slot .en { position: relative; margin: 0 0 1cqh; font-family: 'Dela', sans-serif; font-size: min(11cqh, 3.2cqw); letter-spacing: .4em; padding-left: .4em; color: var(--cyan); text-shadow: 0 0 4px #fff, 0 0 10px var(--cyan), 0 0 22px var(--cyan); white-space: nowrap; }
+.slot .name { position: relative; margin: 0; font-family: 'Boku', serif; font-weight: 400; font-size: min(56cqh, 9.6cqw); line-height: 1; color: #fff1f6; white-space: nowrap;
+  text-shadow: 0 0 4px #fff, 0 0 12px var(--pink), 0 0 28px var(--pink), 0 0 60px rgba(255,61,127,.75); animation: neonon 2.2s .3s both; }
+.slot .name .fl { animation: flick 7s 2.6s infinite; }
+@keyframes neonon { 0%, 18% { opacity: .08; text-shadow: none; } 20% { opacity: 1; } 24% { opacity: .2; } 30%, 100% { opacity: 1; } }
+@keyframes flick { 0%, 7%, 9%, 52%, 54%, 100% { opacity: 1; } 8%, 53% { opacity: .25; text-shadow: none; } }
+.rain { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.ovl { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(ellipse 90% 80% at 50% 45%, transparent 55%, rgba(0,0,0,.7) 100%); }
+.door { position: absolute; left: 50%; bottom: 7vh; translate: -50% 0; width: max-content; text-align: center; animation: fadein 1s 1.6s both; }
+@keyframes fadein { from { opacity: 0; } }
+.enter { position: relative; display: inline-flex; flex-direction: column; align-items: center; padding: 14px 40px 12px; border-radius: 14px; color: #fff;
+  background: linear-gradient(rgba(255,61,127,.32), rgba(120,20,80,.45)); border: 2px solid #ff8fb8; box-shadow: 0 0 14px rgba(255,61,127,.8), inset 0 0 16px rgba(255,61,127,.5); backdrop-filter: blur(2px);
+  animation: pulse 1.6s ease-in-out infinite; }
+.enter b { white-space: nowrap; font-family: 'Boku', serif; font-weight: 400; font-size: 34px; line-height: 1.1; text-shadow: 0 0 8px #ff3d7f, 0 0 2px #fff; }
+.enter small { font-family: 'Dela', sans-serif; font-size: 11px; letter-spacing: .45em; padding-left: .45em; color: #ffd0e2; }
+@keyframes pulse { 50% { box-shadow: 0 0 30px rgba(255,61,127,1), inset 0 0 22px rgba(255,61,127,.7); } }
+.door p { margin: 10px 0 0; font-size: 12px; color: #d9cfee; text-shadow: 0 1px 4px #000; }
+.flash { position: fixed; inset: 0; background: #fff; opacity: 0; pointer-events: none; z-index: 60; }
+body.entering .flash { animation: wflash 1.25s ease-in forwards; }
+@keyframes wflash { 0%, 60% { opacity: 0; } 100% { opacity: 1; } }
+body.arrive .flash { opacity: 1; animation: wout .7s ease-out forwards; }
+@keyframes wout { to { opacity: 0; } }
+
+/* ═════ 店内（ゲーム選択） ═════ */
 .room { position: fixed; inset: 0; z-index: -1; background: url('top/arcade_bg.webp') 50% 40% / cover no-repeat; }
 .room::after { content: ''; position: absolute; inset: 0; background: linear-gradient(rgba(8,5,16,.82) 0%, rgba(8,5,16,.45) 38%, rgba(8,5,16,.35) 60%, rgba(8,5,16,.8) 100%); }
-
-/* ── 看板（ネオン） ── */
-.top { position: relative; padding: 40px 16px 6px; text-align: center; }
+.bar { position: absolute; left: 0; right: 0; top: 0; z-index: 50; display: flex; justify-content: space-between; padding: 10px; pointer-events: none; }
+.bar button { pointer-events: auto; height: 38px; padding: 0 14px; border-radius: 19px; font-size: 12px; background: rgba(12,8,24,.75); border: 2px solid rgba(255,255,255,.35); backdrop-filter: blur(3px); }
+.bar .mute { width: 38px; padding: 0; font-size: 17px; }
+.mute::after { content: '🔊'; } .mute.off::after { content: '🔇'; }
+.top { position: relative; padding: 44px 16px 6px; text-align: center; }
 .sign { position: relative; display: inline-block; max-width: 100%; padding: 18px 28px 16px; border-radius: 14px; background: linear-gradient(#17112a, #0e0a1a); border: 3px solid #3a2c5c;
   box-shadow: 0 0 0 6px #120d20, 0 10px 40px rgba(0,0,0,.7), inset 0 0 30px rgba(255,61,127,.12); }
 .sign::before, .sign::after { content: ''; position: absolute; top: -40px; width: 2px; height: 40px; background: repeating-linear-gradient(#6b6280 0 4px, #2a2438 4px 6px); }
 .sign::before { left: 18%; } .sign::after { right: 18%; }
 .bulbs { position: absolute; inset: 5px; border-radius: 10px; pointer-events: none;
-  background:
-    radial-gradient(circle, #ffd86b 0 2.2px, transparent 3px) 0 0 / 18px 18px repeat-x,
-    radial-gradient(circle, #ffd86b 0 2.2px, transparent 3px) 0 100% / 18px 18px repeat-x;
+  background: radial-gradient(circle, #ffd86b 0 2.2px, transparent 3px) 0 0 / 18px 18px repeat-x, radial-gradient(circle, #ffd86b 0 2.2px, transparent 3px) 0 100% / 18px 18px repeat-x;
   filter: drop-shadow(0 0 3px #ffb300); animation: chase 1s steps(2) infinite; }
 @keyframes chase { 50% { background-position: 9px 0, 9px 100%; } }
-.sign .en { margin: 0 0 2px; font-family: 'Dela', sans-serif; font-size: clamp(10px, 2.4vw, 15px); letter-spacing: .4em; color: var(--cyan);
-  text-shadow: 0 0 4px #fff, 0 0 10px var(--cyan), 0 0 22px var(--cyan); }
+.sign .en { margin: 0 0 2px; font-family: 'Dela', sans-serif; font-size: clamp(10px, 2.4vw, 15px); letter-spacing: .4em; color: var(--cyan); text-shadow: 0 0 4px #fff, 0 0 10px var(--cyan), 0 0 22px var(--cyan); }
 .sign h1 { margin: 0; font-family: 'Boku', serif; font-weight: 400; font-size: clamp(26px, 7.8vw, 84px); line-height: 1.12; color: #fff1f6; white-space: nowrap;
   text-shadow: 0 0 4px #fff, 0 0 12px var(--pink), 0 0 28px var(--pink), 0 0 52px rgba(255,61,127,.7); }
 .sign h1 .fl { animation: flick 6s infinite; }
-@keyframes flick { 0%, 7%, 9%, 52%, 54%, 100% { opacity: 1; } 8%, 53% { opacity: .25; text-shadow: none; } }
 .open { position: absolute; right: -14px; top: -14px; padding: 4px 10px; border-radius: 6px; font-family: 'Dela', sans-serif; font-size: 12px; letter-spacing: .1em; color: #fff;
   background: #e0242c; box-shadow: 0 0 12px #ff3030, 0 3px 0 #7a0c10; rotate: 8deg; animation: blink 1.6s steps(1) infinite; }
 @keyframes blink { 50% { opacity: .55; } }
 .lead { margin: 16px 0 0; font-size: 14px; color: #e3dcf5; letter-spacing: .05em; text-shadow: 0 2px 6px #000; }
-
-/* ── 電光掲示板 ── */
 .ticker { max-width: 1180px; margin: 18px auto 0; margin-inline: max(10px, calc((100% - 1180px) / 2)); overflow: hidden; border-radius: 8px; background: #070507; border: 2px solid #2b2140; box-shadow: inset 0 0 12px #000, 0 6px 16px rgba(0,0,0,.5); }
-.ticker p { margin: 0; padding: 7px 0; white-space: nowrap; font-family: 'Dot', monospace; font-size: 16px; color: #ff9a2a; text-shadow: 0 0 6px #ff6a00;
-  display: inline-block; padding-left: 100%; animation: tick 34s linear infinite; }
+.ticker p { margin: 0; padding: 7px 0; white-space: nowrap; font-family: 'Dot', monospace; font-size: 16px; color: #ff9a2a; text-shadow: 0 0 6px #ff6a00; display: inline-block; padding-left: 100%; animation: tick 34s linear infinite; }
 @keyframes tick { to { transform: translateX(-100%); } }
 
-/* ── 筐体の列 ── */
+/* 筐体の列（ゲームごとに色・操作パネルの違う筐体） */
 .floor { max-width: 1180px; margin: 30px auto 0; padding: 0 12px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 22px 18px; }
 .cab { --c: #ff3d7f; --c2: #ffcf4a; position: relative; display: block; text-decoration: none; color: inherit; }
-/* 筐体の絵（画面の部分は透明）。画面はその後ろに置く */
-.machine { position: relative; width: 100%; aspect-ratio: 796 / 1479; transition: transform .2s; }
-.cab:hover .machine, .cab:focus-visible .machine { transform: translateY(-6px); }
-.machine::before { content: ''; position: absolute; left: -12%; right: -12%; bottom: -5%; height: 14%; border-radius: 50%; z-index: -1;
-  background: radial-gradient(ellipse, rgba(0,0,0,.75), transparent 70%); }
-.machine::after { content: ''; position: absolute; left: -30%; right: -30%; top: 10%; height: 50%; z-index: -2; pointer-events: none;
+.stand { position: relative; aspect-ratio: 796 / 1479; }
+.stand::before { content: ''; position: absolute; left: -6%; right: -6%; bottom: -4%; height: 12%; border-radius: 50%; background: radial-gradient(ellipse, rgba(0,0,0,.75), transparent 70%); }
+.stand::after { content: ''; position: absolute; left: -30%; right: -30%; top: 10%; height: 50%; z-index: -1; pointer-events: none;
   background: radial-gradient(ellipse, color-mix(in srgb, var(--c) 45%, transparent), transparent 65%); opacity: .55; transition: opacity .2s; }
-.cab:hover .machine::after { opacity: .9; }
+.cab:hover .stand::after { opacity: .9; }
+.machine { position: absolute; left: 50%; bottom: 0; height: 100%; max-width: 100%; aspect-ratio: var(--ar, 796 / 1479); translate: -50% 0; transition: transform .2s; }
+a.cab:hover .machine, a.cab:focus-visible .machine { transform: translateY(-6px); }
 .body { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none; }
-.scr { position: absolute; left: 19.2%; top: 21.5%; width: 61.6%; height: 25.6%; z-index: 1; overflow: hidden; background: #000; }
+.scr { position: absolute; left: var(--sl); top: var(--st); width: var(--sw); height: var(--sh); z-index: 1; overflow: hidden; background: #000; }
 .scr img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; transform: scale(1.14); filter: saturate(1.1) brightness(.95) contrast(1.05); transition: filter .2s; }
-.scr img.alt { opacity: 0; object-fit: cover; transform: none; image-rendering: pixelated; animation: attract 8s steps(1) infinite; }
-@keyframes attract { 50% { opacity: 1; } }
 .scr::after { content: ''; position: absolute; inset: 0; pointer-events: none;
   background: linear-gradient(115deg, rgba(255,255,255,.16) 0 18%, transparent 30%), repeating-linear-gradient(rgba(0,0,0,0) 0 2px, rgba(0,0,0,.2) 2px 3px), radial-gradient(ellipse at 50% 50%, transparent 55%, rgba(0,0,0,.6) 100%); }
 .cab:hover .scr img { filter: saturate(1.25) brightness(1.1) contrast(1.05); }
 .scr em { position: absolute; left: 0; right: 0; bottom: 0; padding: 3px 0 4px; text-align: center; font-style: normal; font-family: 'Dot', monospace; font-size: 11px; color: #fff; z-index: 1;
   background: linear-gradient(transparent, rgba(0,0,0,.8) 45%); text-shadow: 0 0 6px var(--c); animation: blink 1.2s steps(1) infinite; }
-/* マーキー（上の光る看板）にゲームの題名 */
-.marq { position: absolute; left: 10.4%; top: 1.3%; width: 79.2%; height: 7.6%; z-index: 3; display: flex; align-items: center; justify-content: center; border-radius: 3px; overflow: hidden;
+.marq { position: absolute; left: var(--ml); top: var(--mt); width: var(--mw); height: var(--mh); z-index: 3; display: flex; align-items: center; justify-content: center; border-radius: 3px; overflow: hidden;
   background: radial-gradient(ellipse at 50% 30%, color-mix(in srgb, var(--c) 55%, #fff), var(--c) 75%); box-shadow: inset 0 0 0 1px rgba(255,255,255,.4), inset 0 -4px 8px rgba(0,0,0,.25), 0 0 16px color-mix(in srgb, var(--c) 70%, transparent); }
-.marq b { font-family: 'Boku', serif; font-weight: 400; font-size: clamp(13px, 1.65vw, 21px); line-height: 1; color: #fff; text-shadow: 0 2px 0 rgba(0,0,0,.35), 0 0 8px rgba(255,255,255,.4); white-space: nowrap; }
+.marq b { font-family: 'Boku', serif; font-weight: 400; font-size: 21px; line-height: 1; color: #fff; text-shadow: 0 2px 0 rgba(0,0,0,.35), 0 0 8px rgba(255,255,255,.4); white-space: nowrap; }
 .marq .no { position: absolute; left: 5px; top: 3px; font-family: 'Dela', sans-serif; font-size: 8px; color: rgba(255,255,255,.85); }
-/* 筐体の下の案内板 */
 .pop { position: relative; margin: 14px 2px 0; padding: 10px 10px 12px; border-radius: 10px; background: rgba(14,10,24,.86); border: 1px solid #3a2d55; box-shadow: 0 8px 18px rgba(0,0,0,.5); backdrop-filter: blur(3px); }
 .pop::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 3px; border-radius: 10px 10px 0 0; background: var(--c); }
 .genre { display: inline-block; margin: 0 0 6px; padding: 2px 8px; border-radius: 999px; font-size: 11px; color: #0b0912; background: var(--c2); }
@@ -87,163 +113,319 @@ a { color: inherit; }
 .coin { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 46px; height: 40px; border-radius: 6px; background: #0a070f; border: 2px solid #3a2d55; font-family: 'Dot', monospace; line-height: 1.05; }
 .coin span { font-size: 9px; color: #9a8fb8; } .coin b { font-weight: 400; font-size: 14px; color: #ff4b4b; text-shadow: 0 0 6px #ff2020; }
 .play { flex: 1; text-align: center; padding: 10px 6px; border-radius: 10px; font-family: 'Dela', sans-serif; font-size: 15px; color: #0b0912; background: linear-gradient(color-mix(in srgb, var(--c2) 70%, #fff), var(--c2)); box-shadow: 0 4px 0 color-mix(in srgb, var(--c2) 45%, #000); }
-.cab:active .play { transform: translateY(3px); box-shadow: 0 1px 0 color-mix(in srgb, var(--c2) 45%, #000); }
-.c1 { --c: #e8322a; --c2: #ffd34d; } .c2 { --c: #1c8fd3; --c2: #ffd34d; } .c3 { --c: #ff8a1e; --c2: #7bdc4a; } .c4 { --c: #7a4fc8; --c2: #c6a6ff; }
+a.cab:active .play { transform: translateY(3px); box-shadow: 0 1px 0 color-mix(in srgb, var(--c2) 45%, #000); }
+.c1 { --c: #e8322a; --c2: #ffd34d; } .c2 { --c: #1c5fa8; --c2: #ffd34d; } .c3 { --c: #ff8a1e; --c2: #7bdc4a; } .c4 { --c: #7a4fc8; --c2: #e0c46a; }
 .c5 { --c: #b3170e; --c2: #e9e3d6; }
 .c5 .marq { background: linear-gradient(#1a0606, #070202); box-shadow: inset 0 0 0 2px #b3170e, 0 0 16px rgba(179,23,14,.6); }
-.c5 .marq b { color: #f1ece3; font-size: clamp(15px, 1.9vw, 24px); }
+.c5 .marq b { color: #f1ece3; }
+/* 両替機（2列・3列の時だけ置いて、右下の空きを埋める） */
+.changer { --c: #3aa0d8; --c2: #bfe6ff; display: none; cursor: pointer; }
+.changer .pop .play { background: #2a2140; color: #bfb4dc; box-shadow: none; }
+.changer .say { position: absolute; left: 50%; top: 18%; translate: -50% 0; z-index: 4; padding: 6px 10px; border-radius: 10px; background: #fff; color: #1a1430; font-size: 12px; white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity .2s; }
+.changer.talk .say { opacity: 1; }
 
-/* ── 下 ── */
 .notice { max-width: 1180px; margin: 34px auto 0; padding: 0 16px; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
 .notice p { margin: 0; padding: 8px 14px; border-radius: 8px; font-size: 12px; color: #d5cdea; background: rgba(10,7,18,.75); border: 1px dashed #3a2d55; }
 footer { max-width: 1180px; margin: 30px auto 0; padding: 0 16px 40px; text-align: center; font-size: 12px; color: #a59cc0; line-height: 1.9; text-shadow: 0 1px 4px #000; }
 footer b { font-family: 'Dela', sans-serif; font-weight: 400; letter-spacing: .15em; color: #e3dcf5; }
 
-@media (max-width: 1100px) { .floor { grid-template-columns: repeat(3, 1fr); max-width: 760px; } .marq b { font-size: clamp(14px, 2.6vw, 22px); } }
+@media (max-width: 1100px) { .floor { grid-template-columns: repeat(3, 1fr); max-width: 760px; } .changer { display: block; } }
 @media (max-width: 700px) {
-  .top { padding-top: 34px; }
+  .top { padding-top: 54px; }
   .sign { padding: 14px 16px 12px; }
   .open { right: -8px; top: -12px; font-size: 10px; }
   .floor { grid-template-columns: repeat(2, 1fr); gap: 18px 12px; padding: 0 12px; }
-  .marq b { font-size: 13px; } .c5 .marq b { font-size: 15px; } .marq .no { font-size: 7px; }
+  .marq .no { font-size: 7px; }
   .scr em { font-size: 9px; }
   .pop { padding: 8px 8px 10px; margin-top: 10px; }
   .desc { font-size: 11.5px; } .who { font-size: 11px; } .genre { font-size: 10px; }
   .coin { width: 40px; } .play { font-size: 13px; padding: 9px 4px; }
   .ticker p { font-size: 14px; }
+  .enter b { font-size: 28px; }
 }
 </style>
 </head>
-<body>
-<div class="room" aria-hidden="true"></div>
-<header class="top">
-  <div class="sign">
-    <i class="bulbs"></i>
-    <p class="en">SHINDENTSU GAME CENTER</p>
-    <h1>心電通<span class="fl">ゲ</span>ームセンター</h1>
-    <span class="open">営業中</span>
+<body class="out">
+
+<!-- ═════ 店の外（トップ） ═════ -->
+<section id="outside">
+  <div class="ext" id="ext">
+    <img id="extImg" alt="夜の心電通ゲームセンター">
+    <div class="slot" id="slot"><p class="en">SHINDENTSU GAME CENTER</p><p class="name">心電通<span class="fl">ゲ</span>ームセンター</p></div>
   </div>
-  <p class="lead">社員がそのままゲームになりました。くだらないけど、本気です。</p>
-</header>
+  <canvas class="rain" id="rain"></canvas>
+  <div class="ovl"></div>
+  <div class="door">
+    <button class="enter" id="btnEnter"><b>中に入る</b><small>ENTER</small></button>
+    <p>音が出ます 🔊</p>
+  </div>
+</section>
 
-<div class="ticker"><p>★ 全5タイトル 稼働中 ★ 1プレイ 0円 ★ スマホでもPCでも遊べます ★ 出演はすべて 株式会社 心電通 の社員のみなさん ★ ゲームはフィクションです。社員のみなさんは実際には仲良しです ★ 本日も安全第一でお遊びください ★</p></div>
+<!-- ═════ 店内（ゲーム選択） ═════ -->
+<section id="inside">
+  <div class="room" aria-hidden="true"></div>
+  <div class="bar"><button id="btnOut">◀ 店の外へ</button><button class="mute" id="mute" aria-label="音のオンオフ"></button></div>
+  <header class="top">
+    <div class="sign">
+      <i class="bulbs"></i>
+      <p class="en">SHINDENTSU GAME CENTER</p>
+      <h1>心電通<span class="fl">ゲ</span>ームセンター</h1>
+      <span class="open">営業中</span>
+    </div>
+    <p class="lead">社員がそのままゲームになりました。くだらないけど、本気です。</p>
+  </header>
 
-<main class="floor">
-  <a class="cab c1" href="mou-yoroshii/" data-key="eba_save_v1">
-    <div class="machine">
-      <div class="scr"><img src="top/mou-yoroshii.webp" alt="もうよろしいですわ の画面"><em>PRESS START</em></div>
-      <img class="body" src="top/cabinet.webp" alt="">
-      <div class="marq"><span class="no">01</span><b>もうよろしいですわ</b></div>
-    </div>
-    <div class="pop">
-      <p class="genre">お使いアクション</p>
-      <p class="who">出演：江原さん</p>
-      <p class="desc">江原部長の「あれ取って」に、正しいものを渡そう。1回でもまちがえたら、帰ります。</p>
-      <p class="best"></p>
-      <div class="foot"><div class="coin"><span>1PLAY</span><b>¥0</b></div><span class="play">あそぶ ▶</span></div>
-    </div>
-  </a>
-  <a class="cab c2" href="yoshiyasu/" data-key="yoshi_save_v1">
-    <div class="machine">
-      <div class="scr"><img src="top/yoshiyasu.webp" alt="よしやす の画面"><em>PRESS START</em></div>
-      <img class="body" src="top/cabinet.webp" alt="">
-      <div class="marq"><span class="no">02</span><b>よしやす</b></div>
-    </div>
-    <div class="pop">
-      <p class="genre">60秒しりとり</p>
-      <p class="who">出演：宮本さん</p>
-      <p class="desc">宮本さんと60秒しりとり。うっかりルール違反には「アカン！」でツッコもう。「ガリ」だけは、なぜかOK。</p>
-      <p class="best"></p>
-      <div class="foot"><div class="coin"><span>1PLAY</span><b>¥0</b></div><span class="play">あそぶ ▶</span></div>
-    </div>
-  </a>
-  <a class="cab c3" href="nebou/" data-key="nebou_save_v1" data-unit="sec">
-    <div class="machine">
-      <div class="scr"><img src="top/nebou.webp" alt="寝坊 の画面"><em>PRESS START</em></div>
-      <img class="body" src="top/cabinet.webp" alt="">
-      <div class="marq"><span class="no">03</span><b>寝坊</b></div>
-    </div>
-    <div class="pop">
-      <p class="genre">目覚ましアクション</p>
-      <p class="who">出演：中島さん</p>
-      <p class="desc">夜間工事明けの朝、中島さんが来ない。走って、インターホンを直して、ピンポンで起こせ。</p>
-      <p class="best"></p>
-      <div class="foot"><div class="coin"><span>1PLAY</span><b>¥0</b></div><span class="play">あそぶ ▶</span></div>
-    </div>
-  </a>
-  <a class="cab c4" href="nurarihyon/" data-key="nura_save_v1">
-    <div class="machine">
-      <div class="scr"><img src="top/nurarihyon.webp" alt="ぬらりひょん の画面"><em>PRESS START</em></div>
-      <img class="body" src="top/cabinet.webp" alt="">
-      <div class="marq"><span class="no">04</span><b>ぬらりひょん</b></div>
-    </div>
-    <div class="pop">
-      <p class="genre">落ちものパズル</p>
-      <p class="who">出演：社員7人</p>
-      <p class="desc">社員の顔ブロックをラックに積む落ちものパズル。妖怪ぬらりひょんが、消せない「税」を置いていく。</p>
-      <p class="best"></p>
-      <div class="foot"><div class="coin"><span>1PLAY</span><b>¥0</b></div><span class="play">あそぶ ▶</span></div>
-    </div>
-  </a>
-  <a class="cab c5" href="ryuga-shibaku/" data-key="ryuga_save_v1">
-    <div class="machine">
-      <div class="scr"><img src="top/ryuga-shibaku.webp" alt="龍がしばく の画面"><img class="alt" src="top/ryuga-shibaku_play.webp" alt=""><em>PRESS START</em></div>
-      <img class="body" src="top/cabinet.webp" alt="">
-      <div class="marq"><span class="no">05</span><b>龍がしばく</b></div>
-    </div>
-    <div class="pop">
-      <p class="genre">ベルトスクロールアクション</p>
-      <p class="who">出演：龍之介さん ほか5人</p>
-      <p class="desc">奥さんが連れ去られた。龍之介は、黒幕の待つ新社屋へ――。※始まるとファミコン画質になります。</p>
-      <p class="best"></p>
-      <div class="foot"><div class="coin"><span>1PLAY</span><b>¥0</b></div><span class="play">あそぶ ▶</span></div>
-    </div>
-  </a>
-</main>
+  <div class="ticker"><p>★ 全5タイトル 稼働中 ★ 1プレイ 0円 ★ スマホでもPCでも遊べます ★ 出演は全て弊社の社員です ★ ゲームはフィクションです。社員のみんなは実際には仲良しです ★ 本日も安全第一でお遊びください ★</p></div>
 
-<div class="notice">
-  <p>📱 スマホは縦、💻 PCは横の画面で遊べます</p>
-  <p>🔊 音が出ます（各ゲームの右上で消せます）</p>
-  <p>🏆 自己ベストは、この端末に記録されます</p>
-</div>
+  <main class="floor">
+    <a class="cab c1" href="mou-yoroshii/" data-key="eba_save_v1" data-m="mou">
+      <div class="stand"><div class="machine">
+        <div class="scr"><img src="top/mou-yoroshii.webp" alt="もうよろしいですわ の画面"><em>PRESS START</em></div>
+        <img class="body" src="top/cab_mou.webp" alt="">
+        <div class="marq"><span class="no">01</span><b>もうよろしいですわ</b></div>
+      </div></div>
+      <div class="pop">
+        <p class="genre">おつかいアクション</p>
+        <p class="who">出演：江原さん</p>
+        <p class="desc">江原部長の「あれ取って」に、正しいものを渡そう。1回でもまちがえたら、帰ります。</p>
+        <p class="best"></p>
+        <div class="foot"><div class="coin"><span>1PLAY</span><b>¥0</b></div><span class="play">あそぶ ▶</span></div>
+      </div>
+    </a>
+    <a class="cab c2" href="yoshiyasu/" data-key="yoshi_save_v1" data-m="yoshi">
+      <div class="stand"><div class="machine">
+        <div class="scr"><img src="top/yoshiyasu.webp" alt="よしやす の画面"><em>PRESS START</em></div>
+        <img class="body" src="top/cab_yoshi.webp" alt="">
+        <div class="marq"><span class="no">02</span><b>よしやす</b></div>
+      </div></div>
+      <div class="pop">
+        <p class="genre">60秒しりとり</p>
+        <p class="who">出演：宮本さん</p>
+        <p class="desc">宮本さんと60秒しりとり。うっかりルール違反には「アカン！」でツッコもう。「ガリ」だけは、なぜかOK。</p>
+        <p class="best"></p>
+        <div class="foot"><div class="coin"><span>1PLAY</span><b>¥0</b></div><span class="play">あそぶ ▶</span></div>
+      </div>
+    </a>
+    <a class="cab c3" href="nebou/" data-key="nebou_save_v1" data-unit="sec" data-m="nebou">
+      <div class="stand"><div class="machine">
+        <div class="scr"><img src="top/nebou.webp" alt="寝坊 の画面"><em>PRESS START</em></div>
+        <img class="body" src="top/cab_nebou.webp" alt="">
+        <div class="marq"><span class="no">03</span><b>寝坊</b></div>
+      </div></div>
+      <div class="pop">
+        <p class="genre">目覚ましアクション</p>
+        <p class="who">出演：中島さん</p>
+        <p class="desc">夜間工事明けの朝、中島さんが来ない。走って、インターホンを直して、ピンポンで起こせ。</p>
+        <p class="best"></p>
+        <div class="foot"><div class="coin"><span>1PLAY</span><b>¥0</b></div><span class="play">あそぶ ▶</span></div>
+      </div>
+    </a>
+    <a class="cab c4" href="nurarihyon/" data-key="nura_save_v1" data-m="nura">
+      <div class="stand"><div class="machine">
+        <div class="scr"><img src="top/nurarihyon.webp" alt="ぬらりひょん の画面"><em>PRESS START</em></div>
+        <img class="body" src="top/cab_nura.webp" alt="">
+        <div class="marq"><span class="no">04</span><b>ぬらりひょん</b></div>
+      </div></div>
+      <div class="pop">
+        <p class="genre">落ちものパズル</p>
+        <p class="who">出演：社員7人</p>
+        <p class="desc">社員の顔ブロックをラックに積む落ちものパズル。妖怪ぬらりひょんが、消せない「税」を置いていく。</p>
+        <p class="best"></p>
+        <div class="foot"><div class="coin"><span>1PLAY</span><b>¥0</b></div><span class="play">あそぶ ▶</span></div>
+      </div>
+    </a>
+    <a class="cab c5" href="ryuga-shibaku/" data-key="ryuga_save_v1" data-m="ryu">
+      <div class="stand"><div class="machine">
+        <div class="scr"><img src="top/ryuga-shibaku.webp" alt="龍がしばく の画面"><em>PRESS START</em></div>
+        <img class="body" src="top/cab_ryu.webp" alt="">
+        <div class="marq"><span class="no">05</span><b>龍がしばく</b></div>
+      </div></div>
+      <div class="pop">
+        <p class="genre">ベルトスクロールアクション</p>
+        <p class="who">出演：龍之介さん ほか5人</p>
+        <p class="desc">奥さんが連れ去られた。龍之介は、黒幕の待つ新社屋へ――。※始まるとファミコン画質になります。</p>
+        <p class="best"></p>
+        <div class="foot"><div class="coin"><span>1PLAY</span><b>¥0</b></div><span class="play">あそぶ ▶</span></div>
+      </div>
+    </a>
+    <div class="cab changer" id="changer" data-m="changer" role="button" tabindex="0" aria-label="両替機">
+      <div class="stand"><div class="machine">
+        <img class="body" src="top/changer.webp" alt="">
+        <p class="say">全部タダです！</p>
+      </div></div>
+      <div class="pop">
+        <p class="genre">両替機</p>
+        <p class="who">両替はいりません</p>
+        <p class="desc">当店のゲームは全部 1プレイ0円。お財布はしまって、そのままお楽しみください。</p>
+        <p class="best">CHANGE ---</p>
+        <div class="foot"><div class="coin"><span>1PLAY</span><b>¥0</b></div><span class="play">両替中止</span></div>
+      </div>
+    </div>
+  </main>
 
-<footer>
-  <b>株式会社 心電通</b><br>
-  音楽：魔王魂　効果音：効果音ラボ
-</footer>
+  <div class="notice">
+    <p>📱 スマホは縦、💻 PCは横の画面で遊べます</p>
+    <p>🔊 音が出ます（右上で消せます）</p>
+    <p>🏆 自己ベストは、この端末に記録されます</p>
+  </div>
 
+  <footer>
+    <b>株式会社 心電通</b><br>
+    音楽：魔王魂　効果音：効果音ラボ
+  </footer>
+</section>
+<div class="flash"></div>
+
+<script src="top/layout.js"></script>
+<script src="shared/js/audio.js"></script>
 <script>
-// 自己ベスト（各ゲームがこの端末に保存したもの）を筐体の下に表示
-document.querySelectorAll('.cab').forEach((c) => {
-  let s = null;
-  try { s = JSON.parse(localStorage.getItem(c.dataset.key) || 'null'); } catch (_) { }
-  const el = c.querySelector('.best');
-  if (!s) { el.textContent = 'HI-SCORE ---'; return; }
-  if (c.dataset.unit === 'sec') el.textContent = s.best >= 0 ? `BEST ${s.best}秒のこし` : 'HI-SCORE ---';
-  else el.textContent = s.best ? `HI-SCORE ${Number(s.best).toLocaleString()}` : 'HI-SCORE ---';
-});
-// マーキーの題名が板からはみ出さないように、文字を小さくする
-function fitMarquee() {
-  document.querySelectorAll('.marq b').forEach((b) => {
-    b.style.fontSize = '';
-    let fs = parseFloat(getComputedStyle(b).fontSize);
-    const max = b.parentElement.clientWidth * .86;
-    while (b.scrollWidth > max && fs > 8) { fs -= .5; b.style.fontSize = fs + 'px'; }
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const LAY = window.TOP_LAYOUT || {};
+  const A = window.AUDIO;
+  A.init({ se: ['doorchime', 'chin', 'tap', 'cursor'], seBase: 'shared/se/', bgmBase: 'top/bgm/' });
+
+  // ── 店の外：絵を画面いっぱいに（はみ出す分は切る）し、看板の板にネオンの店名をはめ込む ──
+  const ext = $('ext'), extImg = $('extImg'), slot = $('slot');
+  function placeExt() {
+    const land = innerWidth > innerHeight * 1.05, L = LAY[land ? 'ext_land' : 'ext_port'];
+    if (!L) return;
+    const src = `top/exterior_${land ? 'land' : 'port'}.webp`;
+    if (!extImg.src.endsWith(src)) extImg.src = src;
+    const [aw, ah] = L.ar.split('/').map(Number), ar = aw / ah;
+    const w = Math.max(innerWidth, innerHeight * ar);
+    ext.style.width = w + 'px'; ext.style.height = (w / ar) + 'px';
+    const [x, y, sw, sh] = L.sign;
+    Object.assign(slot.style, { left: x + '%', top: y + '%', width: sw + '%', height: sh + '%' });
+  }
+  addEventListener('resize', placeExt);
+  placeExt();
+
+  // ── 雨：1粒ずつ描く（奥は細く薄く遅い、手前は長く濃く速い）。地面には小さな波紋 ──
+  const rc = $('rain'), rx = rc.getContext('2d');
+  const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let drops = [], rips = [], rw = 0, rh = 0, rlast = performance.now();
+  function rainSize() {
+    const d = Math.min(2, devicePixelRatio || 1);
+    rw = innerWidth; rh = innerHeight; rc.width = rw * d; rc.height = rh * d; rx.setTransform(d, 0, 0, d, 0, 0);
+    const n = Math.round((rw * rh) / (calm ? 7000 : 2600));
+    drops = Array.from({ length: n }, () => newDrop(true));
+  }
+  function newDrop(any) {
+    const z = Math.random();   // 0＝奥 … 1＝手前
+    return { x: Math.random() * (rw + 200) - 100, y: any ? Math.random() * rh : -40 - Math.random() * 200, z,
+      len: 14 + z * 34, v: 750 + z * 950, a: .22 + z * .45, w: .7 + z * 1.6, ground: rh * (.70 + Math.random() * .28) };
+  }
+  function rainFrame(t) {
+    const dt = Math.min(.05, (t - rlast) / 1000); rlast = t;
+    if (document.body.classList.contains('out')) {
+      rx.clearRect(0, 0, rw, rh);
+      const slant = .18;   // 少し斜めに降る
+      rx.lineCap = 'round';
+      for (const d of drops) {
+        d.y += d.v * dt; d.x += d.v * slant * dt;
+        if (d.z > .55 && d.y > d.ground) {   // 手前の雨粒は地面で波紋になる
+          if (rips.length < 120) rips.push({ x: d.x, y: d.ground, r: 1.5, a: .65 * d.z, z: d.z });
+          Object.assign(d, newDrop(false));
+          continue;
+        }
+        if (d.y > rh + 40) { Object.assign(d, newDrop(false)); continue; }
+        const g = rx.createLinearGradient(d.x, d.y - d.len, d.x + d.len * slant, d.y);
+        g.addColorStop(0, 'rgba(200,220,255,0)'); g.addColorStop(1, `rgba(215,230,255,${d.a})`);
+        rx.strokeStyle = g; rx.lineWidth = d.w;
+        rx.beginPath(); rx.moveTo(d.x - d.len * slant, d.y - d.len); rx.lineTo(d.x, d.y); rx.stroke();
+      }
+      for (const r of rips) {
+        r.r += (16 + r.z * 22) * dt; r.a -= .9 * dt;
+        if (r.a <= 0) continue;
+        rx.strokeStyle = `rgba(225,238,255,${r.a})`; rx.lineWidth = 1.1;
+        rx.beginPath(); rx.ellipse(r.x, r.y, r.r * (1 + r.z), r.r * .32 * (1 + r.z), 0, 0, Math.PI * 2); rx.stroke();
+      }
+      rips = rips.filter((r) => r.a > 0);
+    }
+    requestAnimationFrame(rainFrame);
+  }
+  addEventListener('resize', rainSize);
+  rainSize();
+  requestAnimationFrame(rainFrame);
+
+  // ── 筐体ごとに、絵の中の画面・マーキーの位置を合わせる ──
+  document.querySelectorAll('[data-m]').forEach((c) => {
+    const L = LAY[c.dataset.m]; if (!L) return;
+    const m = c.querySelector('.machine'); m.style.setProperty('--ar', L.ar);
+    if (L.scr) { const [x, y, w, h] = L.scr; Object.entries({ sl: x - .6, st: y - .4, sw: w + 1.2, sh: h + .8 }).forEach(([k, v]) => m.style.setProperty('--' + k, v + '%')); }
+    if (L.mq) { const [x, y, w, h] = L.mq; Object.entries({ ml: x + 1.5, mt: y + .9, mw: w - 3, mh: h - 1.8 }).forEach(([k, v]) => m.style.setProperty('--' + k, v + '%')); }
   });
-}
-addEventListener('resize', fitMarquee);
-document.fonts.ready.then(fitMarquee);
-fitMarquee();
-// コインを入れる音 → 少し待ってからゲームへ
-let coin = null;
-try { coin = new Audio('shared/se/chin.mp3'); coin.volume = .6; if (localStorage.getItem('shindentsu_mute') === '1') coin = null; } catch (_) { }
-document.querySelectorAll('.cab').forEach((c) => c.addEventListener('click', (e) => {
-  if (e.metaKey || e.ctrlKey || e.shiftKey || !coin) return;
-  e.preventDefault();
-  coin.currentTime = 0; coin.play().catch(() => { });
-  c.querySelector('.scr em').textContent = 'COIN IN!';
-  setTimeout(() => { location.href = c.getAttribute('href'); }, 380);
-}));
+
+  // ── 入店：自動ドアの音 → 近づいて → 店内へ（ここからBGM） ──
+  const muteBtn = $('mute');
+  const syncMute = () => muteBtn.classList.toggle('off', A.muted);
+  muteBtn.addEventListener('click', () => { A.unlock(); A.setMuted(!A.muted); syncMute(); if (!A.muted) A.bgm('lobby'); });
+  syncMute();
+  function showInside(arrive) {
+    document.body.className = 'in' + (arrive ? ' arrive' : '');
+    if (location.hash !== '#floor') history.replaceState(null, '', '#floor');
+    fitMarquee();
+  }
+  let entering = false;
+  $('btnEnter').addEventListener('click', () => {
+    if (entering) return; entering = true;
+    A.unlock(); A.se('doorchime'); A.bgm('lobby');
+    document.body.classList.add('entering');
+    setTimeout(() => { showInside(true); window.scrollTo(0, 0); entering = false; }, 1250);
+  });
+  $('btnOut').addEventListener('click', () => {
+    A.se('tap'); A.stopBgm(400);
+    document.body.className = 'out'; history.replaceState(null, '', location.pathname + location.search);
+    ext.style.animation = 'none'; void ext.offsetWidth; ext.style.animation = '';
+  });
+  // ゲームから戻ってきた時（#floor）は店内から。BGM は最初にどこかを触った時に流す（ブラウザの決まりで、自動では鳴らせない）
+  if (location.hash === '#floor') {
+    showInside(false);
+    const start = () => { A.unlock(); if (!A.muted) A.bgm('lobby'); removeEventListener('pointerdown', start, true); removeEventListener('keydown', start, true); };
+    addEventListener('pointerdown', start, true); addEventListener('keydown', start, true);
+  }
+
+  addEventListener('hashchange', () => { if (location.hash === '#floor' && !document.body.classList.contains('in')) showInside(false); });
+
+  // ── 自己ベスト（各ゲームがこの端末に保存したもの） ──
+  document.querySelectorAll('a.cab').forEach((c) => {
+    let s = null;
+    try { s = JSON.parse(localStorage.getItem(c.dataset.key) || 'null'); } catch (_) { }
+    const el = c.querySelector('.best');
+    if (!s) { el.textContent = 'HI-SCORE ---'; return; }
+    if (c.dataset.unit === 'sec') el.textContent = s.best >= 0 ? `BEST ${s.best}秒のこし` : 'HI-SCORE ---';
+    else el.textContent = s.best ? `HI-SCORE ${Number(s.best).toLocaleString()}` : 'HI-SCORE ---';
+  });
+
+  // ── マーキーの題名が板からはみ出さないように、文字を小さくする ──
+  function fitMarquee() {
+    document.querySelectorAll('.marq b').forEach((b) => {
+      b.style.fontSize = '';
+      const box = b.parentElement;
+      let fs = Math.min(parseFloat(getComputedStyle(b).fontSize), box.clientHeight * .62);
+      b.style.fontSize = fs + 'px';
+      while (b.scrollWidth > box.clientWidth * .86 && fs > 8) { fs -= .5; b.style.fontSize = fs + 'px'; }
+    });
+  }
+  addEventListener('resize', fitMarquee);
+  document.fonts.ready.then(fitMarquee);
+  fitMarquee();
+
+  // ── 筐体を押す：コインの音 → 少し待ってからゲームへ ──
+  document.querySelectorAll('a.cab').forEach((c) => c.addEventListener('click', (e) => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || A.muted) return;
+    e.preventDefault();
+    A.unlock(); A.se('chin');
+    c.querySelector('.scr em').textContent = 'COIN IN!';
+    setTimeout(() => { location.href = c.getAttribute('href'); }, 380);
+  }));
+  // 両替機：押すとひとこと
+  const ch = $('changer');
+  const talk = () => { A.unlock(); A.se('cursor'); ch.classList.add('talk'); clearTimeout(ch._t); ch._t = setTimeout(() => ch.classList.remove('talk'), 1600); };
+  ch.addEventListener('click', talk);
+  ch.addEventListener('keydown', (e) => { if (e.key === 'Enter') talk(); });
+})();
 </script>
 </body>
 </html>

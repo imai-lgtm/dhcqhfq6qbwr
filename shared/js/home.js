@@ -37,7 +37,7 @@
   addEventListener('keydown', (e) => { if (window.GC_HOLD) { e.stopImmediatePropagation(); if (e.code === 'Escape') close(); } }, true);
 
   const visible = (id) => { const s = document.getElementById(id); return !!(s && s.classList.contains('on')); };
-  const goHome = () => { location.href = '../'; };
+  const goHome = () => { location.href = '../#floor'; };   // ゲーセンの店内（ゲーム選択）へ
   function close() { modal.classList.remove('on'); window.GC_HOLD = false; }
   btn.addEventListener('click', () => {
     try { window.AUDIO && AUDIO.se('tap'); } catch (_) { }
