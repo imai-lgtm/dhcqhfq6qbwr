@@ -755,7 +755,10 @@
     await wait(1100);
     startGame(0);
   }
+  let lastStart = -1e9;
   async function startGame(si, skipOpening) {
+    if (performance.now() - lastStart < 1500) return;   // ボタンの2度押しで、ゲームが2つ同時に始まらないように
+    lastStart = performance.now();
     G = newGame(); E = null; TB = null; CARD = null;
     setScene('play'); show('play'); busy = false;
     $('textbox').classList.remove('on'); $('card').classList.remove('on'); $('go').classList.remove('on'); $('pausebox').classList.remove('on');
@@ -920,7 +923,8 @@
     ctx.restore();
     if (G.pause === 'kiwami') {
       const t = G.kiwamiT || 0;
-      ctx.fillStyle = t % 8 < 2 ? 'rgba(255,255,255,.7)' : 'rgba(40,0,0,.55)';
+      // 白く光るのは最初の1回だけ（点滅は光に敏感な人に負担になるため、1秒に3回以上は光らせない）
+      ctx.fillStyle = t < 6 ? `rgba(255,255,255,${(.7 * (1 - t / 6)).toFixed(2)})` : 'rgba(40,0,0,.55)';
       ctx.fillRect(0, 0, W, H);
       ctx.fillStyle = '#ffd23a';
       for (let i = 0; i < 14; i++) { const y = (i * 37 + t * 9) % H; ctx.fillRect(0, y, W, 1); }
@@ -1036,6 +1040,8 @@
   };
 
   // 始まり：?stage=2 などで、その面から（テスト・確認用）
+  // 途中で切りかえる絵は、先に読み込んでおく（切りかえた瞬間に前の絵が一瞬出たり、消えたりしないように）
+  const PRELOAD = ['assets/photo/naka.webp', 'assets/photo/dani.webp', 'assets/photo/miya.webp', 'assets/photo/soma.webp', 'assets/photo/shacho.webp', 'assets/photo/ryu.webp'].map((s) => { const i = new Image(); i.src = s; if (i.decode) i.decode().catch(() => { }); return i; });
   const qs = parseInt(Q.get('stage'), 10);
   if (qs >= 1 && qs <= 3) startGame(qs - 1, true); else toTitle();
 })();

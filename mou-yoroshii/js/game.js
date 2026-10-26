@@ -97,7 +97,10 @@
   const face = (f) => document.querySelectorAll('#eba img').forEach(i => i.classList.toggle('on', i.dataset.f === f));
   const ebaEl = $('#eba'), fx = $('#fx'), ring = $('#ring'), bubble = $('#bubble'), sayEl = $('#say');
 
+  let lastStart = -1e9;
   function startGame() {
+    if (performance.now() - lastStart < 1500) return;   // ボタンの2度押しで、ゲームが2つ同時に始まらないように
+    lastStart = performance.now();
     const startStage = Math.max(0, Math.min(4, (+P.get('stage') || 1) - 1));
     G = { si: startStage, n: startStage * 4, score: 0, correct: startStage * 4, newCards: [], praise: 0, alive: true };
     // 各ステージ4問。社長の割り込み・浩二くんの入れ替わりの位置もここで決める
@@ -637,12 +640,18 @@
     show('ending');
     A.bgm('ending');
     const sl = $('#eSlide'), img = $('#eImg'), cap = $('#eCap');
-    for (const s of D.ENDING) {
-      img.src = `assets/album/${s.img}.jpg`;
+    // 写真は先に全部読み込んでおく（読み込み中に前の写真がもう一度映らないように）
+    const pre = D.ENDING.map(s => { const im = new Image(); im.src = `assets/album/${s.img}.jpg`; return im; });
+    const fin = new Image(); fin.src = 'assets/album/end_tower.jpg';
+    for (const [i, s] of D.ENDING.entries()) {
+      await pre[i].decode().catch(() => { });
+      img.src = pre[i].src;
+      await img.decode().catch(() => { });
       cap.textContent = s.cap;
       sl.classList.remove('show'); void sl.offsetWidth; sl.classList.add('show');
       await sl.animate([{ opacity: 0 }, { opacity: 1, offset: .15 }, { opacity: 1, offset: .85 }, { opacity: 0 }], { duration: 2600 * FAST, fill: 'forwards' }).finished;
     }
+    await fin.decode().catch(() => { });
     $('#eFinal').classList.add('on');
     await sleep(5200);
     $('#eLogo').classList.add('on');
@@ -757,6 +766,8 @@
     findKoji() { const h = $('#hiding'); if (h.onclick) { h.onclick(); return true; } return false; },
   };
 
+  // 途中で切りかえる絵は、先に読み込んでおく（切りかえた瞬間に前の絵が一瞬出たり、消えたりしないように）
+  const PRELOAD = ['assets/photo/eba_laugh.webp', 'assets/photo/eba_smile.webp', 'assets/photo/eba_down.webp', 'assets/album/end_tower.jpg'].map((s) => { const i = new Image(); i.src = s; if (i.decode) i.decode().catch(() => { }); return i; });
   fit();
   toTitle();
   if (P.has('play')) startGame();

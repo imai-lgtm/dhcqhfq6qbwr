@@ -194,7 +194,10 @@
     save.cards.push(id); G.newCards.push(id); store();
   }
 
+  let lastStart = -1e9;
   async function startGame() {
+    if (performance.now() - lastStart < 1500) return;   // ボタンの2度押しで、ゲームが2つ同時に始まらないように
+    lastStart = performance.now();
     G = { score: 0, chain: 0, tsukkomi: 0, miss: 0, used: new Set(), miyaSaid: [], need: null, timeLeft: GAME_SEC, running: false, gari: 0,
       statue: false, spurt: false, newCards: [], phase: 'practice', lastTurn: '' };
     show('play');
@@ -562,6 +565,8 @@
     },
   };
 
+  // 途中で切りかえる絵は、先に読み込んでおく（切りかえた瞬間に前の絵が一瞬出たり、消えたりしないように）
+  const PRELOAD = ['assets/photo/miya_peace.webp', 'assets/photo/miya_grin.webp', 'assets/photo/miya_blank.webp'].map((s) => { const i = new Image(); i.src = s; if (i.decode) i.decode().catch(() => { }); return i; });
   fit();
   toTitle();
   if (P.has('play')) startGame();

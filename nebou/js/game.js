@@ -78,7 +78,10 @@
 
   // ───── ゲームの状態と持ち時間 ─────
   let G = null, clockRaf = 0;
+  let lastStart = -1e9;
   function startGame() {
+    if (performance.now() - lastStart < 1500) return;   // ボタンの2度押しで、ゲームが2つ同時に始まらないように
+    lastStart = performance.now();
     G = { left: D.TIME, hits: 0, coffee: 0, phase: 'run', over: false, paused: false, rings: 0 };
     show('play'); scene('run'); guide('');
     $('#pcam').classList.remove('grandma', 'shake');
@@ -467,6 +470,8 @@
     next() { if (!R || !R.on) return null; const o = R.objs.filter(o => !o.done && o.x + o.w > L.runX).sort((a, b) => a.x - b.x)[0]; return o ? { dx: o.x - L.runX, coffee: !!o.coffee, y: o.y, onGround: R.y <= 0 } : null; },
   };
 
+  // 途中で切りかえる絵は、先に読み込んでおく（切りかえた瞬間に前の絵が一瞬出たり、消えたりしないように）
+  const PRELOAD = ['assets/art/runner_1.svg', 'assets/art/runner_2.svg', 'assets/art/runner_3.svg', 'assets/art/runner_jump.svg', 'assets/art/runner_fall.svg', 'assets/art/dad.svg', 'assets/art/grandma.svg', 'assets/art/dad_shadow.svg', 'assets/art/grandma_shadow.svg', 'assets/art/item_coffee.svg', 'assets/art/obs_bike.svg', 'assets/art/obs_cone.svg', 'assets/art/obs_dog.svg', 'assets/art/obs_sign.svg', 'assets/art/obs_trash.svg', 'assets/art/bush_hide.svg', 'assets/photo/naka_awake.webp', 'assets/photo/naka_body.webp'].map((s) => { const i = new Image(); i.src = s; if (i.decode) i.decode().catch(() => { }); return i; });
   fit();
   toTitle();
   if (P.has('play')) startGame();

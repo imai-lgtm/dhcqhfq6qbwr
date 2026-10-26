@@ -231,7 +231,10 @@
   // ───── 進行 ─────
   let raf = 0;
   const hold = { left: 0, right: 0, down: 0 };
+  let lastStart = -1e9;
   function startGame() {
+    if (performance.now() - lastStart < 1500) return;   // ボタンの2度押しで、ゲームが2つ同時に始まらないように
+    lastStart = performance.now();
     G = { board: empty(), bag: [], next: null, cur: null, lv: P.has('lv') ? Math.max(0, Math.min(4, +P.get('lv') - 1)) : 0, lines: 0, totalLines: 0, score: 0, taxEaten: 0, taxTotal: 0, taxCount: 0,
       sinceRyu: 0, sinceTax: 0, visits: 0, busy: false, over: false, paused: false };
     show('play'); fit();
@@ -446,6 +449,8 @@
     },
   };
 
+  // 途中で切りかえる絵は、先に読み込んでおく（切りかえた瞬間に前の絵が一瞬出たり、消えたりしないように）
+  const PRELOAD = ['assets/art/nura_idle.svg', 'assets/art/nura_throw.svg', 'assets/art/nura_bye.svg'].map((s) => { const i = new Image(); i.src = s; if (i.decode) i.decode().catch(() => { }); return i; });
   fit();
   toTitle();
   if (P.has('play')) startGame();
