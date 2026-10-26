@@ -12,8 +12,8 @@
   // ───── 画面の形（縦長＝スマホ／横長＝PC・スマホ横向き） ─────
   const LAYOUT = { port: { W: 390, H: 844, runX: 70, runH: 128, ground: 214, house: { x: 0, y: 140 } }, land: { W: 1280, H: 720, runX: 220, runH: 150, ground: 186, house: { x: 445, y: 120 } } };
   let L = LAYOUT.port, scale = 1;
-  // スマホ縦は、横幅を画面にぴったり合わせ、縦の長さは画面の形に合わせて伸び縮みさせる（700〜900）
-  const portH = () => Math.round(Math.max(700, Math.min(900, innerHeight * 390 / innerWidth)));
+  // スマホ縦は、横幅を画面にぴったり合わせ、縦の長さは画面の形に合わせて伸び縮みさせる（680〜900）
+  const portH = () => Math.round(Math.max(680, Math.min(900, innerHeight * 390 / innerWidth)));
   function fit() {
     const land = innerWidth > innerHeight * 1.05;
     if (!land) LAYOUT.port.H = portH();

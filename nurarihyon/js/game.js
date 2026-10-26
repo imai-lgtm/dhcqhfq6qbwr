@@ -12,8 +12,8 @@
   const LAYOUT = { port: { W: 390, H: 844, cell: 35 }, land: { W: 1280, H: 720, cell: 40 } };
   let L = LAYOUT.port, scale = 1;
   const cv = $('#board'), ctx = cv.getContext('2d');
-  // スマホ縦は、横幅を画面にぴったり合わせ、縦の長さは画面の形に合わせて伸び縮みさせる（700〜900）
-  const portH = () => Math.round(Math.max(700, Math.min(900, innerHeight * 390 / innerWidth)));
+  // スマホ縦は、横幅を画面にぴったり合わせ、縦の長さは画面の形に合わせて伸び縮みさせる（680〜900）
+  const portH = () => Math.round(Math.max(680, Math.min(900, innerHeight * 390 / innerWidth)));
   function fit() {
     const land = innerWidth > innerHeight * 1.05;
     if (!land) { LAYOUT.port.H = portH(); LAYOUT.port.cell = Math.min(35, Math.floor((LAYOUT.port.H - 318) / 15)); }

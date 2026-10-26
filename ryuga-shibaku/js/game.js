@@ -16,8 +16,8 @@
 
   // ───── 画面の形 ─────
   const LAYOUT = { port: { W: 390, H: 844 }, land: { W: 1280, H: 720 } };
-  // スマホ縦は、横幅を画面にぴったり合わせ、縦の長さは画面の形に合わせて伸び縮みさせる（700〜900）
-  const portH = () => Math.round(Math.max(700, Math.min(900, innerHeight * 390 / innerWidth)));
+  // スマホ縦は、横幅を画面にぴったり合わせ、縦の長さは画面の形に合わせて伸び縮みさせる（680〜900）
+  const portH = () => Math.round(Math.max(680, Math.min(900, innerHeight * 390 / innerWidth)));
   function fit() {
     const land = innerWidth > innerHeight * 1.05;
     if (!land) LAYOUT.port.H = portH();
