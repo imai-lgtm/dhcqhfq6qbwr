@@ -1,4 +1,4 @@
-// 寝坊 — 中島さんを起こしに行け（道中 → インターホン修理 → ピンポン）
+// 寝坊 — 颯馬さんを起こしに行け（道中 → インターホン修理 → ピンポン）
 (() => {
   const D = window.DATA, A = window.AUDIO;
   const $ = (s) => document.querySelector(s);
@@ -198,12 +198,12 @@
   }
   async function arrive() {
     A.se('speedup', { vol: .6 });
-    telop('中島家に着いた！');
+    telop('颯馬家に着いた！');
     await sleep(1100);
     await doorPhase();
   }
 
-  // ═════ 場面②③ 中島家の玄関 ═════
+  // ═════ 場面②③ 颯馬家の玄関 ═════
   const H = D.HOUSE, px = (r) => ({ left: r.x + 'px', top: r.y + 'px', width: r.w + 'px', height: r.h + 'px' });
   function placeHouse() {
     Object.assign($('#glass').style, px(H.glass));
@@ -413,7 +413,7 @@
     $('#ePhone').classList.remove('on'); $('#eBubble').classList.remove('on');
     $('#eCam').classList.add('on'); A.se('snore', { vol: .7 });
     await sleep(1400);
-    $('#eTelop').textContent = '中島さんは、\n昼まで寝ました。'; $('#eTelop').classList.add('on');
+    $('#eTelop').textContent = '颯馬さんは、\n昼まで寝ました。'; $('#eTelop').classList.add('on');
     A.se('chanchan');
     await sleep(2400);
     A.stopSe('snore');
@@ -428,7 +428,7 @@
     const rk = rankOf(left), best = left > save.best;
     if (best) { save.best = left; store(); }
     G.result = left;
-    $('#rPic').src = left >= 0 ? 'assets/photo/naka_awake.webp' : 'assets/photo/naka_body.webp';
+    $('#rPic').src = left >= 0 ? 'assets/photo/soma_awake.webp' : 'assets/photo/soma_body.webp';
     $('#rName').textContent = ''; $('#rNote').textContent = '';
     await countUp($('#rLeft'), Math.max(0, left), 600);
     await countUp($('#rHit'), G.hits, 300);
@@ -474,7 +474,16 @@
   };
 
   // 途中で切りかえる絵は、先に読み込んでおく（切りかえた瞬間に前の絵が一瞬出たり、消えたりしないように）
-  const PRELOAD = ['assets/art/runner_1.svg', 'assets/art/runner_2.svg', 'assets/art/runner_3.svg', 'assets/art/runner_jump.svg', 'assets/art/runner_fall.svg', 'assets/art/dad.svg', 'assets/art/grandma.svg', 'assets/art/dad_shadow.svg', 'assets/art/grandma_shadow.svg', 'assets/art/item_coffee.svg', 'assets/art/obs_bike.svg', 'assets/art/obs_cone.svg', 'assets/art/obs_dog.svg', 'assets/art/obs_sign.svg', 'assets/art/obs_trash.svg', 'assets/art/bush_hide.svg', 'assets/photo/naka_awake.webp', 'assets/photo/naka_body.webp'].map((s) => { const i = new Image(); i.src = s; if (i.decode) i.decode().catch(() => { }); return i; });
+  const PRELOAD = ['assets/art/runner_1.svg', 'assets/art/runner_2.svg', 'assets/art/runner_3.svg', 'assets/art/runner_jump.svg', 'assets/art/runner_fall.svg', 'assets/art/dad.svg', 'assets/art/grandma.svg', 'assets/art/dad_shadow.svg', 'assets/art/grandma_shadow.svg', 'assets/art/item_coffee.svg', 'assets/art/obs_bike.svg', 'assets/art/obs_cone.svg', 'assets/art/obs_dog.svg', 'assets/art/obs_sign.svg', 'assets/art/obs_trash.svg', 'assets/art/bush_hide.svg', 'assets/photo/soma_awake.webp', 'assets/photo/soma_body.webp'].map((s) => { const i = new Image(); i.src = s; if (i.decode) i.decode().catch(() => { }); return i; });
+  // 見守りカメラの寝言：見えているカメラに、ときどき「らむちゃ～ん…」
+  let talkN = 0;
+  setInterval(() => {
+    const cams = [...document.querySelectorAll('.cam')].filter((c) => c.offsetParent && !c.classList.contains('grandma'));
+    if (!cams.length) return;
+    const line = D.LINES.sleepTalk[talkN++ % D.LINES.sleepTalk.length];
+    cams.forEach((c) => { const t = c.querySelector('.talk'); if (!t) return; t.textContent = line; t.classList.add('on'); setTimeout(() => t.classList.remove('on'), 2400); });
+  }, 5200);
+
   fit();
   toTitle();
   if (P.has('play')) startGame();

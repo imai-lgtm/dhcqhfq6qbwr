@@ -17,8 +17,8 @@
     <div class="stripes"><i></i><i></i><i></i><i></i></div>
     <div class="t-rain" id="tRain"></div>
     <div class="t-logo"><span class="t-big">ぬらり<br>ひょん</span><div class="hanko"><span>税</span></div></div>
-    <img class="t-nura" src="assets/art/nura_idle.svg" alt="">
-    <p class="t-sub">〜 心電通、決算前の攻防 〜</p>
+    <img class="t-nura" src="assets/art/kita_up.webp" alt="ぬらりひょん（北村さん）">
+    <p class="t-sub">〜 妖怪ぬらりひょん、市民税と戦う 〜</p>
     <button class="btn-main" id="btnStart"><span>積みはじめる</span></button>
     <p class="t-best" id="best"></p>
     <footer class="t-foot"><a href="../#floor">← ゲーム一覧</a>　｜　株式会社 心電通 presents　｜　<a id="btnCredits">クレジット</a></footer>
@@ -27,13 +27,13 @@
   <!-- 遊び方 -->
   <section id="howto" class="screen modal-bg">
     <div class="card howto-card">
-      <p class="h-lead">社員ブロックを<b>ラックに積んで、<br>横1列そろえて消そう。</b></p>
+      <p class="h-lead">北村さんブロックを積んで、<br><b>横1列そろえて消そう。</b></p>
       <ol class="h-steps">
         <li><b>1</b><span>ボタンで動かす・回す・落とす<br><small>PC：← → 移動／↑ 回転／スペース すとん</small></span></li>
-        <li><b>2</b><span>ぬらりひょんが置いていく<br><img class="ic" src="assets/art/tax_block.svg" alt="">「税」がある列は、消せない</span></li>
-        <li><b>3</b><span>光る<em>龍之介ブロック</em>を置くと、<br>その列の税を全部食べる</span></li>
+        <li><b>2</b><span>税務署員が<img class="ic" src="assets/art/kanji_shi.svg" alt="市"><img class="ic" src="assets/art/kanji_min.svg" alt="民"><img class="ic" src="assets/art/kanji_zei.svg" alt="税">を投げ込んでくる。<br>これがある列は、そろえても消えない</span></li>
+        <li><b>3</b><span>「<em>市・民・税</em>」の順に並べると<em>小爆発</em>！<br>まわりのブロックも消える<br><small>（横は左から、縦は上から）</small></span></li>
       </ol>
-      <p class="h-note">全5レベル。レベル1は税なしの練習です。</p>
+      <p class="h-note">全5レベル。レベル1は税務署員の来ない練習です。</p>
       <button class="btn-main small" id="btnHowtoOk"><span>わかった</span></button>
     </div>
   </section>
@@ -54,9 +54,9 @@
     </div>
     <div class="nura" id="nura">
       <div class="n-bubble" id="nBubble">ちょっと、<br>よろしいですか…</div>
-      <img id="nuraImg" src="assets/art/nura_throw.svg" alt="">
+      <img id="nuraImg" src="assets/art/officer_idle.webp" alt="税務署員">
     </div>
-    <div class="ryu-say" id="ryuSay"><img src="assets/face/ryu.jpg" alt=""><p>税は全部、<br>俺が引き受けた！</p></div>
+    <div class="ryu-say kita-say" id="kitaSay"><img src="assets/face/kitamura_sq.jpg" alt=""><p>やめときましょう！</p></div>
     <div class="pad" id="pad">
       <button data-k="left" aria-label="左">◀</button>
       <button data-k="rot" class="rot" aria-label="回転">⟳</button>
@@ -70,8 +70,9 @@
   <!-- おわり -->
   <section id="end" class="screen">
     <div class="e-win" id="eWin">
-      <div class="e-bubble">……今年は、<br>もうよろしいですわ。</div>
-      <img class="e-nura" src="assets/art/nura_bye.svg" alt="">
+      <div class="e-bubble">税務署さん、今年は<br>やめときましょう！</div>
+      <img class="e-nura" src="assets/art/officer_idle.webp" alt="">
+      <img class="e-kita" src="assets/art/kita_up.webp" alt="">
       <p class="e-telop">決算、無事終了！</p>
     </div>
     <div class="e-lose" id="eLose">
@@ -85,12 +86,12 @@
   <section id="result" class="screen">
     <div class="stripes"><i></i><i></i><i></i><i></i></div>
     <p class="r-head">けっか</p>
-    <img class="r-pic" id="rPic" src="assets/art/nura_idle.svg" alt="">
+    <img class="r-pic" id="rPic" src="assets/art/kita_up.webp" alt="">
     <div class="r-rank"><p class="r-label">あなたは</p><p class="r-name" id="rName"></p><p class="r-note" id="rNote"></p></div>
     <div class="r-nums">
       <div><b id="rScore">0</b><span>点</span></div>
       <div><b id="rLines">0</b><span>列そろえた</span></div>
-      <div><b id="rTax">0</b><span>税を食べた</span></div>
+      <div><b id="rTax">0</b><span>市民税 爆発</span></div>
     </div>
     <div class="r-btns">
       <button class="btn-main small" id="btnRetry"><span>もう一回積む</span></button>
@@ -107,13 +108,13 @@
       <h2>クレジット</h2>
       <dl>
         <dt>企画・制作</dt><dd>（制作会社名）</dd>
-        <dt>出演</dt><dd>江原さん、宮本さん、社長、中島さん、颯馬さん、ダニエルさん、龍之介さん（株式会社 心電通）</dd>
-        <dt>写真</dt><dd>株式会社 心電通 ブログより</dd>
+        <dt>出演</dt><dd>北村勝又さん（株式会社 心電通）</dd>
+        <dt>写真</dt><dd>株式会社 心電通 ご提供</dd>
         <dt>音楽</dt><dd>魔王魂</dd>
         <dt>効果音</dt><dd>効果音ラボ</dd>
         <dt>フォント</dt><dd>Yuji Boku / Yusei Magic / Dela Gothic One / Zen Maru Gothic（SIL Open Font License）</dd>
       </dl>
-      <p class="c-note">このゲームはフィクションです。ぬらりひょんは妖怪で、実在の人物・団体とは関係ありません。</p>
+      <p class="c-note">このゲームはフィクションです。「ぬらりひょん」は北村さんの異名です。税務署員は架空の人物で、実在の人物・団体とは関係ありません。</p>
       <button class="btn-main small" id="btnCreditsOk"><span>とじる</span></button>
     </div>
   </section>

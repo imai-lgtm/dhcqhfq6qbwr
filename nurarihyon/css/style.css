@@ -183,3 +183,15 @@ a { color: inherit; }
 .land .e-bubble { left: 360px; right: 360px; top: 40px; }
 .land .e-nura { top: 220px; height: 340px; }
 .land .e-win .e-telop { top: 600px; }
+
+/* 北村さん版：ぬらりひょん＝北村さん、税務署員が「市」「民」「税」を投げ込む */
+.t-nura { border-radius: 0; }
+.h-steps .ic { margin-right: 1px; }
+.kita-say { top: 186px; background: linear-gradient(#fff8e0, #ffe9a8); border-color: #b8860b; }
+.land .kita-say { top: 150px; }
+.kita-say p { color: #5a3a08; font-size: 22px; }
+.next.hit { animation: nexthit .6s cubic-bezier(.3,1.6,.5,1); }
+@keyframes nexthit { 0% { transform: scale(1); } 30% { transform: scale(1.18) rotate(-4deg); box-shadow: 0 0 0 6px rgba(184,53,42,.6); } 100% { transform: scale(1); } }
+.e-kita { position: absolute; left: 50%; top: 300px; height: 300px; translate: -50% 0; opacity: 0; animation: kitain .6s cubic-bezier(.3,1.5,.5,1) 3.6s forwards; }
+@keyframes kitain { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: none; } }
+.land .e-kita { top: 230px; height: 360px; }

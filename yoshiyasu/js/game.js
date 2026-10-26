@@ -1,4 +1,4 @@
-// よしやす — 宮本さんと60秒しりとり
+// よしやす — 宮本さんと60秒の二文字しりとり
 (() => {
   const D = window.DATA, A = window.AUDIO, X = D.dict();
   const $ = (s) => document.querySelector(s);
@@ -142,7 +142,8 @@
     const sib = X.siblings(c).flatMap(s => [...(X.byStart[s] || []), ...(X.nByStart[s] || [])]).filter(w => !used.has(w));
     const nw = (X.nByStart[c] || []);
     const usedSame = [...used].filter(w => X.first(w) === c && w !== ok);
-    const pools = shuffle([sib, nw, usedSame].filter(p => p.length));
+    const long = (X.longByStart[c] || []);   // 二文字しりとりなので、長い言葉は罠
+    const pools = shuffle([sib, nw, usedSame, long, long].filter(p => p.length));
     for (const p of pools) { if (traps.length >= n - 1) break; const w = pick(p); if (w !== ok && w !== exclude && !traps.includes(w)) traps.push(w); }
     while (traps.length < n - 1) {   // 足りなければ、ほかの文字から始まる言葉
       const w = pick(X.usable);
@@ -228,8 +229,8 @@
     const used = new Set();
     // 1. ふつう
     G.lastTurn = 'p_ok';
-    let w = 'すいか'; used.add(w); history(w, 'miya'); sayWord(w); face('grin');
-    banner.innerHTML = '練習①　宮本さんの言葉の<b style="color:#d8361b">最後の文字「か」</b>から<br>始まるカードをタップ！'; banner.classList.add('on');
+    let w = 'いか'; used.add(w); history(w, 'miya'); sayWord(w); face('grin');
+    banner.innerHTML = '練習①　<b style="color:#d8361b">「か」から始まる2文字の言葉</b>を<br>タップ！'; banner.classList.add('on');
     let cards = buildCards('か', 2, used); showCards(cards); await sleep(300);
     fingerOn(cardsEl.querySelector('[data-ok="1"]'));
     let ans;
@@ -238,7 +239,7 @@
     await sleep(900);
     // 2. 「ん」で終わるうっかり
     const c2 = X.last(ans.w);
-    w = (X.nByStart[c2] || []).find(x => D.MIYA_N.includes(x)) || (X.nByStart[c2] || [])[0] || 'らーめん';
+    w = (X.nByStart[c2] || []).find(x => D.MIYA_N.includes(x)) || (X.nByStart[c2] || [])[0] || 'めん';
     G.lastTurn = 'p_n';
     sayWord(w); history(w, 'miya');
     banner.innerHTML = '練習②　「ん」で終わった！ルール違反です。<br><b style="color:#d8361b">アカン！</b>を押してツッコもう';
@@ -312,7 +313,9 @@
     if (G.need && Math.random() < bugRate) {
       const kinds = ['n', 'disconnect'];
       if (G.miyaSaid.length) kinds.push('repeat');
+      if ((X.longByStart[G.need] || []).length) kinds.push('long', 'long');   // 二文字のはずが、うっかり長い言葉
       const k = pick(kinds);
+      if (k === 'long') return { type: 'long', w: pick(X.longByStart[G.need]) };
       if (k === 'n') {
         const same = (X.nByStart[G.need] || []);
         return { type: 'n', w: pick(same.filter(w => D.MIYA_N.includes(w)).concat(same).slice(0, 4).concat(same.length ? [] : D.MIYA_N)) };
@@ -340,7 +343,7 @@
   async function miyaTurn(turn) {
     G.lastTurn = turn.type;
     const w = turn.w;
-    const isBug = ['n', 'disconnect', 'repeat'].includes(turn.type);
+    const isBug = ['n', 'disconnect', 'repeat', 'long'].includes(turn.type);
     face(turn.type === 'gari' ? 'eat' : baseFace);
     sayWord(w);
     const hs = history(w, 'miya');
@@ -348,7 +351,7 @@
     if (turn.type === 'gari') { A.voice('gari'); G.gari++; }
     if (turn.type === 'ok') { G.used.add(w); G.miyaSaid.push(w); }
     // 次に始める文字（うっかりの時は、それっぽい文字でカードを出して迷わせる）
-    const base = turn.type === 'ok' ? X.last(w) : turn.type === 'gari' ? 'り' : turn.type === 'n' ? G.need : X.last(w);
+    const base = turn.type === 'ok' ? X.last(w) : turn.type === 'gari' ? 'り' : (turn.type === 'n' || turn.type === 'long') ? G.need : X.last(w);
     const nCards = elapsed() < 15 ? 2 : 3;
     const cards = buildCards((X.byStart[base] || []).length ? base : G.need, nCards, G.used, w);
     await sleep(160);
@@ -365,7 +368,7 @@
           addScore(2, akanBtn, 'ツッコミ');
           hs.className = 'bad';
           bubble.classList.add('strike');
-          const v = { n: 'n_oops', disconnect: 'nanyattakke', repeat: 'sukiyanen' }[turn.type];
+          const v = { n: 'n_oops', disconnect: 'nanyattakke', repeat: 'sukiyanen', long: 'sukiyanen' }[turn.type];
           A.voice(v);
           await sleep(500);
           sayText(pick(D.EXCUSE[turn.type]), 'angry');
@@ -396,7 +399,7 @@
         act.el.classList.add('right');
         A.se('card_put'); A.se('correct', { vol: .5 });
         const comm = X.comm.has(act.w);
-        addScore((comm ? 3 : 1) + (turn.type === 'gari' ? 1 : 0), act.el, comm ? '⚡通信' : turn.type === 'gari' ? 'ガリ見逃し' : '');
+        addScore((comm ? 3 : 1) + (turn.type === 'gari' ? 1 : 0), act.el, comm ? '⚡現場' : turn.type === 'gari' ? 'ガリ見逃し' : '');
         if (comm) A.se('kira', { vol: .6 });
         G.used.add(act.w); G.chain++; G.need = X.last(act.w);
         history(act.w, 'me');
@@ -412,7 +415,7 @@
       const right = cardsEl.querySelector('[data-ok="1"]');
       if (right) right.classList.add('show');
       face('smug'); A.voice('akanyatsu');
-      const why = !X.first(act.w).startsWith(X.first(right.dataset.w)) ? `「${X.first(right.dataset.w)}」からやで` : X.last(act.w) === 'ん' ? '「ん」で終わっとる' : 'それ、さっき出たで';
+      const why = !X.first(act.w).startsWith(X.first(right.dataset.w)) ? `「${X.first(right.dataset.w)}」からやで` : act.w.length !== 2 ? '二文字やで' : X.last(act.w) === 'ん' ? '「ん」で終わっとる' : 'それ、さっき出たで';
       sayText(why, 'angry');
       await sleep(1300);
       G.used.add(right.dataset.w); G.chain++; G.need = X.last(right.dataset.w);
@@ -562,7 +565,7 @@
     expect() {
       if (!G || !onAct) return null;
       const t = G.lastTurn;
-      if (['n', 'disconnect', 'repeat', 'p_n'].includes(t)) return 'akan';
+      if (['n', 'disconnect', 'repeat', 'long', 'p_n'].includes(t)) return 'akan';
       if (t === 'statue') return 'wait';
       const ok = cardsEl.querySelector('[data-ok="1"]');
       return ok ? ok.dataset.w : null;

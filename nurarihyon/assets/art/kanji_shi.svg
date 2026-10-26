@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".35"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/></linearGradient></defs>
+<rect x="3" y="3" width="94" height="94" rx="15" fill="#2f62b8" stroke="#1b1530" stroke-width="6"/>
+<rect x="9" y="9" width="82" height="82" rx="11" fill="url(#g)"/>
+<text x="50" y="54" text-anchor="middle" dominant-baseline="middle" font-family="'Yuji Boku','Hiragino Mincho ProN','Yu Mincho',serif" font-size="66" fill="#fff">市</text>
+</svg>
