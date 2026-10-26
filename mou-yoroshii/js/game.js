@@ -229,11 +229,16 @@
     spinRaf = requestAnimationFrame(step);
   }
   function placeRing() {
-    const n = +ring.dataset.n || 1, off = +ring.dataset.off || .5;
+    const n = +ring.dataset.n || 1, off = +ring.dataset.off || .5, W = ring.offsetWidth;
     ring.querySelectorAll('.item').forEach(el => {
       const a = -Math.PI / 2 + (+el.dataset.i + off) * Math.PI * 2 / n + spinPhase;
-      el.style.left = (L.cx + Math.cos(a) * L.rx) + 'px';
+      const x = L.cx + Math.cos(a) * L.rx;
+      el.style.left = x + 'px';
       el.style.top = (L.cy + Math.sin(a) * L.ry) + 'px';
+      // 名前のラベルが画面の端で切れないように、内側へずらす
+      const lbl = el.querySelector('.lbl'), half = lbl.offsetWidth / 2;
+      const dx = Math.min(0, W - 4 - (x + half)) + Math.max(0, 4 - (x - half));
+      lbl.style.transform = `translateX(calc(-50% + ${dx}px))`;
     });
   }
   function clearRing() {

@@ -83,7 +83,7 @@ body.arrive .flash { opacity: 1; animation: wout .7s ease-out forwards; }
 
 /* 筐体の列（ゲームごとに色・操作パネルの違う筐体） */
 .floor { max-width: 1180px; margin: 30px auto 0; padding: 0 12px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 22px 18px; }
-.cab { --c: #ff3d7f; --c2: #ffcf4a; position: relative; display: block; text-decoration: none; color: inherit; }
+.cab { --c: #ff3d7f; --c2: #ffcf4a; position: relative; display: flex; flex-direction: column; text-decoration: none; color: inherit; }   /* 同じ段の説明の枠は、同じ高さにそろえる */
 .stand { position: relative; aspect-ratio: 796 / 1479; }
 .stand::before { content: ''; position: absolute; left: -6%; right: -6%; bottom: -4%; height: 12%; border-radius: 50%; background: radial-gradient(ellipse, rgba(0,0,0,.75), transparent 70%); }
 .stand::after { content: ''; position: absolute; left: -30%; right: -30%; top: 10%; height: 50%; z-index: -1; pointer-events: none;
@@ -103,13 +103,13 @@ a.cab:hover .machine, a.cab:focus-visible .machine { transform: translateY(-6px)
   background: radial-gradient(ellipse at 50% 30%, color-mix(in srgb, var(--c) 55%, #fff), var(--c) 75%); box-shadow: inset 0 0 0 1px rgba(255,255,255,.4), inset 0 -4px 8px rgba(0,0,0,.25), 0 0 16px color-mix(in srgb, var(--c) 70%, transparent); }
 .marq b { font-family: 'Boku', serif; font-weight: 400; font-size: 21px; line-height: 1; color: #fff; text-shadow: 0 2px 0 rgba(0,0,0,.35), 0 0 8px rgba(255,255,255,.4); white-space: nowrap; }
 .marq .no { position: absolute; left: 5px; top: 3px; font-family: 'Dela', sans-serif; font-size: 8px; color: rgba(255,255,255,.85); }
-.pop { position: relative; margin: 14px 2px 0; padding: 10px 10px 12px; border-radius: 10px; background: rgba(14,10,24,.86); border: 1px solid #3a2d55; box-shadow: 0 8px 18px rgba(0,0,0,.5); }
+.pop { flex: 1; display: flex; flex-direction: column; position: relative; margin: 14px 2px 0; padding: 10px 10px 12px; border-radius: 10px; background: rgba(14,10,24,.86); border: 1px solid #3a2d55; box-shadow: 0 8px 18px rgba(0,0,0,.5); }
 .pop::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 3px; border-radius: 10px 10px 0 0; background: var(--c); }
-.genre { display: inline-block; margin: 0 0 6px; padding: 2px 8px; border-radius: 999px; font-size: 11px; color: #0b0912; background: var(--c2); }
+.genre { display: inline-block; align-self: flex-start; margin: 0 0 6px; padding: 2px 8px; border-radius: 999px; font-size: 11px; color: #0b0912; background: var(--c2); }
 .who { margin: 0 0 6px; font-size: 12px; color: color-mix(in srgb, var(--c) 50%, #fff); }
 .desc { margin: 0; font-size: 12.5px; line-height: 1.6; color: #d9d2ea; }
 .best { margin: 8px 0 0; font-family: 'Dot', monospace; font-size: 12px; color: var(--gold); }
-.foot { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+.foot { display: flex; align-items: center; gap: 8px; margin-top: auto; padding-top: 10px; }   /* あそぶボタンは枠の下にそろえる */
 .coin { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 46px; height: 40px; border-radius: 6px; background: #0a070f; border: 2px solid #3a2d55; font-family: 'Dot', monospace; line-height: 1.05; }
 .coin span { font-size: 9px; color: #9a8fb8; } .coin b { font-weight: 400; font-size: 14px; color: #ff4b4b; text-shadow: 0 0 6px #ff2020; }
 .play { flex: 1; text-align: center; padding: 10px 6px; border-radius: 10px; font-family: 'Dela', sans-serif; font-size: 15px; color: #0b0912; background: linear-gradient(color-mix(in srgb, var(--c2) 70%, #fff), var(--c2)); box-shadow: 0 4px 0 color-mix(in srgb, var(--c2) 45%, #000); }
@@ -201,7 +201,7 @@ footer b { font-family: 'Dela', sans-serif; font-weight: 400; letter-spacing: .1
       <div class="pop">
         <p class="genre">二文字しりとり</p>
         <p class="who">出演：宮本さん</p>
-        <p class="desc">二文字で話す宮本さんと、60秒の二文字しりとり。長い言葉や「ん」には「アカン！」でツッコもう。「ガリ」だけは、なぜかOK。</p>
+        <p class="desc">二文字で話す宮本さんと60秒しりとり。長い言葉や「ん」には「アカン！」。「ガリ」だけは、なぜかOK。</p>
         <p class="best"></p>
         <div class="foot"><div class="coin"><span>1PLAY</span><b>¥0</b></div><span class="play">あそぶ ▶</span></div>
       </div>

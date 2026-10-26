@@ -116,7 +116,7 @@ a { color: inherit; }
 .c-txt { position: absolute; left: 12px; top: 84px; width: 150px; animation: ctxt .45s .2s ease-out both; }
 @keyframes ctxt { from { opacity: 0; transform: translateX(-20px); } }
 .c-role { margin: 0; font-family: 'Maru', sans-serif; font-size: 7px; color: #d9c7a0; letter-spacing: .1em; }
-.c-name { margin: 2px 0 4px; font-family: 'Boku', serif; font-size: 22px; line-height: 1.05; color: #fff; text-shadow: 0 0 6px rgba(216,38,27,.9); }
+.c-name { word-break: keep-all; margin: 2px 0 4px; font-family: 'Boku', serif; font-size: 22px; line-height: 1.05; color: #fff; text-shadow: 0 0 6px rgba(216,38,27,.9); }
 .c-catch { margin: 0; display: inline-block; padding: 1px 5px; font-family: 'Maru', sans-serif; font-size: 7px; background: var(--red); color: #fff; }
 .stage-title { position: absolute; inset: 0; display: none; background: #000; text-align: center; padding-top: 88px; }
 .stage-title.on { display: block; }

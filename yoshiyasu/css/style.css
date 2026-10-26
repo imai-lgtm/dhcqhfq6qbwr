@@ -109,7 +109,7 @@ a { color: inherit; }
 .bubble.angry { border-color: var(--akan); box-shadow: 0 6px 0 var(--akan); }
 .bubble.strike p { text-decoration: line-through; text-decoration-color: var(--akan); text-decoration-thickness: 5px; }
 
-.miya { position: absolute; left: 50%; top: 214px; width: 240px; height: min(230px, calc(var(--H, 844px) - 512px)); margin-left: -120px; z-index: 2; transform-origin: 50% 100%; }
+.miya { position: absolute; left: 50%; top: 214px; width: 240px; height: var(--miyaH, 230px); margin-left: -120px; z-index: 2; transform-origin: 50% 100%; }
 .miya img { position: absolute; left: 50%; bottom: 0; max-width: 240px; max-height: 230px; translate: -50% 0; opacity: 0; transition: opacity .1s; filter: drop-shadow(0 8px 10px rgba(0,0,0,.3)); }
 .miya img.on { opacity: 1; }
 .miya.hop { animation: hop .45s cubic-bezier(.3,1.6,.5,1); }
@@ -119,15 +119,15 @@ a { color: inherit; }
 .fx { position: absolute; inset: 0; pointer-events: none; }
 .fx .mark { position: absolute; font-size: 44px; animation: bpop .35s cubic-bezier(.3,1.6,.5,1) both; }
 
-.history { position: absolute; left: 0; right: 0; top: min(452px, calc(var(--H, 844px) - 290px)); height: 26px; z-index: 4; display: flex; justify-content: flex-end; gap: 6px; padding: 0 16px; overflow: hidden; mask-image: linear-gradient(90deg, transparent, #000 20%); -webkit-mask-image: linear-gradient(90deg, transparent, #000 20%); }
+.history { position: absolute; left: 0; right: 0; top: var(--histTop, 452px); height: 26px; z-index: 4; display: flex; justify-content: flex-end; gap: 6px; padding: 0 16px; overflow: hidden; mask-image: linear-gradient(90deg, transparent, #000 20%); -webkit-mask-image: linear-gradient(90deg, transparent, #000 20%); }
 .history span { flex: none; font-size: 13px; line-height: 26px; padding: 0 9px; border-radius: 999px; background: rgba(255,255,255,.85); color: var(--ink); white-space: nowrap; }
 .history span.me { background: #ffe7a0; }
 .history span.bad { background: rgba(255,255,255,.5); color: #a99; text-decoration: line-through; }
 .history span::after { content: ' →'; color: #b8a888; }
 .history span:last-child::after { content: ''; }
 
-.cards { position: absolute; left: 22px; right: 22px; top: min(488px, calc(var(--H, 844px) - 254px)); z-index: 5; display: flex; flex-direction: column; gap: 10px; }
-.wcard { position: relative; height: 64px; border-radius: 18px; background: #fff; border: 4px solid var(--navy); box-shadow: 0 5px 0 var(--navy); font-family: 'Maru', sans-serif; font-weight: 900; font-size: 30px; letter-spacing: .08em; color: var(--ink); display: flex; align-items: center; justify-content: center; transition: transform .08s; }
+.cards { position: absolute; left: 22px; right: 22px; top: var(--cardsTop, 488px); z-index: 5; display: flex; flex-direction: column; gap: var(--cardGap, 10px); }
+.wcard { position: relative; height: var(--cardH, 64px); border-radius: 18px; background: #fff; border: 4px solid var(--navy); box-shadow: 0 5px 0 var(--navy); font-family: 'Maru', sans-serif; font-weight: 900; font-size: 30px; letter-spacing: .08em; color: var(--ink); display: flex; align-items: center; justify-content: center; transition: transform .08s; }
 .wcard:active { transform: translateY(4px); box-shadow: 0 1px 0 var(--navy); }
 .wcard.deal { animation: deal .32s cubic-bezier(.3,1.4,.5,1) both; }
 @keyframes deal { from { transform: translateX(120%) rotate(8deg); opacity: 0; } }
@@ -140,7 +140,7 @@ a { color: inherit; }
 .cards.off .wcard, .akan.off { pointer-events: none; }
 .cards.dim .wcard { opacity: .35; }
 
-.akan { position: absolute; left: 60px; right: 60px; bottom: 26px; height: 74px; z-index: 5; border-radius: 22px; background: linear-gradient(#ff5a46, var(--akan)); color: #fff; font-family: 'Dela', sans-serif; font-size: 34px; letter-spacing: .1em;
+.akan { position: absolute; left: 60px; right: 60px; bottom: var(--akanB, 26px); height: var(--akanH, 74px); z-index: 5; border-radius: 22px; background: linear-gradient(#ff5a46, var(--akan)); color: #fff; font-family: 'Dela', sans-serif; font-size: 34px; letter-spacing: .1em;
   box-shadow: 0 7px 0 #8f1610, 0 12px 20px rgba(0,0,0,.3); display: flex; align-items: center; justify-content: center; gap: 10px; transition: transform .08s, box-shadow .08s; }
 .akan:active { transform: translateY(6px); box-shadow: 0 1px 0 #8f1610; }
 .akan .hari { width: 40px; height: 40px; flex: none; }
@@ -150,7 +150,7 @@ a { color: inherit; }
 .akan.swing .hari { animation: swing .3s; transform-origin: 50% 90%; }
 @keyframes swing { 40% { transform: rotate(-60deg) scale(1.4); } }
 
-.practice { position: absolute; left: 16px; right: 16px; top: 412px; z-index: 11; padding: 9px 12px; text-align: center; border-radius: 14px; background: #ffd21f; color: var(--navy); font-size: 15px; line-height: 1.35; box-shadow: 0 4px 0 var(--navy); display: none; }
+.practice { position: absolute; left: 16px; right: 16px; top: calc(var(--cardsTop, 488px) - 76px);   /* カードのすぐ上（画面の高さに合わせて動く） */  z-index: 11; padding: 9px 12px; text-align: center; border-radius: 14px; background: #ffd21f; color: var(--navy); font-size: 15px; line-height: 1.35; box-shadow: 0 4px 0 var(--navy); display: none; }
 .practice.on { display: block; animation: bpop .3s; }
 .finger { position: absolute; right: 18px; bottom: -26px; font-size: 44px; z-index: 6; pointer-events: none; animation: tapme 1s ease-in-out infinite; filter: drop-shadow(0 3px 3px rgba(0,0,0,.35)); }
 

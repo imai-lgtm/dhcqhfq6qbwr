@@ -248,7 +248,7 @@
       const c = D.CARDS[type], el = $('card'), prev = G.pause;
       G.pause = 'card';
       $('cardImg').src = `assets/photo/${c.photo}.webp`;
-      $('cardRole').textContent = c.role; $('cardName').textContent = c.name; $('cardCatch').textContent = c.catch;
+      $('cardRole').textContent = c.role; $('cardName').innerHTML = c.name.replace(/・/g, '・<wbr>'); $('cardCatch').textContent = c.catch;   // 名前は「・」の所でだけ改行する
       el.classList.remove('on'); void el.offsetWidth; el.classList.add('on');
       A.se('text_impact');
       CARD = { t: 0, done: () => { if (!CARD) return; CARD = null; el.classList.remove('on'); G.pause = prev === 'card' ? null : prev; res(); } };

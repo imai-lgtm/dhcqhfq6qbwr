@@ -28,6 +28,14 @@
     scale = Math.min(innerWidth / L.W, innerHeight / L.H);
     app.style.setProperty('--s', scale);
     if (changed || !$('#bg').innerHTML) $('#bg').innerHTML = window.BG.izakaya(L.W, L.H);
+    // スマホ縦：カードが3枚の時でも「アカン！」に重ならないように、縦の長さからカード・写真の位置を決める
+    if (!land) {
+      const H = L.H, short = H < 760;
+      const akanH = short ? 62 : 74, akanB = short ? 14 : 26, cardH = short ? 54 : 64, gap = short ? 8 : 10;
+      const cardsTop = Math.min(488, H - akanB - akanH - 12 - (3 * cardH + 2 * gap));
+      const v = { '--akanH': akanH, '--akanB': akanB, '--cardH': cardH, '--cardGap': gap, '--cardsTop': cardsTop, '--histTop': cardsTop - 34, '--miyaH': Math.min(230, cardsTop - 34 - 6 - 214) };
+      for (const [k, x] of Object.entries(v)) app.style.setProperty(k, x + 'px');
+    }
   }
   addEventListener('resize', fit);
   function at(el) {
