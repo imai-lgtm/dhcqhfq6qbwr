@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow, noarchive">   <!-- 検索に出さない -->
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#000000">
+<title>りゅうがしばく｜株式会社 心電通</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- タイトル（ここだけ本気の高画質） -->
+  <section id="title" class="screen">
+    <div class="t-art"></div>
+    <svg class="t-smoke" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+      <defs>
+        <filter id="smokeA" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".0028 .0055" numOctaves="5" seed="7"/><feColorMatrix values="0 0 0 0 .62  0 0 0 0 .08  0 0 0 0 .04  0 0 0 1.5 -.78"/></filter>
+        <filter id="rough" x="-5%" y="-10%" width="110%" height="120%"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" seed="3" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="3" xChannelSelector="R" yChannelSelector="G"/></filter>
+        <filter id="brush" x="-5%" y="-30%" width="110%" height="160%"><feTurbulence type="fractalNoise" baseFrequency=".02 .4" numOctaves="3" seed="11" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="16" xChannelSelector="R" yChannelSelector="G"/></filter>
+      </defs>
+      <rect class="sm-a" width="1600" height="900" filter="url(#smokeA)"/>
+    </svg>
+    <canvas class="t-embers" id="embers"></canvas>
+    <div class="t-vignette"></div>
+    <div class="t-logo">
+      <span class="t-small">株式会社 心電通 presents</span>
+      <svg class="t-stroke" viewBox="0 0 400 90" preserveAspectRatio="none" aria-hidden="true"><path d="M14 58 C 110 34, 250 30, 392 46" filter="url(#brush)"/></svg>
+      <span class="t-main"><b class="l-ryu">龍</b><b class="l-ga">が</b><b class="l-shibaku">しばく</b></span>
+      <span class="t-en">RYU GA SHIBAKU</span>
+      <i class="t-seal">心<br>電<br>通</i>
+    </div>
+    <p class="t-copy">この街の夜は、まだ終わらない――</p>
+    <button class="t-start" id="btnStart">PRESS START</button>
+    <p class="t-best" id="best"></p>
+    <footer class="t-foot"><a href="../">← ゲーム一覧</a>　｜　<a id="btnCredits">クレジット</a></footer>
+    <div class="t-bars"></div>
+    <div class="t-flash"></div>
+    <div class="crumble" id="crumble"></div>
+  </section>
+
+  <!-- ゲーム（ファミコン画質） -->
+  <section id="play" class="screen">
+    <div class="side side-l">
+      <p class="s-logo">りゅうが<br>しばく</p>
+      <dl class="keys">
+        <dt>移動</dt><dd>← → ↑ ↓</dd>
+        <dt>しばく</dt><dd>Z（連打でコンボ）</dd>
+        <dt>ジャンプ</dt><dd>X</dd>
+        <dt>極しばき</dt><dd>C（ゲージ満タン）</dd>
+        <dt>ポーズ</dt><dd>P / Esc</dd>
+      </dl>
+    </div>
+    <div class="tv" aria-hidden="true"><div class="tv-bottom"><span class="tv-brand">SHINDEN</span><i class="tv-led"></i><i class="tv-knob"></i><i class="tv-knob"></i></div></div>
+    <svg class="cable" viewBox="0 0 390 30" aria-hidden="true"><path d="M195 0 C 195 14, 150 10, 150 30" /></svg>
+    <div class="nes" id="nes">
+      <canvas id="cv" width="256" height="240"></canvas>
+      <div class="ov" id="ov">
+        <div class="hud">
+          <span class="h-name">りゅう</span><i class="bar hp"><b id="hpBar"></b></i>
+          <span class="h-g">しばき</span><i class="bar gauge" id="gaugeWrap"><b id="gaugeBar"></b></i>
+          <span class="h-items" id="hItems"></span>
+          <span class="h-score" id="hScore">0</span>
+        </div>
+        <div class="boss" id="bossHud"><span id="bossName"></span><i class="bar bhp"><b id="bossBar"></b></i></div>
+        <div class="go" id="go">GO ▶</div>
+        <div class="msg" id="msg"></div>
+        <div class="pop-layer" id="pops"></div>
+        <div class="textbox" id="textbox"><p id="tbText"></p><span class="tb-next">▼</span></div>
+        <div class="card" id="card"><div class="c-band"></div><img id="cardImg" alt=""><div class="c-txt"><p class="c-role" id="cardRole"></p><p class="c-name" id="cardName"></p><p class="c-catch" id="cardCatch"></p></div></div>
+        <div class="stage-title" id="stageTitle"><p id="stNum"></p><p id="stName"></p></div>
+        <div class="kiwami" id="kiwami">極</div>
+        <div class="pausebox" id="pausebox">PAUSE<small>START で つづける</small></div>
+      </div>
+    </div>
+    <div class="pad" id="pad">
+      <div class="pad-strip"><b>SHINDENTSU</b><span>しばき コントローラー</span></div>
+      <div class="pad-face"></div>
+      <div class="dpad" id="dpad"><i class="u"></i><i class="d"></i><i class="l"></i><i class="r"></i><b></b></div>
+      <div class="mid">
+        <span>SELECT</span><span>START</span>
+        <button class="pill" id="btnSelect" aria-label="音のオンオフ"></button><button class="pill" id="btnPause" aria-label="ポーズ"></button>
+        <em>音</em><em>ポーズ</em>
+      </div>
+      <div class="btns">
+        <button class="bk" id="btnK">極</button><label class="lk">極しばき</label>
+        <button class="bb" data-k="b">B</button><label class="lb">ジャンプ</label>
+        <button class="ba" data-k="a">A</button><label class="la">しばく</label>
+      </div>
+    </div>
+  </section>
+
+  <!-- 結果 -->
+  <section id="result" class="screen">
+    <div class="r-bg"></div>
+    <p class="r-head">RESULT</p>
+    <img class="r-pic" id="rPic" src="assets/photo/ryu.webp" alt="">
+    <div class="r-rank"><p class="r-label">あなたは</p><p class="r-name" id="rName"></p><p class="r-note" id="rNote"></p></div>
+    <div class="r-nums">
+      <div><b id="rScore">0</b><span>点</span></div>
+      <div><b id="rKo">0</b><span>人しばいた</span></div>
+      <div><b id="rCombo">0</b><span>最大コンボ</span></div>
+    </div>
+    <div class="r-btns">
+      <button class="r-btn main" id="btnRetry">もう一回しばく</button>
+      <div class="r-row">
+        <button class="r-btn" id="btnSave">結果を画像で保存</button>
+        <button class="r-btn" id="btnTitle">タイトル</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- クレジット -->
+  <section id="credits" class="screen modal-bg">
+    <div class="ccard">
+      <h2>クレジット</h2>
+      <dl>
+        <dt>企画・制作</dt><dd>（制作会社名）</dd>
+        <dt>出演</dt><dd>龍之介さん、中島さん、ダニエルさん、宮本さん、颯馬さん、社長（株式会社 心電通）</dd>
+        <dt>写真</dt><dd>株式会社 心電通 ブログより</dd>
+        <dt>タイトル絵</dt><dd>画像生成AI（ChatGPT）で作成</dd>
+        <dt>音楽</dt><dd>魔王魂</dd>
+        <dt>効果音</dt><dd>効果音ラボ</dd>
+        <dt>声</dt><dd>Google Gemini の読み上げ（仮の声）</dd>
+        <dt>フォント</dt><dd>DotGothic16 / Yuji Boku / Dela Gothic One / Zen Maru Gothic（SIL Open Font License）</dd>
+      </dl>
+      <p class="c-note">このゲームはフィクションです。題名は有名ゲームのパロディですが、公式とは関係ありません。社員のみなさんは実際には仲良しです。</p>
+      <button class="r-btn main" id="btnCreditsOk">とじる</button>
+    </div>
+  </section>
+
+  <button class="mute" id="mute" aria-label="音のオンオフ"></button>
+</div>
+
+<script src="js/data.js"></script>
+<script src="../shared/js/audio.js"></script>
+<script src="../shared/js/home.js"></script>
+<script src="js/game.js"></script>
+</body>
+</html>

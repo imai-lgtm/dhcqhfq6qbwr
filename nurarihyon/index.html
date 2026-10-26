@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow, noarchive">   <!-- 検索に出さない -->
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#141a2a">
+<title>ぬらりひょん｜株式会社 心電通</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- タイトル -->
+  <section id="title" class="screen">
+    <div class="stripes"><i></i><i></i><i></i><i></i></div>
+    <div class="t-rain" id="tRain"></div>
+    <div class="t-logo"><span class="t-big">ぬらり<br>ひょん</span><div class="hanko"><span>税</span></div></div>
+    <img class="t-nura" src="assets/art/nura_idle.svg" alt="">
+    <p class="t-sub">〜 心電通、決算前の攻防 〜</p>
+    <button class="btn-main" id="btnStart"><span>積みはじめる</span></button>
+    <p class="t-best" id="best"></p>
+    <footer class="t-foot"><a href="../">← ゲーム一覧</a>　｜　株式会社 心電通 presents　｜　<a id="btnCredits">クレジット</a></footer>
+  </section>
+
+  <!-- 遊び方 -->
+  <section id="howto" class="screen modal-bg">
+    <div class="card howto-card">
+      <p class="h-lead">社員ブロックを<b>ラックに積んで、<br>横1列そろえて消そう。</b></p>
+      <ol class="h-steps">
+        <li><b>1</b><span>ボタンで動かす・回す・落とす<br><small>PC：← → 移動／↑ 回転／スペース すとん</small></span></li>
+        <li><b>2</b><span>ぬらりひょんが置いていく<br><img class="ic" src="assets/art/tax_block.svg" alt="">「税」がある列は、消せない</span></li>
+        <li><b>3</b><span>光る<em>龍之介ブロック</em>を置くと、<br>その列の税を全部食べる</span></li>
+      </ol>
+      <p class="h-note">全5レベル。レベル1は税なしの練習です。</p>
+      <button class="btn-main small" id="btnHowtoOk"><span>わかった</span></button>
+    </div>
+  </section>
+
+  <!-- ゲーム -->
+  <section id="play" class="screen">
+    <div class="p-bg"></div>
+    <header class="hud">
+      <div class="lv"><span>LEVEL</span><b id="lvNum">1</b></div>
+      <div class="goal"><span>のこり</span><b id="goalNum">4</b><small>列</small></div>
+      <div class="score"><span id="score">0</span><small>点</small></div>
+    </header>
+    <div class="next"><span>つぎ</span><canvas id="nextCv" width="120" height="120"></canvas></div>
+    <div class="board-wrap" id="boardWrap">
+      <div class="rack l"></div><div class="rack r"></div>
+      <canvas id="board"></canvas>
+      <div class="flashrow" id="flashRows"></div>
+    </div>
+    <div class="nura" id="nura">
+      <div class="n-bubble" id="nBubble">ちょっと、<br>よろしいですか…</div>
+      <img id="nuraImg" src="assets/art/nura_throw.svg" alt="">
+    </div>
+    <div class="ryu-say" id="ryuSay"><img src="assets/face/ryu.jpg" alt=""><p>税は全部、<br>俺が引き受けた！</p></div>
+    <div class="pad" id="pad">
+      <button data-k="left" aria-label="左">◀</button>
+      <button data-k="rot" class="rot" aria-label="回転">⟳</button>
+      <button data-k="right" aria-label="右">▶</button>
+      <button data-k="down" aria-label="はやく">▼</button>
+      <button data-k="drop" class="drop" aria-label="すとん">すとん</button>
+    </div>
+    <div class="telop" id="telop"></div>
+  </section>
+
+  <!-- おわり -->
+  <section id="end" class="screen">
+    <div class="e-win" id="eWin">
+      <div class="e-bubble">……今年は、<br>もうよろしいですわ。</div>
+      <img class="e-nura" src="assets/art/nura_bye.svg" alt="">
+      <p class="e-telop">決算、無事終了！</p>
+    </div>
+    <div class="e-lose" id="eLose">
+      <p class="e-banner">心電通<br>税務署被害者の会<br>開催</p>
+      <div class="e-circle" id="eCircle"><img class="e-kanpai" src="assets/art/kanpai.svg" alt=""></div>
+      <p class="e-telop">みんなで愚痴って、また明日。</p>
+    </div>
+  </section>
+
+  <!-- 結果 -->
+  <section id="result" class="screen">
+    <div class="stripes"><i></i><i></i><i></i><i></i></div>
+    <p class="r-head">けっか</p>
+    <img class="r-pic" id="rPic" src="assets/art/nura_idle.svg" alt="">
+    <div class="r-rank"><p class="r-label">あなたは</p><p class="r-name" id="rName"></p><p class="r-note" id="rNote"></p></div>
+    <div class="r-nums">
+      <div><b id="rScore">0</b><span>点</span></div>
+      <div><b id="rLines">0</b><span>列そろえた</span></div>
+      <div><b id="rTax">0</b><span>税を食べた</span></div>
+    </div>
+    <div class="r-btns">
+      <button class="btn-main small" id="btnRetry"><span>もう一回積む</span></button>
+      <div class="r-row">
+        <button class="btn-sub" id="btnSave">結果を画像で保存</button>
+        <button class="btn-sub" id="btnTitle">タイトル</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- クレジット -->
+  <section id="credits" class="screen modal-bg">
+    <div class="card credit-card">
+      <h2>クレジット</h2>
+      <dl>
+        <dt>企画・制作</dt><dd>（制作会社名）</dd>
+        <dt>出演</dt><dd>江原さん、宮本さん、社長、中島さん、颯馬さん、ダニエルさん、龍之介さん（株式会社 心電通）</dd>
+        <dt>写真</dt><dd>株式会社 心電通 ブログより</dd>
+        <dt>音楽</dt><dd>魔王魂</dd>
+        <dt>効果音</dt><dd>効果音ラボ</dd>
+        <dt>フォント</dt><dd>Yuji Boku / Yusei Magic / Dela Gothic One / Zen Maru Gothic（SIL Open Font License）</dd>
+      </dl>
+      <p class="c-note">このゲームはフィクションです。ぬらりひょんは妖怪で、実在の人物・団体とは関係ありません。</p>
+      <button class="btn-main small" id="btnCreditsOk"><span>とじる</span></button>
+    </div>
+  </section>
+
+  <button class="mute" id="mute" aria-label="音のオンオフ"></button>
+  <div class="flash" id="flash"></div>
+</div>
+
+<script src="js/data.js"></script>
+<script src="../shared/js/audio.js"></script>
+<script src="../shared/js/home.js"></script>
+<script src="js/game.js"></script>
+</body>
+</html>

@@ -1,0 +1,248 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow, noarchive">   <!-- 検索に出さない -->
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b0912">
+<title>心電通ゲームセンター｜株式会社 心電通</title>
+<style>
+@font-face { font-family: 'Boku'; src: url('shared/fonts/boku.woff2') format('woff2'); font-display: swap; }
+@font-face { font-family: 'Dela'; src: url('shared/fonts/dela.woff2') format('woff2'); font-display: swap; }
+@font-face { font-family: 'Maru'; src: url('shared/fonts/maru.woff2') format('woff2'); font-weight: 700; font-display: swap; }
+@font-face { font-family: 'Dot'; src: url('shared/fonts/dot.woff2') format('woff2'); font-display: swap; }
+:root { --pink: #ff3d7f; --cyan: #3ee6ff; --gold: #ffcf4a; --bg: #0b0912; }
+* { box-sizing: border-box; }
+html, body { margin: 0; overflow-x: clip; }
+body { min-height: 100vh; font-family: 'Maru', 'Hiragino Maru Gothic ProN', 'Meiryo', sans-serif; font-weight: 700; color: #efe9ff; background: var(--bg); overflow-x: hidden; }
+a { color: inherit; }
+/* 店内（夜のゲーセン） */
+.room { position: fixed; inset: 0; z-index: -1; background: url('top/arcade_bg.webp') 50% 40% / cover no-repeat; }
+.room::after { content: ''; position: absolute; inset: 0; background: linear-gradient(rgba(8,5,16,.82) 0%, rgba(8,5,16,.45) 38%, rgba(8,5,16,.35) 60%, rgba(8,5,16,.8) 100%); }
+
+/* ── 看板（ネオン） ── */
+.top { position: relative; padding: 40px 16px 6px; text-align: center; }
+.sign { position: relative; display: inline-block; max-width: 100%; padding: 18px 28px 16px; border-radius: 14px; background: linear-gradient(#17112a, #0e0a1a); border: 3px solid #3a2c5c;
+  box-shadow: 0 0 0 6px #120d20, 0 10px 40px rgba(0,0,0,.7), inset 0 0 30px rgba(255,61,127,.12); }
+.sign::before, .sign::after { content: ''; position: absolute; top: -40px; width: 2px; height: 40px; background: repeating-linear-gradient(#6b6280 0 4px, #2a2438 4px 6px); }
+.sign::before { left: 18%; } .sign::after { right: 18%; }
+.bulbs { position: absolute; inset: 5px; border-radius: 10px; pointer-events: none;
+  background:
+    radial-gradient(circle, #ffd86b 0 2.2px, transparent 3px) 0 0 / 18px 18px repeat-x,
+    radial-gradient(circle, #ffd86b 0 2.2px, transparent 3px) 0 100% / 18px 18px repeat-x;
+  filter: drop-shadow(0 0 3px #ffb300); animation: chase 1s steps(2) infinite; }
+@keyframes chase { 50% { background-position: 9px 0, 9px 100%; } }
+.sign .en { margin: 0 0 2px; font-family: 'Dela', sans-serif; font-size: clamp(10px, 2.4vw, 15px); letter-spacing: .4em; color: var(--cyan);
+  text-shadow: 0 0 4px #fff, 0 0 10px var(--cyan), 0 0 22px var(--cyan); }
+.sign h1 { margin: 0; font-family: 'Boku', serif; font-weight: 400; font-size: clamp(26px, 7.8vw, 84px); line-height: 1.12; color: #fff1f6; white-space: nowrap;
+  text-shadow: 0 0 4px #fff, 0 0 12px var(--pink), 0 0 28px var(--pink), 0 0 52px rgba(255,61,127,.7); }
+.sign h1 .fl { animation: flick 6s infinite; }
+@keyframes flick { 0%, 7%, 9%, 52%, 54%, 100% { opacity: 1; } 8%, 53% { opacity: .25; text-shadow: none; } }
+.open { position: absolute; right: -14px; top: -14px; padding: 4px 10px; border-radius: 6px; font-family: 'Dela', sans-serif; font-size: 12px; letter-spacing: .1em; color: #fff;
+  background: #e0242c; box-shadow: 0 0 12px #ff3030, 0 3px 0 #7a0c10; rotate: 8deg; animation: blink 1.6s steps(1) infinite; }
+@keyframes blink { 50% { opacity: .55; } }
+.lead { margin: 16px 0 0; font-size: 14px; color: #e3dcf5; letter-spacing: .05em; text-shadow: 0 2px 6px #000; }
+
+/* ── 電光掲示板 ── */
+.ticker { max-width: 1180px; margin: 18px auto 0; margin-inline: max(10px, calc((100% - 1180px) / 2)); overflow: hidden; border-radius: 8px; background: #070507; border: 2px solid #2b2140; box-shadow: inset 0 0 12px #000, 0 6px 16px rgba(0,0,0,.5); }
+.ticker p { margin: 0; padding: 7px 0; white-space: nowrap; font-family: 'Dot', monospace; font-size: 16px; color: #ff9a2a; text-shadow: 0 0 6px #ff6a00;
+  display: inline-block; padding-left: 100%; animation: tick 34s linear infinite; }
+@keyframes tick { to { transform: translateX(-100%); } }
+
+/* ── 筐体の列 ── */
+.floor { max-width: 1180px; margin: 30px auto 0; padding: 0 12px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 22px 18px; }
+.cab { --c: #ff3d7f; --c2: #ffcf4a; position: relative; display: block; text-decoration: none; color: inherit; }
+/* 筐体の絵（画面の部分は透明）。画面はその後ろに置く */
+.machine { position: relative; width: 100%; aspect-ratio: 796 / 1479; transition: transform .2s; }
+.cab:hover .machine, .cab:focus-visible .machine { transform: translateY(-6px); }
+.machine::before { content: ''; position: absolute; left: -12%; right: -12%; bottom: -5%; height: 14%; border-radius: 50%; z-index: -1;
+  background: radial-gradient(ellipse, rgba(0,0,0,.75), transparent 70%); }
+.machine::after { content: ''; position: absolute; left: -30%; right: -30%; top: 10%; height: 50%; z-index: -2; pointer-events: none;
+  background: radial-gradient(ellipse, color-mix(in srgb, var(--c) 45%, transparent), transparent 65%); opacity: .55; transition: opacity .2s; }
+.cab:hover .machine::after { opacity: .9; }
+.body { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none; }
+.scr { position: absolute; left: 19.2%; top: 21.5%; width: 61.6%; height: 25.6%; z-index: 1; overflow: hidden; background: #000; }
+.scr img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; transform: scale(1.14); filter: saturate(1.1) brightness(.95) contrast(1.05); transition: filter .2s; }
+.scr img.alt { opacity: 0; object-fit: cover; transform: none; image-rendering: pixelated; animation: attract 8s steps(1) infinite; }
+@keyframes attract { 50% { opacity: 1; } }
+.scr::after { content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(115deg, rgba(255,255,255,.16) 0 18%, transparent 30%), repeating-linear-gradient(rgba(0,0,0,0) 0 2px, rgba(0,0,0,.2) 2px 3px), radial-gradient(ellipse at 50% 50%, transparent 55%, rgba(0,0,0,.6) 100%); }
+.cab:hover .scr img { filter: saturate(1.25) brightness(1.1) contrast(1.05); }
+.scr em { position: absolute; left: 0; right: 0; bottom: 0; padding: 3px 0 4px; text-align: center; font-style: normal; font-family: 'Dot', monospace; font-size: 11px; color: #fff; z-index: 1;
+  background: linear-gradient(transparent, rgba(0,0,0,.8) 45%); text-shadow: 0 0 6px var(--c); animation: blink 1.2s steps(1) infinite; }
+/* マーキー（上の光る看板）にゲームの題名 */
+.marq { position: absolute; left: 10.4%; top: 1.3%; width: 79.2%; height: 7.6%; z-index: 3; display: flex; align-items: center; justify-content: center; border-radius: 3px; overflow: hidden;
+  background: radial-gradient(ellipse at 50% 30%, color-mix(in srgb, var(--c) 55%, #fff), var(--c) 75%); box-shadow: inset 0 0 0 1px rgba(255,255,255,.4), inset 0 -4px 8px rgba(0,0,0,.25), 0 0 16px color-mix(in srgb, var(--c) 70%, transparent); }
+.marq b { font-family: 'Boku', serif; font-weight: 400; font-size: clamp(13px, 1.65vw, 21px); line-height: 1; color: #fff; text-shadow: 0 2px 0 rgba(0,0,0,.35), 0 0 8px rgba(255,255,255,.4); white-space: nowrap; }
+.marq .no { position: absolute; left: 5px; top: 3px; font-family: 'Dela', sans-serif; font-size: 8px; color: rgba(255,255,255,.85); }
+/* 筐体の下の案内板 */
+.pop { position: relative; margin: 14px 2px 0; padding: 10px 10px 12px; border-radius: 10px; background: rgba(14,10,24,.86); border: 1px solid #3a2d55; box-shadow: 0 8px 18px rgba(0,0,0,.5); backdrop-filter: blur(3px); }
+.pop::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 3px; border-radius: 10px 10px 0 0; background: var(--c); }
+.genre { display: inline-block; margin: 0 0 6px; padding: 2px 8px; border-radius: 999px; font-size: 11px; color: #0b0912; background: var(--c2); }
+.who { margin: 0 0 6px; font-size: 12px; color: color-mix(in srgb, var(--c) 50%, #fff); }
+.desc { margin: 0; font-size: 12.5px; line-height: 1.6; color: #d9d2ea; }
+.best { margin: 8px 0 0; font-family: 'Dot', monospace; font-size: 12px; color: var(--gold); }
+.foot { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+.coin { display: flex; flex-direction: column; align-items: center; justify-content: center; width: 46px; height: 40px; border-radius: 6px; background: #0a070f; border: 2px solid #3a2d55; font-family: 'Dot', monospace; line-height: 1.05; }
+.coin span { font-size: 9px; color: #9a8fb8; } .coin b { font-weight: 400; font-size: 14px; color: #ff4b4b; text-shadow: 0 0 6px #ff2020; }
+.play { flex: 1; text-align: center; padding: 10px 6px; border-radius: 10px; font-family: 'Dela', sans-serif; font-size: 15px; color: #0b0912; background: linear-gradient(color-mix(in srgb, var(--c2) 70%, #fff), var(--c2)); box-shadow: 0 4px 0 color-mix(in srgb, var(--c2) 45%, #000); }
+.cab:active .play { transform: translateY(3px); box-shadow: 0 1px 0 color-mix(in srgb, var(--c2) 45%, #000); }
+.c1 { --c: #e8322a; --c2: #ffd34d; } .c2 { --c: #1c8fd3; --c2: #ffd34d; } .c3 { --c: #ff8a1e; --c2: #7bdc4a; } .c4 { --c: #7a4fc8; --c2: #c6a6ff; }
+.c5 { --c: #b3170e; --c2: #e9e3d6; }
+.c5 .marq { background: linear-gradient(#1a0606, #070202); box-shadow: inset 0 0 0 2px #b3170e, 0 0 16px rgba(179,23,14,.6); }
+.c5 .marq b { color: #f1ece3; font-size: clamp(15px, 1.9vw, 24px); }
+
+/* ── 下 ── */
+.notice { max-width: 1180px; margin: 34px auto 0; padding: 0 16px; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+.notice p { margin: 0; padding: 8px 14px; border-radius: 8px; font-size: 12px; color: #d5cdea; background: rgba(10,7,18,.75); border: 1px dashed #3a2d55; }
+footer { max-width: 1180px; margin: 30px auto 0; padding: 0 16px 40px; text-align: center; font-size: 12px; color: #a59cc0; line-height: 1.9; text-shadow: 0 1px 4px #000; }
+footer b { font-family: 'Dela', sans-serif; font-weight: 400; letter-spacing: .15em; color: #e3dcf5; }
+
+@media (max-width: 1100px) { .floor { grid-template-columns: repeat(3, 1fr); max-width: 760px; } .marq b { font-size: clamp(14px, 2.6vw, 22px); } }
+@media (max-width: 700px) {
+  .top { padding-top: 34px; }
+  .sign { padding: 14px 16px 12px; }
+  .open { right: -8px; top: -12px; font-size: 10px; }
+  .floor { grid-template-columns: repeat(2, 1fr); gap: 18px 12px; padding: 0 12px; }
+  .marq b { font-size: 13px; } .c5 .marq b { font-size: 15px; } .marq .no { font-size: 7px; }
+  .scr em { font-size: 9px; }
+  .pop { padding: 8px 8px 10px; margin-top: 10px; }
+  .desc { font-size: 11.5px; } .who { font-size: 11px; } .genre { font-size: 10px; }
+  .coin { width: 40px; } .play { font-size: 13px; padding: 9px 4px; }
+  .ticker p { font-size: 14px; }
+}
+</style>
+</head>
+<body>
+<div class="room" aria-hidden="true"></div>
+<header class="top">
+  <div class="sign">
+    <i class="bulbs"></i>
+    <p class="en">SHINDENTSU GAME CENTER</p>
+    <h1>心電通<span class="fl">ゲ</span>ームセンター</h1>
+    <span class="open">営業中</span>
+  </div>
+  <p class="lead">社員がそのままゲームになりました。くだらないけど、本気です。</p>
+</header>
+
+<div class="ticker"><p>★ 全5タイトル 稼働中 ★ 1プレイ 0円 ★ スマホでもPCでも遊べます ★ 出演はすべて 株式会社 心電通 の社員のみなさん ★ ゲームはフィクションです。社員のみなさんは実際には仲良しです ★ 本日も安全第一でお遊びください ★</p></div>
+
+<main class="floor">
+  <a class="cab c1" href="mou-yoroshii/" data-key="eba_save_v1">
+    <div class="machine">
+      <div class="scr"><img src="top/mou-yoroshii.webp" alt="もうよろしいですわ の画面"><em>PRESS START</em></div>
+      <img class="body" src="top/cabinet.webp" alt="">
+      <div class="marq"><span class="no">01</span><b>もうよろしいですわ</b></div>
+    </div>
+    <div class="pop">
+      <p class="genre">お使いアクション</p>
+      <p class="who">出演：江原さん</p>
+      <p class="desc">江原部長の「あれ取って」に、正しいものを渡そう。1回でもまちがえたら、帰ります。</p>
+      <p class="best"></p>
+      <div class="foot"><div class="coin"><span>1PLAY</span><b>¥0</b></div><span class="play">あそぶ ▶</span></div>
+    </div>
+  </a>
+  <a class="cab c2" href="yoshiyasu/" data-key="yoshi_save_v1">
+    <div class="machine">
+      <div class="scr"><img src="top/yoshiyasu.webp" alt="よしやす の画面"><em>PRESS START</em></div>
+      <img class="body" src="top/cabinet.webp" alt="">
+      <div class="marq"><span class="no">02</span><b>よしやす</b></div>
+    </div>
+    <div class="pop">
+      <p class="genre">60秒しりとり</p>
+      <p class="who">出演：宮本さん</p>
+      <p class="desc">宮本さんと60秒しりとり。うっかりルール違反には「アカン！」でツッコもう。「ガリ」だけは、なぜかOK。</p>
+      <p class="best"></p>
+      <div class="foot"><div class="coin"><span>1PLAY</span><b>¥0</b></div><span class="play">あそぶ ▶</span></div>
+    </div>
+  </a>
+  <a class="cab c3" href="nebou/" data-key="nebou_save_v1" data-unit="sec">
+    <div class="machine">
+      <div class="scr"><img src="top/nebou.webp" alt="寝坊 の画面"><em>PRESS START</em></div>
+      <img class="body" src="top/cabinet.webp" alt="">
+      <div class="marq"><span class="no">03</span><b>寝坊</b></div>
+    </div>
+    <div class="pop">
+      <p class="genre">目覚ましアクション</p>
+      <p class="who">出演：中島さん</p>
+      <p class="desc">夜間工事明けの朝、中島さんが来ない。走って、インターホンを直して、ピンポンで起こせ。</p>
+      <p class="best"></p>
+      <div class="foot"><div class="coin"><span>1PLAY</span><b>¥0</b></div><span class="play">あそぶ ▶</span></div>
+    </div>
+  </a>
+  <a class="cab c4" href="nurarihyon/" data-key="nura_save_v1">
+    <div class="machine">
+      <div class="scr"><img src="top/nurarihyon.webp" alt="ぬらりひょん の画面"><em>PRESS START</em></div>
+      <img class="body" src="top/cabinet.webp" alt="">
+      <div class="marq"><span class="no">04</span><b>ぬらりひょん</b></div>
+    </div>
+    <div class="pop">
+      <p class="genre">落ちものパズル</p>
+      <p class="who">出演：社員7人</p>
+      <p class="desc">社員の顔ブロックをラックに積む落ちものパズル。妖怪ぬらりひょんが、消せない「税」を置いていく。</p>
+      <p class="best"></p>
+      <div class="foot"><div class="coin"><span>1PLAY</span><b>¥0</b></div><span class="play">あそぶ ▶</span></div>
+    </div>
+  </a>
+  <a class="cab c5" href="ryuga-shibaku/" data-key="ryuga_save_v1">
+    <div class="machine">
+      <div class="scr"><img src="top/ryuga-shibaku.webp" alt="龍がしばく の画面"><img class="alt" src="top/ryuga-shibaku_play.webp" alt=""><em>PRESS START</em></div>
+      <img class="body" src="top/cabinet.webp" alt="">
+      <div class="marq"><span class="no">05</span><b>龍がしばく</b></div>
+    </div>
+    <div class="pop">
+      <p class="genre">ベルトスクロールアクション</p>
+      <p class="who">出演：龍之介さん ほか5人</p>
+      <p class="desc">奥さんが連れ去られた。龍之介は、黒幕の待つ新社屋へ――。※始まるとファミコン画質になります。</p>
+      <p class="best"></p>
+      <div class="foot"><div class="coin"><span>1PLAY</span><b>¥0</b></div><span class="play">あそぶ ▶</span></div>
+    </div>
+  </a>
+</main>
+
+<div class="notice">
+  <p>📱 スマホは縦、💻 PCは横の画面で遊べます</p>
+  <p>🔊 音が出ます（各ゲームの右上で消せます）</p>
+  <p>🏆 自己ベストは、この端末に記録されます</p>
+</div>
+
+<footer>
+  <b>株式会社 心電通</b><br>
+  音楽：魔王魂　効果音：効果音ラボ
+</footer>
+
+<script>
+// 自己ベスト（各ゲームがこの端末に保存したもの）を筐体の下に表示
+document.querySelectorAll('.cab').forEach((c) => {
+  let s = null;
+  try { s = JSON.parse(localStorage.getItem(c.dataset.key) || 'null'); } catch (_) { }
+  const el = c.querySelector('.best');
+  if (!s) { el.textContent = 'HI-SCORE ---'; return; }
+  if (c.dataset.unit === 'sec') el.textContent = s.best >= 0 ? `BEST ${s.best}秒のこし` : 'HI-SCORE ---';
+  else el.textContent = s.best ? `HI-SCORE ${Number(s.best).toLocaleString()}` : 'HI-SCORE ---';
+});
+// マーキーの題名が板からはみ出さないように、文字を小さくする
+function fitMarquee() {
+  document.querySelectorAll('.marq b').forEach((b) => {
+    b.style.fontSize = '';
+    let fs = parseFloat(getComputedStyle(b).fontSize);
+    const max = b.parentElement.clientWidth * .86;
+    while (b.scrollWidth > max && fs > 8) { fs -= .5; b.style.fontSize = fs + 'px'; }
+  });
+}
+addEventListener('resize', fitMarquee);
+document.fonts.ready.then(fitMarquee);
+fitMarquee();
+// コインを入れる音 → 少し待ってからゲームへ
+let coin = null;
+try { coin = new Audio('shared/se/chin.mp3'); coin.volume = .6; if (localStorage.getItem('shindentsu_mute') === '1') coin = null; } catch (_) { }
+document.querySelectorAll('.cab').forEach((c) => c.addEventListener('click', (e) => {
+  if (e.metaKey || e.ctrlKey || e.shiftKey || !coin) return;
+  e.preventDefault();
+  coin.currentTime = 0; coin.play().catch(() => { });
+  c.querySelector('.scr em').textContent = 'COIN IN!';
+  setTimeout(() => { location.href = c.getAttribute('href'); }, 380);
+}));
+</script>
+</body>
+</html>

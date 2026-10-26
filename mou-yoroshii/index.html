@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow, noarchive">   <!-- 検索に出さない -->
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#141a2a">
+<title>もうよろしいですわ｜株式会社 心電通</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- タイトル -->
+  <section id="title" class="screen">
+    <div class="stripes"><i></i><i></i><i></i><i></i></div>
+    <div class="t-rays"></div>
+    <div class="t-glow"></div>
+    <img class="t-eba" src="assets/photo/eba_smile.webp" alt="江原さん">
+    <div class="t-logo">
+      <span class="t-small">もう、</span>
+      <span class="t-big">よろしい<br>ですわ</span>
+      <div class="hanko"><span>江原</span></div>
+    </div>
+    <p class="t-sub">〜 江原部長の、あれ取って 〜</p>
+    <button class="btn-main" id="btnStart"><span>あれ取って</span></button>
+    <button class="btn-sub" id="btnAlbum">江原部長日記アルバム <b id="albumCount"></b></button>
+    <p class="t-best" id="best"></p>
+    <footer class="t-foot"><a href="../">← ゲーム一覧</a>　｜　株式会社 心電通 presents　｜　<a id="btnCredits">クレジット</a></footer>
+  </section>
+
+  <!-- 遊び方 -->
+  <section id="howto" class="screen modal-bg">
+    <div class="card howto-card">
+      <img class="h-eba" src="assets/photo/eba_want.webp" alt="">
+      <p class="h-lead">江原部長の「あれ取って」に<br>こたえるゲームです。</p>
+      <ol class="h-steps">
+        <li><b>1</b><span>吹き出しのお願いを読む</span></li>
+        <li><b>2</b><span>まわりの品物から選んで<br>タップして渡す</span></li>
+        <li><b>3</b><span>まちがえたら…<em>帰ります。</em></span></li>
+      </ol>
+      <p class="h-note">最初の1問は練習です。時間制限はありません。</p>
+      <button class="btn-main small" id="btnHowtoOk"><span>わかった</span></button>
+    </div>
+  </section>
+
+  <!-- ゲーム -->
+  <section id="play" class="screen">
+    <div class="bg" id="bg"></div>
+    <div class="spin-wrap" id="spinWrap">
+      <header class="hud">
+        <div class="st-pill" id="stName"></div>
+        <div class="qnum" id="qNum"></div>
+        <div class="score" id="score">0</div>
+      </header>
+      <div class="mood" id="mood">
+        <div class="mood-face" id="moodFace">😊</div>
+        <div class="mood-bar"><i id="timeBar"></i><span>のこり時間</span></div>
+      </div>
+      <div class="bubble" id="bubble"><p id="say"></p><canvas id="dream" width="128" height="128"></canvas></div>
+      <div class="field" id="field">
+        <div class="eba" id="eba">
+          <img data-f="smile" src="assets/photo/eba_smile.webp" alt="">
+          <img data-f="laugh" src="assets/photo/eba_laugh.webp" alt="">
+          <img data-f="want" src="assets/photo/eba_want.webp" alt="">
+          <img data-f="down" src="assets/photo/eba_down.webp" alt="">
+          <img data-f="koji" src="assets/photo/koji.webp" alt="">
+          <div class="fx" id="fx"></div>
+        </div>
+        <div class="think" id="think"><img alt=""></div>
+        <svg class="gaze" id="gaze" viewBox="0 0 390 500"><path id="gazePath" d=""/></svg>
+        <div class="ring" id="ring"></div>
+      </div>
+      <div class="hiding" id="hiding"><img src="assets/photo/eba_want.webp" alt=""></div>
+      <div class="shacho" id="shacho"><img src="assets/photo/shacho.webp" alt=""><div class="s-bubble">俺のは？</div></div>
+      <footer class="meter">
+        <div class="m-label">満腹度</div>
+        <div class="m-bar"><i id="fullBar"></i><span id="fullPct">0%</span></div>
+      </footer>
+    </div>
+    <div class="dim" id="dim"></div>
+    <div class="telop" id="telop"></div>
+    <div class="practice" id="practice">練習：指さしている品物をタップ！</div>
+    <div class="stage-intro" id="stIntro">
+      <div class="si-band">
+        <div class="si-num" id="siNum"></div>
+        <div class="si-name" id="siName"></div>
+        <div class="si-sub" id="siSub"></div>
+      </div>
+      <p class="si-note" id="siNote"></p>
+    </div>
+  </section>
+
+  <!-- 帰宅（ゲームオーバー） -->
+  <section id="over" class="screen">
+    <div class="o-bg"></div>
+    <div class="o-bubble" id="oBubble">もう、<br>よろしいですわ。</div>
+    <img class="o-face" id="oFace" src="assets/photo/eba_down.webp" alt="">
+    <div class="o-road"><img class="o-walk" id="oWalk" src="assets/photo/eba_walk.webp" alt=""></div>
+    <div class="o-progress" id="oProg"><p>江原さんが帰宅中…</p><div class="o-bar"><i id="oBar"></i></div></div>
+    <button class="o-skip" id="oSkip">スキップ ▶▶</button>
+    <div class="o-toast" id="oToast">江原さんは急げません</div>
+    <div class="o-black" id="oBlack"><p id="oTelop">江原さんは<br>家に帰って寝ました。</p><p class="o-answer" id="oAnswer"></p></div>
+  </section>
+
+  <!-- エンディング -->
+  <section id="ending" class="screen">
+    <div class="e-slide" id="eSlide"><img id="eImg" alt=""><p id="eCap"></p></div>
+    <div class="e-final" id="eFinal">
+      <img src="assets/album/end_tower.jpg" alt="">
+      <p class="e-msg">出会って27年。<br>江原さん、いつもありがとう。</p>
+    </div>
+    <div class="e-logo" id="eLogo">
+      <div class="stripes small"><i></i><i></i><i></i><i></i></div>
+      <p class="e-copy">心と心を繋ぐ</p>
+      <p class="e-name">株式会社 心電通</p>
+    </div>
+  </section>
+
+  <!-- 結果 -->
+  <section id="result" class="screen">
+    <div class="stripes"><i></i><i></i><i></i><i></i></div>
+    <p class="r-head">けっか</p>
+    <img class="r-eba" id="rEba" src="assets/photo/eba_smile.webp" alt="">
+    <div class="r-rank"><p class="r-label">あなたは江原さんの</p><p class="r-name" id="rName"></p><p class="r-note" id="rNote"></p></div>
+    <div class="r-nums"><div><b id="rCorrect"></b><span>問 正解</span></div><div><b id="rScore"></b><span>点</span></div></div>
+    <div class="r-new" id="rNew"></div>
+    <div class="r-btns">
+      <button class="btn-main small" id="btnRetry"><span>もう一回あれ取る</span></button>
+      <div class="r-row">
+        <button class="btn-sub" id="btnResAlbum">アルバム</button>
+        <button class="btn-sub" id="btnSave">結果を画像で保存</button>
+        <button class="btn-sub" id="btnTitle">タイトル</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- アルバム -->
+  <section id="album" class="screen">
+    <header class="a-head"><button class="a-back" id="btnAlbumBack">◀ もどる</button><h2>江原部長日記アルバム</h2><span id="aCount"></span></header>
+    <div class="a-grid" id="aGrid"></div>
+    <div class="a-modal" id="aModal">
+      <div class="a-card" id="aCard"></div>
+    </div>
+  </section>
+
+  <!-- クレジット -->
+  <section id="credits" class="screen modal-bg">
+    <div class="card credit-card">
+      <h2>クレジット</h2>
+      <dl>
+        <dt>企画・制作</dt><dd>（制作会社名）</dd>
+        <dt>出演</dt><dd>江原さん、社長、江原浩二くん（株式会社 心電通）</dd>
+        <dt>写真</dt><dd>株式会社 心電通 ブログ「江原部長日記」ほか</dd>
+        <dt>音楽</dt><dd>魔王魂</dd>
+        <dt>効果音</dt><dd>効果音ラボ</dd>
+        <dt>フォント</dt><dd>Yuji Boku / Yusei Magic / Dela Gothic One / Zen Maru Gothic（SIL Open Font License）</dd>
+      </dl>
+      <p class="c-note">このゲームはフィクションを含みます。江原さんは実際にはもっと優しいです。</p>
+      <button class="btn-main small" id="btnCreditsOk"><span>とじる</span></button>
+    </div>
+  </section>
+
+  <button class="mute" id="mute" aria-label="音のオンオフ"></button>
+  <div class="flash" id="flash"></div>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/bg.js"></script>
+<script src="../shared/js/audio.js"></script>
+<script src="../shared/js/home.js"></script>
+<script src="js/game.js"></script>
+</body>
+</html>

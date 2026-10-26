@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex, nofollow, noarchive">   <!-- 検索に出さない -->
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#141a2a">
+<title>寝坊｜株式会社 心電通</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- タイトル -->
+  <section id="title" class="screen">
+    <div class="stripes"><i></i><i></i><i></i><i></i></div>
+    <div class="t-sky"></div>
+    <div class="t-logo"><span class="t-big">寝坊</span><div class="hanko"><span>中島</span></div></div>
+    <p class="t-sub">〜 中島さんを、起こしに行け 〜</p>
+    <div class="cam t-cam"><img src="assets/photo/cam_sleep.jpg" alt=""><div class="cam-ui"><b>● REC</b><span>中島家　寝室</span><i class="cam-time">06:58</i></div><div class="zzz"><span>Z</span><span>z</span><span>z</span></div></div>
+    <button class="btn-main" id="btnStart"><span>起こしに行く</span></button>
+    <p class="t-best" id="best"></p>
+    <footer class="t-foot"><a href="../">← ゲーム一覧</a>　｜　株式会社 心電通 presents　｜　<a id="btnCredits">クレジット</a></footer>
+  </section>
+
+  <!-- 遊び方 -->
+  <section id="howto" class="screen modal-bg">
+    <div class="card howto-card">
+      <p class="h-lead">夜間工事明けの朝。<br><b>中島さんが現場に来ない。</b></p>
+      <ol class="h-steps">
+        <li><b>1</b><span>タップでジャンプして、中島さんの家まで走る</span></li>
+        <li><b>2</b><span>壊れたインターホンを直す<br>（端子の色を覚えて、同じ色の線とつなぐ）</span></li>
+        <li><b>3</b><span>ドアの影を見て<br><em>お父さん</em>なら隠れる／<em>おばあちゃん</em>なら待つ</span></li>
+      </ol>
+      <p class="h-note">持ち時間は90秒。ぶつかったり、まちがえると減ります。</p>
+      <button class="btn-main small" id="btnHowtoOk"><span>わかった</span></button>
+    </div>
+  </section>
+
+  <!-- ゲーム -->
+  <section id="play" class="screen">
+    <!-- 道中 -->
+    <div class="scene" id="run">
+      <div class="r-sky"></div>
+      <div class="r-layer r-houses" id="layHouses"></div>
+      <div class="r-layer r-poles" id="layPoles"></div>
+      <div class="r-ground"></div>
+      <div class="r-objs" id="objs"></div>
+      <img class="runner" id="runner" src="assets/art/runner_1.svg" alt="">
+      <div class="r-progress"><span>中島家まで</span><div class="rp-bar"><i id="runBar"></i></div><img src="assets/art/house_front.svg" alt=""></div>
+      <div class="hint" id="jumpHint">タップでジャンプ！</div>
+    </div>
+    <!-- 中島家の玄関 -->
+    <div class="scene" id="door">
+      <div class="d-sky"></div>
+      <div class="house" id="house">
+        <img class="h-front" src="assets/art/house_front.svg" alt="">
+        <div class="glass" id="glass"><img id="shadow" alt=""></div>
+        <div class="doorway" id="doorway"><img id="person" alt=""></div>
+        <img class="h-bush" id="bushMe" src="assets/art/bush_hide.svg" alt="">
+        <button class="h-intercom" id="intercomBtn" aria-label="インターホン"></button>
+      </div>
+      <div class="steps" id="steps"></div>
+      <div class="d-bubble" id="dBubble"></div>
+      <div class="d-btns">
+        <button class="btn-ring" id="btnRing">ピンポン</button>
+        <button class="btn-hide" id="btnHide"><img src="assets/art/bush_hide.svg" alt=""><span>隠れる</span></button>
+      </div>
+      <!-- インターホン修理 -->
+      <div class="fix" id="fix">
+        <p class="fix-t" id="fixT"></p>
+        <div class="fix-box" id="fixBox">
+          <img src="assets/art/intercom_open.svg" alt="">
+          <svg class="fix-lines" id="fixLines" viewBox="0 0 320 300"></svg>
+          <div id="fixDots"></div>
+        </div>
+      </div>
+    </div>
+
+    <header class="hud">
+      <div class="clock"><span>集合まで</span><b id="timeNum">90</b><small>秒</small></div>
+    </header>
+    <div class="cam p-cam" id="pcam"><img id="camImg" src="assets/photo/cam_sleep.jpg" alt=""><img class="cam-grandma" id="camGrandma" src="assets/art/grandma.svg" alt=""><div class="cam-ui"><b>● REC</b><span>中島家　寝室</span><i class="cam-time" id="camTime">06:58</i></div><div class="zzz"><span>Z</span><span>z</span><span>z</span></div></div>
+    <div class="telop" id="telop"></div>
+    <div class="minus" id="minus"></div>
+    <div class="guide" id="guide"></div>
+  </section>
+
+  <!-- おわり（起床・時間切れ） -->
+  <section id="end" class="screen">
+    <div class="e-bg" id="eBg"></div>
+    <img class="e-naka" id="eNaka" src="assets/photo/naka_awake.webp" alt="">
+    <img class="e-ramen" id="eRamen" src="assets/art/ramen.svg" alt="">
+    <div class="e-phone" id="ePhone"><img class="e-ring" src="assets/art/phone_ring.svg" alt=""><img class="e-shacho" src="assets/photo/shacho.webp" alt=""></div>
+    <div class="cam e-cam" id="eCam"><img src="assets/photo/cam_sleep.jpg" alt=""><div class="cam-ui"><b>● REC</b><span>中島家　寝室</span><i class="cam-time">12:00</i></div><div class="zzz"><span>Z</span><span>z</span><span>z</span></div></div>
+    <div class="e-bubble" id="eBubble"></div>
+    <div class="e-telop" id="eTelop"></div>
+  </section>
+
+  <!-- 結果 -->
+  <section id="result" class="screen">
+    <div class="stripes"><i></i><i></i><i></i><i></i></div>
+    <p class="r-head">けっか</p>
+    <img class="r-pic" id="rPic" src="assets/photo/naka_awake.webp" alt="">
+    <div class="r-rank"><p class="r-label">あなたは</p><p class="r-name" id="rName"></p><p class="r-note" id="rNote"></p></div>
+    <div class="r-nums">
+      <div><b id="rLeft">0</b><span>秒のこし</span></div>
+      <div><b id="rHit">0</b><span>回ぶつかった</span></div>
+      <div><b id="rCoffee">0</b><span>本コーヒー</span></div>
+    </div>
+    <div class="r-btns">
+      <button class="btn-main small" id="btnRetry"><span>もう一回起こしに行く</span></button>
+      <div class="r-row">
+        <button class="btn-sub" id="btnSave">結果を画像で保存</button>
+        <button class="btn-sub" id="btnTitle">タイトル</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- クレジット -->
+  <section id="credits" class="screen modal-bg">
+    <div class="card credit-card">
+      <h2>クレジット</h2>
+      <dl>
+        <dt>企画・制作</dt><dd>（制作会社名）</dd>
+        <dt>出演</dt><dd>中島さん、社長（株式会社 心電通）</dd>
+        <dt>写真</dt><dd>株式会社 心電通 ブログより</dd>
+        <dt>音楽</dt><dd>魔王魂</dd>
+        <dt>効果音</dt><dd>効果音ラボ</dd>
+        <dt>フォント</dt><dd>Yuji Boku / Yusei Magic / Dela Gothic One / Zen Maru Gothic（SIL Open Font License）</dd>
+      </dl>
+      <p class="c-note">このゲームはフィクションです。中島さんのご家族は架空の人物です。中島さんは実際には遅刻しません（たぶん）。</p>
+      <button class="btn-main small" id="btnCreditsOk"><span>とじる</span></button>
+    </div>
+  </section>
+
+  <button class="mute" id="mute" aria-label="音のオンオフ"></button>
+  <div class="flash" id="flash"></div>
+</div>
+
+<script src="js/data.js"></script>
+<script src="../shared/js/audio.js"></script>
+<script src="../shared/js/home.js"></script>
+<script src="js/game.js"></script>
+</body>
+</html>
