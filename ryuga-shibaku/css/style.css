@@ -26,23 +26,21 @@ a { color: inherit; }
 .t-art { position: absolute; inset: 0; background: url('../assets/title/keyart_port.webp') 50% 0 / cover no-repeat; animation: artin 2s ease-out both, kenburns 24s 2s ease-in-out infinite alternate; }
 @keyframes artin { from { opacity: 0; filter: brightness(2.2) blur(8px); transform: scale(1.12); } 70% { filter: brightness(1.1) blur(0); } }
 @keyframes kenburns { from { transform: scale(1); } to { transform: scale(1.07) translateY(-6px); } }
-.t-smoke { position: absolute; inset: 0; width: 100%; height: 100%; mix-blend-mode: screen; opacity: .55; }
-.t-smoke rect { will-change: transform; }
-.sm-a { animation: smoke 26s ease-in-out infinite alternate; }
-@keyframes smoke { from { transform: translate(-60px, 10px) scale(1.15); } to { transform: translate(60px, -20px) scale(1.25); } }
+.t-smoke { position: absolute; inset: -12%; width: 124%; height: 124%; mix-blend-mode: screen; opacity: .55; will-change: transform; animation: smoke 26s ease-in-out infinite alternate; }
+@keyframes smoke { from { transform: translate(-40px, 8px); } to { transform: translate(40px, -14px); } }
 .t-embers { position: absolute; inset: 0; width: 100%; height: 100%; mix-blend-mode: screen; }
 .t-vignette { position: absolute; inset: 0; background: radial-gradient(ellipse 85% 70% at 50% 35%, transparent 45%, rgba(0,0,0,.75) 100%), linear-gradient(transparent 58%, rgba(0,0,0,.75) 72%, rgba(0,0,0,.95) 100%); }
 .t-flash { position: absolute; inset: 0; background: #fff; opacity: 0; animation: flash .9s 1.75s ease-out both; }
 @keyframes flash { 0% { opacity: 0; } 8% { opacity: .8; } 100% { opacity: 0; } }
 .t-bars { position: absolute; inset: 0; border-top: 26px solid #000; border-bottom: 26px solid #000; }
 
-.t-logo { position: absolute; left: 0; right: 0; top: 548px; text-align: center; z-index: 3; animation: logoin .7s 1.75s cubic-bezier(.2,1.5,.4,1) both; }
+.t-logo { position: absolute; left: 0; right: 0; top: calc(var(--H, 844px) - 296px); text-align: center; z-index: 3; animation: logoin .7s 1.75s cubic-bezier(.2,1.5,.4,1) both; }
 @keyframes logoin { from { opacity: 0; transform: scale(2.2); filter: blur(8px); } }
 .t-small { display: block; font-size: 11px; letter-spacing: .35em; color: #b8b0a2; margin-bottom: 0; }
 .t-stroke { position: absolute; left: 6%; width: 88%; top: 44%; height: 70px; z-index: -1; overflow: visible; }
 .t-stroke path { fill: none; stroke: #b0140c; stroke-width: 34; stroke-linecap: round; opacity: .92; stroke-dasharray: 420; stroke-dashoffset: 420; animation: brushin .45s 2.15s cubic-bezier(.6,0,.3,1) forwards; }
 @keyframes brushin { to { stroke-dashoffset: 0; } }
-.t-main { display: flex; justify-content: center; align-items: flex-end; line-height: .9; filter: url(#rough); }
+.t-main { display: flex; justify-content: center; align-items: flex-end; line-height: .9; }
 .t-main b { font-family: 'Boku', serif; font-weight: 400; display: block; position: relative; white-space: nowrap;
   background: linear-gradient(100deg, #cfc8bc 0%, #ffffff 30%, #fffdf6 36%, #bdb5a8 48%, #f6f2ea 70%, #ffffff 80%, #c9c1b3 100%);
   background-size: 260% 100%; background-position: 100% 0; -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent;
@@ -57,13 +55,13 @@ a { color: inherit; }
 .t-en { display: block; margin-top: 8px; font-family: 'Dela', sans-serif; font-size: 11px; letter-spacing: .9em; padding-left: .9em; color: #d6cfc2; }
 .t-seal { position: absolute; right: 16px; top: 18px; font-style: normal; font-family: 'Boku', serif; font-size: 13px; line-height: 1.05; color: #fff4ea; background: #b3170e; padding: 4px; border-radius: 3px; rotate: 6deg; box-shadow: inset 0 0 0 2px #b3170e, inset 0 0 0 3px #f6d6c8; opacity: .92; animation: seal .35s 2.5s cubic-bezier(.3,1.8,.5,1) both; }
 @keyframes seal { from { opacity: 0; transform: scale(2.4); } }
-.t-copy { position: absolute; left: 0; right: 0; top: 712px; margin: 0; text-align: center; font-family: 'Boku', serif; font-size: 15px; color: #e6e0d4; letter-spacing: .25em; text-shadow: 0 2px 8px #000; animation: fadein 1s 2.4s both; }
+.t-copy { position: absolute; left: 0; right: 0; top: calc(var(--H, 844px) - 132px); margin: 0; text-align: center; font-family: 'Boku', serif; font-size: 15px; color: #e6e0d4; letter-spacing: .25em; text-shadow: 0 2px 8px #000; animation: fadein 1s 2.4s both; }
 @keyframes fadein { from { opacity: 0; } }
-.t-start { position: absolute; left: 50%; top: 744px; translate: -50% 0; padding: 10px 26px; font-family: 'Dela', sans-serif; font-size: 16px; letter-spacing: .45em; color: #fffaf0; white-space: nowrap; text-shadow: 0 0 12px rgba(255,120,60,.8); animation: fadein 1s 2.7s both, breathe 2.2s 3.7s ease-in-out infinite; }
+.t-start { position: absolute; left: 50%; top: calc(var(--H, 844px) - 100px); translate: -50% 0; padding: 10px 26px; font-family: 'Dela', sans-serif; font-size: 16px; letter-spacing: .45em; color: #fffaf0; white-space: nowrap; text-shadow: 0 0 12px rgba(255,120,60,.8); animation: fadein 1s 2.7s both, breathe 2.2s 3.7s ease-in-out infinite; }
 .t-start::before, .t-start::after { content: ''; position: absolute; top: 50%; width: 40px; height: 1px; background: #b8b0a2; }
 .t-start::before { right: 100%; } .t-start::after { left: 100%; }
 @keyframes breathe { 50% { opacity: .35; } }
-.t-best { position: absolute; top: 786px; left: 0; right: 0; text-align: center; margin: 0; font-size: 11px; color: #8f877a; animation: fadein 1s 2.9s both; }
+.t-best { position: absolute; top: calc(var(--H, 844px) - 58px); left: 0; right: 0; text-align: center; margin: 0; font-size: 11px; color: #8f877a; animation: fadein 1s 2.9s both; }
 .t-foot { position: absolute; bottom: 30px; left: 0; right: 0; text-align: center; font-size: 11px; color: #8f877a; z-index: 3; animation: fadein 1s 2.9s both; }
 .t-foot a { text-decoration: underline; cursor: pointer; }
 /* 高画質 → ファミコン画質に崩れる */
@@ -75,7 +73,7 @@ a { color: inherit; }
 
 /* ───────── ゲーム画面 ───────── */
 #play { background: #000; }
-.nes { position: absolute; left: 16px; top: 56px; width: 256px; height: 240px; transform: scale(1.4); transform-origin: 0 0; border-radius: 6px; overflow: hidden; }
+.nes { position: absolute; left: var(--nesL, 16px); top: 56px; width: 256px; height: 240px; transform: scale(var(--nesS, 1.4)); transform-origin: 0 0; border-radius: 6px; overflow: hidden; }
 #cv { position: absolute; inset: 0; width: 256px; height: 240px; image-rendering: pixelated; image-rendering: crisp-edges; }
 .ov { position: absolute; inset: 0; font-family: 'Dot', monospace; font-size: 8px; line-height: 1.2; color: #fff; }
 .nes.zoom { transition: transform .25s; }
@@ -131,7 +129,7 @@ a { color: inherit; }
 .nes.ending .hud, .nes.ending .boss, .nes.ending .ov::before { display: none; }
 
 /* 操作ボタン：ファミコン風のコントローラー（スマホ） */
-.pad { position: absolute; left: 8px; right: 8px; bottom: 16px; height: 372px; touch-action: none; border-radius: 26px;
+.pad { position: absolute; left: 8px; right: 8px; bottom: 16px; height: var(--padH, 372px); touch-action: none; border-radius: 26px;
   background: linear-gradient(170deg, #f3ead6 0%, #e2d6bb 55%, #cbbd9f 100%); border: 3px solid #6e1212;
   box-shadow: inset 0 2px 0 rgba(255,255,255,.7), inset 0 -4px 0 rgba(0,0,0,.18), 0 8px 18px rgba(0,0,0,.6); }
 .pad-strip { position: absolute; left: 16px; right: 16px; top: 14px; height: 32px; border-radius: 6px; display: flex; align-items: center; justify-content: space-between; padding: 0 12px;
@@ -171,15 +169,22 @@ a { color: inherit; }
 
 /* ブラウン管テレビ（スマホの時だけ） */
 #play { background: radial-gradient(ellipse at 50% 30%, #2a211c, #0c0908 75%); }
-.tv { position: absolute; left: 4px; right: 4px; top: 38px; height: 404px; border-radius: 22px; background: linear-gradient(#3a3633, #1d1b1a 30%, #141312);
+.tv { position: absolute; left: 4px; right: 4px; top: 38px; height: var(--tvH, 404px); border-radius: 22px; background: linear-gradient(#3a3633, #1d1b1a 30%, #141312);
   box-shadow: inset 0 2px 0 rgba(255,255,255,.12), inset 0 -3px 0 rgba(0,0,0,.6), 0 10px 24px rgba(0,0,0,.7); }
-.tv::before { content: ''; position: absolute; left: 8px; right: 8px; top: 12px; height: 348px; border-radius: 16px; background: #050505; box-shadow: inset 0 0 0 2px #000, inset 0 0 18px rgba(0,0,0,.9), 0 1px 0 rgba(255,255,255,.08); }
+.tv::before { content: ''; position: absolute; left: 8px; right: 8px; top: 12px; height: var(--recH, 348px); border-radius: 16px; background: #050505; box-shadow: inset 0 0 0 2px #000, inset 0 0 18px rgba(0,0,0,.9), 0 1px 0 rgba(255,255,255,.08); }
 .tv-bottom { position: absolute; left: 14px; right: 14px; bottom: 8px; height: 30px; display: flex; align-items: center; gap: 10px; }
 .tv-brand { font-family: 'Dela', sans-serif; font-size: 11px; letter-spacing: .3em; color: #a8946a; margin-right: auto; }
 .tv-led { width: 7px; height: 7px; border-radius: 50%; background: #ff3322; box-shadow: 0 0 6px #ff3322; }
 .tv-knob { width: 22px; height: 22px; border-radius: 50%; background: radial-gradient(circle at 40% 35%, #666, #222 70%); box-shadow: 0 2px 0 #000; position: relative; }
 .tv-knob::after { content: ''; position: absolute; left: 10px; top: 2px; width: 2px; height: 8px; background: #ccc; }
-.cable { position: absolute; left: 0; top: 440px; width: 390px; height: 18px; overflow: visible; }
+.cable { position: absolute; left: 0; top: var(--cabT, 440px); width: 390px; height: var(--cabH, 18px); overflow: visible; }
+/* 縦が短いスマホ：コントローラーを薄く（SELECT・START は金の帯の右へ、十字キーとボタンは下に寄せる） */
+.pad.short .pad-strip span { display: none; }
+.pad.short .mid { top: 13px; left: auto; right: 26px; translate: none; width: 100px; gap: 1px 10px; }
+.pad.short .mid span { color: #4a1608; font-size: 7px; } .pad.short .mid em { display: none; }
+.pad.short .pill { height: 12px; }
+.pad.short .dpad { top: auto; bottom: 26px; }
+.pad.short .btns { top: auto; bottom: 6px; height: 190px; }
 .cable path { fill: none; stroke: #222; stroke-width: 4; stroke-linecap: round; }
 .nes::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(rgba(0,0,0,0) 0 .5px, rgba(0,0,0,.22) .5px 1px), radial-gradient(ellipse at 50% 50%, transparent 65%, rgba(0,0,0,.45) 100%); }
 .pausebox { position: absolute; inset: 0; display: none; background: rgba(0,0,0,.6); text-align: center; padding-top: 96px; font-size: 20px; color: #ffd23a; letter-spacing: .2em; }

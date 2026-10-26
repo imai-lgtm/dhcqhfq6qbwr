@@ -48,6 +48,24 @@
   modal.querySelector('.gc-yes').addEventListener('click', goHome);
   modal.querySelector('.gc-no').addEventListener('click', () => { try { window.AUDIO && AUDIO.se('tap'); } catch (_) { } close(); });
 
+  // 縦が短いスマホ：遊ぶ画面以外（タイトル・説明・結果など。縦844で配置している）は、中身を丸ごと縮めて収める（背景は画面いっぱいのまま）
+  const fitCss = document.createElement('style');
+  fitCss.textContent = `.gc-fit { position: absolute; left: 50%; top: 0; width: 100%; height: 100%; transform-origin: 50% 0; --H: 844px; }
+#app:not(.land) .gc-fit { width: 390px; height: 844px; }`;
+  document.head.appendChild(fitCss);
+  const isRyu = !!document.getElementById('nes');   // ⑤はタイトルも縦の長さに合わせて作ってあるので縮めない
+  function fitScreens() {
+    const k = app.classList.contains('land') ? 1 : Math.min(1, app.offsetHeight / 844);
+    document.querySelectorAll('#app > section.screen').forEach((sec) => {
+      if (sec.id === 'play' || (isRyu && sec.id === 'title')) return;
+      let box = sec.querySelector(':scope > .gc-fit');
+      if (!box) { box = document.createElement('div'); box.className = 'gc-fit'; while (sec.firstChild) box.appendChild(sec.firstChild); sec.appendChild(box); }
+      box.style.transform = `translateX(-50%) scale(${k})`;
+    });
+  }
+  setTimeout(fitScreens, 0);   // ゲーム本体が画面の大きさを決めた後に
+  addEventListener('resize', () => requestAnimationFrame(fitScreens));
+
   // タイトル（下に「← ゲーム一覧」がある）とクレジットの間は隠す
   const sync = () => btn.classList.toggle('on', !visible('title') && !visible('credits'));
   new MutationObserver(sync).observe(app, { subtree: true, attributes: true, attributeFilter: ['class'] });

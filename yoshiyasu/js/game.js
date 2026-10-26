@@ -14,13 +14,17 @@
   // ───── 画面の形（縦長＝スマホ／横長＝PC・スマホ横向き） ─────
   const LAYOUT = { port: { W: 390, H: 844, miya: { x: 195, y: 300 } }, land: { W: 1280, H: 720, miya: { x: 340, y: 390 } } };
   let L = LAYOUT.port, scale = 1;
+  // スマホ縦は、横幅を画面にぴったり合わせ、縦の長さは画面の形に合わせて伸び縮みさせる（700〜900）
+  const portH = () => Math.round(Math.max(700, Math.min(900, innerHeight * 390 / innerWidth)));
   function fit() {
     const land = innerWidth > innerHeight * 1.05;
     const next = land ? LAYOUT.land : LAYOUT.port;
-    const changed = next !== L;
+    const h0 = next.H;
+    if (!land) LAYOUT.port.H = portH();
+    const changed = next !== L || next.H !== h0;
     L = next;
     app.classList.toggle('land', land);
-    app.style.width = L.W + 'px'; app.style.height = L.H + 'px';
+    app.style.width = L.W + 'px'; app.style.height = L.H + 'px'; app.style.setProperty('--H', L.H + 'px');
     scale = Math.min(innerWidth / L.W, innerHeight / L.H);
     app.style.setProperty('--s', scale);
     if (changed || !$('#bg').innerHTML) $('#bg').innerHTML = window.BG.izakaya(L.W, L.H);

@@ -18,16 +18,22 @@
       shachoTo: { x: 1060, y: 420 }, hide: [{ x: -20, y: 430, r: 16 }, { x: 1196, y: 400, r: -16 }, { x: 330, y: 610, r: 8 }, { x: 880, y: 620, r: -8 }] },
   };
   let L = LAYOUT.port, scale = 1;
+  // スマホ縦は、横幅を画面にぴったり合わせ、縦の長さは画面の形に合わせて伸び縮みさせる（700〜900）
+  const portH = () => Math.round(Math.max(700, Math.min(900, innerHeight * 390 / innerWidth)));
   function fit() {
     const land = innerWidth > innerHeight * 1.05;
     const next = land ? LAYOUT.land : LAYOUT.port;
-    const changed = next !== L;
+    const h0 = next.H;
+    if (!land) LAYOUT.port.H = portH();
+    const changed = next !== L || next.H !== h0;
     L = next;
     app.classList.toggle('land', land);
-    app.style.width = L.W + 'px'; app.style.height = L.H + 'px';
+    app.style.width = L.W + 'px'; app.style.height = L.H + 'px'; app.style.setProperty('--H', L.H + 'px');
     scale = Math.min(innerWidth / L.W, innerHeight / L.H);
     app.style.setProperty('--s', scale);
     $('#gaze').setAttribute('viewBox', `0 0 ${L.W} ${L.fieldH}`);
+    // 縦が短いスマホでは、品物の輪の枠（縦500）を丸ごと縮めて、下の帯に重ならないようにする
+    $('#field').style.transform = land ? '' : `scale(${Math.min(1, (L.H - 344) / 500)})`;
     if (changed && G && G.st) { $('#bg').innerHTML = window.BG[G.st.id](L.W, L.H); placeRing(); }
   }
   addEventListener('resize', fit);

@@ -12,13 +12,18 @@
   const LAYOUT = { port: { W: 390, H: 844, cell: 35 }, land: { W: 1280, H: 720, cell: 40 } };
   let L = LAYOUT.port, scale = 1;
   const cv = $('#board'), ctx = cv.getContext('2d');
+  // スマホ縦は、横幅を画面にぴったり合わせ、縦の長さは画面の形に合わせて伸び縮みさせる（700〜900）
+  const portH = () => Math.round(Math.max(700, Math.min(900, innerHeight * 390 / innerWidth)));
   function fit() {
     const land = innerWidth > innerHeight * 1.05;
+    if (!land) { LAYOUT.port.H = portH(); LAYOUT.port.cell = Math.min(35, Math.floor((LAYOUT.port.H - 318) / 15)); }
     L = land ? LAYOUT.land : LAYOUT.port;
     app.classList.toggle('land', land);
-    app.style.width = L.W + 'px'; app.style.height = L.H + 'px';
+    app.style.width = L.W + 'px'; app.style.height = L.H + 'px'; app.style.setProperty('--H', L.H + 'px');
     scale = Math.min(innerWidth / L.W, innerHeight / L.H);
     app.style.setProperty('--s', scale);
+    const bw = $('#boardWrap').style;   // 盤の大きさ・位置（スマホ縦だけ、マス目に合わせる）
+    if (land) { bw.width = bw.height = bw.left = ''; } else { bw.width = COLS * L.cell + 'px'; bw.height = ROWS * L.cell + 'px'; bw.left = (L.W - COLS * L.cell) / 2 + 'px'; }
     const dpr = Math.min(2, (window.devicePixelRatio || 1) * scale + .5);
     cv.width = Math.round(COLS * L.cell * dpr); cv.height = Math.round(ROWS * L.cell * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);

@@ -81,14 +81,14 @@ img { -webkit-user-drag: none; user-select: none; }
   color: #d8361b; font-family: 'Boku', serif; font-size: 22px; line-height: 1; display: flex; align-items: center; justify-content: center;
   transform: rotate(10deg); background: rgba(255,255,255,.6); writing-mode: vertical-rl; }
 .t-sub { position: absolute; top: 520px; left: 0; right: 0; margin: 0; text-align: center; font-family: 'Yusei', sans-serif; font-size: 20px; color: var(--navy); }
-#btnStart { position: absolute; left: 50%; top: 580px; transform: translateX(-50%); }
+#btnStart { position: absolute; left: 50%; top: calc(var(--H, 844px) - 264px); transform: translateX(-50%); }
 #btnStart:active { transform: translateX(-50%) translateY(6px); }
 #btnStart.pulse { animation: pulseX 1.6s ease-in-out infinite; }
 @keyframes pulseX { 0%,100% { transform: translateX(-50%) scale(1); } 50% { transform: translateX(-50%) scale(1.05); } }
-#btnAlbum { position: absolute; left: 50%; top: 690px; transform: translateX(-50%); white-space: nowrap; }
+#btnAlbum { position: absolute; left: 50%; top: calc(var(--H, 844px) - 154px); transform: translateX(-50%); white-space: nowrap; }
 #btnAlbum:active { transform: translateX(-50%) translateY(3px); }
 #btnAlbum b { color: var(--red); }
-.t-best { position: absolute; top: 752px; left: 0; right: 0; text-align: center; margin: 0; font-size: 13px; color: #8a7a64; }
+.t-best { position: absolute; top: calc(var(--H, 844px) - 92px); left: 0; right: 0; text-align: center; margin: 0; font-size: 13px; color: #8a7a64; }
 .t-foot { position: absolute; bottom: 18px; left: 0; right: 0; text-align: center; font-size: 12px; color: #8a7a64; }
 .t-foot a { text-decoration: underline; cursor: pointer; }
 
@@ -141,7 +141,7 @@ img { -webkit-user-drag: none; user-select: none; }
 @keyframes bpop { from { transform: scale(.6); opacity: 0; } }
 .bubble.angry { border-color: var(--red); box-shadow: 0 6px 0 var(--red); }
 
-.field { position: absolute; left: 0; right: 0; top: 230px; height: 500px; }
+.field { position: absolute; left: 0; right: 0; top: 230px; height: 500px; transform-origin: 50% 0; }
 .eba { position: absolute; left: 50%; top: 110px; width: 260px; height: 270px; margin-left: -130px; transform-origin: 50% 100%; animation: breathe2 3s ease-in-out infinite; z-index: 1; }
 .eba img { position: absolute; left: 50%; bottom: 0; max-width: 260px; max-height: 270px; transform: translateX(-50%); opacity: 0; transition: opacity .12s; filter: drop-shadow(0 8px 10px rgba(0,0,0,.3)); }
 .eba img.on { opacity: 1; }
@@ -277,7 +277,7 @@ img { -webkit-user-drag: none; user-select: none; }
 .e-slide img { position: absolute; left: 0; top: 230px; width: 390px; height: 292px; object-fit: cover; box-shadow: 0 0 0 6px #fff, 0 20px 40px rgba(0,0,0,.5); }
 .e-slide.show img { animation: kenburns 2.6s ease-out both; }
 @keyframes kenburns { from { transform: scale(1.12) rotate(-1.5deg); } to { transform: scale(1) rotate(0); } }
-.e-slide p { position: absolute; left: 0; right: 0; top: 560px; text-align: center; color: #fff; font-family: 'Yusei', sans-serif; font-size: 22px; }
+.e-slide p { position: absolute; left: 0; right: 0; top: calc(var(--H, 844px) - 284px); text-align: center; color: #fff; font-family: 'Yusei', sans-serif; font-size: 22px; }
 .e-final { position: absolute; inset: 0; opacity: 0; transition: opacity 1.2s; background: radial-gradient(circle at 50% 40%, #3a2a1a, #0d0a08); }
 .e-final.on { opacity: 1; }
 .e-final img { position: absolute; left: 30px; top: 150px; width: 330px; height: 248px; object-fit: cover; border: 8px solid #fff; transform: rotate(-2deg); box-shadow: 0 20px 50px rgba(0,0,0,.6); }

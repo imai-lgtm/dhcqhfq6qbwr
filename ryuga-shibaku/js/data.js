@@ -8,8 +8,8 @@ window.DATA = {
   ENEMY: {
     naka: { hp: 6, dmg: 1, speed: .55, reach: 24, windup: 26, cool: 70, score: 100 },
     dani: { hp: 7, dmg: 1, speed: .7, reach: 24, windup: 22, cool: 60, score: 120 },
-    miya: { hp: 34, dmg: 2, speed: .5, reach: 26, windup: 30, cool: 60, score: 1000, boss: true },
-    soma: { hp: 22, dmg: 2, speed: 0, reach: 70, windup: 0, cool: 0, score: 1500, boss: true },
+    miya: { hp: 24, dmg: 1, speed: .5, reach: 26, windup: 36, cool: 66, score: 1000, boss: true },   // 1面：いちばんやさしいボス
+    soma: { hp: 16, dmg: 1, speed: 0, reach: 70, windup: 0, cool: 0, score: 1500, boss: true },   // 2面：1面よりは手ごわく、3面よりはやさしく
     shacho: { hp: 46, dmg: 2, speed: .65, reach: 36, windup: 34, cool: 55, score: 3000, boss: true },
   },
   // 攻撃の強さ

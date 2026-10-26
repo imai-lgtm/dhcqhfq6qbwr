@@ -41,7 +41,7 @@ body.entering .ext { transform: scale(2.6); filter: brightness(1.6) blur(2px); }
 .door { position: absolute; left: 50%; bottom: 7vh; translate: -50% 0; width: max-content; text-align: center; animation: fadein 1s 1.6s both; }
 @keyframes fadein { from { opacity: 0; } }
 .enter { position: relative; display: inline-flex; flex-direction: column; align-items: center; padding: 14px 40px 12px; border-radius: 14px; color: #fff;
-  background: linear-gradient(rgba(255,61,127,.32), rgba(120,20,80,.45)); border: 2px solid #ff8fb8; box-shadow: 0 0 14px rgba(255,61,127,.8), inset 0 0 16px rgba(255,61,127,.5); backdrop-filter: blur(2px);
+  background: linear-gradient(rgba(255,61,127,.32), rgba(120,20,80,.45)); border: 2px solid #ff8fb8; box-shadow: 0 0 14px rgba(255,61,127,.8), inset 0 0 16px rgba(255,61,127,.5);
   animation: pulse 1.6s ease-in-out infinite; }
 .enter b { white-space: nowrap; font-family: 'Boku', serif; font-weight: 400; font-size: 34px; line-height: 1.1; text-shadow: 0 0 8px #ff3d7f, 0 0 2px #fff; }
 .enter small { font-family: 'Dela', sans-serif; font-size: 11px; letter-spacing: .45em; padding-left: .45em; color: #ffd0e2; }
@@ -57,7 +57,7 @@ body.arrive .flash { opacity: 1; animation: wout .7s ease-out forwards; }
 .room { position: fixed; inset: 0; z-index: -1; background: url('top/arcade_bg.webp') 50% 40% / cover no-repeat; }
 .room::after { content: ''; position: absolute; inset: 0; background: linear-gradient(rgba(8,5,16,.82) 0%, rgba(8,5,16,.45) 38%, rgba(8,5,16,.35) 60%, rgba(8,5,16,.8) 100%); }
 .bar { position: absolute; left: 0; right: 0; top: 0; z-index: 50; display: flex; justify-content: space-between; padding: 10px; pointer-events: none; }
-.bar button { pointer-events: auto; height: 38px; padding: 0 14px; border-radius: 19px; font-size: 12px; background: rgba(12,8,24,.75); border: 2px solid rgba(255,255,255,.35); backdrop-filter: blur(3px); }
+.bar button { pointer-events: auto; height: 38px; padding: 0 14px; border-radius: 19px; font-size: 12px; background: rgba(12,8,24,.75); border: 2px solid rgba(255,255,255,.35); }
 .bar .mute { width: 38px; padding: 0; font-size: 17px; }
 .mute::after { content: '🔊'; } .mute.off::after { content: '🔇'; }
 .top { position: relative; padding: 44px 16px 6px; text-align: center; }
@@ -103,7 +103,7 @@ a.cab:hover .machine, a.cab:focus-visible .machine { transform: translateY(-6px)
   background: radial-gradient(ellipse at 50% 30%, color-mix(in srgb, var(--c) 55%, #fff), var(--c) 75%); box-shadow: inset 0 0 0 1px rgba(255,255,255,.4), inset 0 -4px 8px rgba(0,0,0,.25), 0 0 16px color-mix(in srgb, var(--c) 70%, transparent); }
 .marq b { font-family: 'Boku', serif; font-weight: 400; font-size: 21px; line-height: 1; color: #fff; text-shadow: 0 2px 0 rgba(0,0,0,.35), 0 0 8px rgba(255,255,255,.4); white-space: nowrap; }
 .marq .no { position: absolute; left: 5px; top: 3px; font-family: 'Dela', sans-serif; font-size: 8px; color: rgba(255,255,255,.85); }
-.pop { position: relative; margin: 14px 2px 0; padding: 10px 10px 12px; border-radius: 10px; background: rgba(14,10,24,.86); border: 1px solid #3a2d55; box-shadow: 0 8px 18px rgba(0,0,0,.5); backdrop-filter: blur(3px); }
+.pop { position: relative; margin: 14px 2px 0; padding: 10px 10px 12px; border-radius: 10px; background: rgba(14,10,24,.86); border: 1px solid #3a2d55; box-shadow: 0 8px 18px rgba(0,0,0,.5); }
 .pop::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 3px; border-radius: 10px 10px 0 0; background: var(--c); }
 .genre { display: inline-block; margin: 0 0 6px; padding: 2px 8px; border-radius: 999px; font-size: 11px; color: #0b0912; background: var(--c2); }
 .who { margin: 0 0 6px; font-size: 12px; color: color-mix(in srgb, var(--c) 50%, #fff); }
@@ -317,11 +317,13 @@ footer b { font-family: 'Dela', sans-serif; font-weight: 400; letter-spacing: .1
       len: 14 + z * 34, v: 750 + z * 950, a: .22 + z * .45, w: .7 + z * 1.6, ground: rh * (.70 + Math.random() * .28) };
   }
   function rainFrame(t) {
-    const dt = Math.min(.05, (t - rlast) / 1000); rlast = t;
+    const dt = Math.max(0, Math.min(.05, (t - rlast) / 1000)); rlast = t;
     if (document.body.classList.contains('out')) {
       rx.clearRect(0, 0, rw, rh);
       const slant = .18;   // 少し斜めに降る
       rx.lineCap = 'round';
+      // 奥・まん中・手前の3段に分けて、段ごとに1回でまとめて描く（1粒ずつ描くとスマホが重い）
+      const layers = [[], [], []];
       for (const d of drops) {
         d.y += d.v * dt; d.x += d.v * slant * dt;
         if (d.z > .55 && d.y > d.ground) {   // 手前の雨粒は地面で波紋になる
@@ -330,17 +332,24 @@ footer b { font-family: 'Dela', sans-serif; font-weight: 400; letter-spacing: .1
           continue;
         }
         if (d.y > rh + 40) { Object.assign(d, newDrop(false)); continue; }
-        const g = rx.createLinearGradient(d.x, d.y - d.len, d.x + d.len * slant, d.y);
-        g.addColorStop(0, 'rgba(200,220,255,0)'); g.addColorStop(1, `rgba(215,230,255,${d.a})`);
-        rx.strokeStyle = g; rx.lineWidth = d.w;
-        rx.beginPath(); rx.moveTo(d.x - d.len * slant, d.y - d.len); rx.lineTo(d.x, d.y); rx.stroke();
+        layers[d.z < .34 ? 0 : d.z < .67 ? 1 : 2].push(d);
       }
+      layers.forEach((L, i) => {
+        if (!L.length) return;
+        rx.strokeStyle = `rgba(215,230,255,${[.22, .4, .6][i]})`; rx.lineWidth = [.8, 1.3, 2][i];
+        rx.beginPath();
+        for (const d of L) { rx.moveTo(d.x - d.len * slant, d.y - d.len); rx.lineTo(d.x, d.y); }
+        rx.stroke();
+      });
+      rx.lineWidth = 1.1; rx.strokeStyle = 'rgba(225,238,255,.45)';
+      rx.beginPath();
       for (const r of rips) {
         r.r += (16 + r.z * 22) * dt; r.a -= .9 * dt;
-        if (r.a <= 0) continue;
-        rx.strokeStyle = `rgba(225,238,255,${r.a})`; rx.lineWidth = 1.1;
-        rx.beginPath(); rx.ellipse(r.x, r.y, r.r * (1 + r.z), r.r * .32 * (1 + r.z), 0, 0, Math.PI * 2); rx.stroke();
+        if (r.a <= 0 || r.r <= 0) continue;
+        rx.moveTo(r.x + r.r * (1 + r.z), r.y);
+        rx.ellipse(r.x, r.y, r.r * (1 + r.z), r.r * .32 * (1 + r.z), 0, 0, Math.PI * 2);
       }
+      rx.stroke();
       rips = rips.filter((r) => r.a > 0);
     }
     requestAnimationFrame(rainFrame);

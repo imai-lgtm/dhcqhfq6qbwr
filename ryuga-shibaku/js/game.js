@@ -16,12 +16,25 @@
 
   // ───── 画面の形 ─────
   const LAYOUT = { port: { W: 390, H: 844 }, land: { W: 1280, H: 720 } };
+  // スマホ縦は、横幅を画面にぴったり合わせ、縦の長さは画面の形に合わせて伸び縮みさせる（700〜900）
+  const portH = () => Math.round(Math.max(700, Math.min(900, innerHeight * 390 / innerWidth)));
   function fit() {
     const land = innerWidth > innerHeight * 1.05;
+    if (!land) LAYOUT.port.H = portH();
     const L = land ? LAYOUT.land : LAYOUT.port;
     app.classList.toggle('land', land);
-    app.style.width = L.W + 'px'; app.style.height = L.H + 'px';
+    app.style.width = L.W + 'px'; app.style.height = L.H + 'px'; app.style.setProperty('--H', L.H + 'px');
     app.style.setProperty('--s', Math.min(innerWidth / L.W, innerHeight / L.H));
+    if (!land) {
+      const padH = Math.max(262, Math.min(372, L.H - 472));               // コントローラーの高さ
+      const avail = L.H - 16 - padH - 14 - 38;                               // テレビに使える高さ
+      const s = Math.min(1.4, (avail - 66) / 240);                           // ゲーム画面の拡大率
+      const tvH = Math.round(240 * s + 66);
+      const v = { '--padH': padH, '--tvH': tvH, '--recH': Math.round(240 * s + 12), '--nesL': Math.round((390 - 256 * s) / 2), '--cabT': 38 + tvH, '--cabH': L.H - 16 - padH - 38 - tvH };
+      for (const [k, x] of Object.entries(v)) app.style.setProperty(k, x + 'px');
+      app.style.setProperty('--nesS', s.toFixed(3));
+      document.getElementById('pad').classList.toggle('short', padH < 330);
+    }
   }
   addEventListener('resize', fit);
   fit();
@@ -367,7 +380,7 @@
     const d = D.ENEMY[type];
     const e = { type, d, x, y, z: 0, vx: 0, vz: 0, face: -1, hp: d.hp, max: d.hp, st: 'idle', ft: 0, cool: rnd(30, 80), inv: 0,
       poseCool: 60, poise: 0, slot: ++G.uid, dead: false, gone: false };
-    if (type === 'soma') { e.phase = 'sleep'; e.pt = 0; e.sleepLen = 260; e.punish = 0; e.st = 'sleep'; }
+    if (type === 'soma') { e.phase = 'sleep'; e.pt = 0; e.sleepLen = 330; e.punish = 0; e.st = 'sleep'; }
     G.en.push(e);
     return e;
   }
@@ -456,7 +469,7 @@
       case 'call': if (e.ft >= 45) setE(e, 'idle'); return;
       case 'throw':
         if (e.ft === 18) { G.pr.push({ kind: 'karaage', x: e.x + e.face * 14, y: e.y, z: -24, vx: e.face * 2.2, vy: 0, dmg: 1, t: 0 }); A.se('throw', { vol: .6 }); }
-        if (e.ft >= 34) { setE(e, 'idle'); e.cool = 50; }
+        if (e.ft >= 34) { setE(e, 'idle'); e.cool = 100; }   // からあげを投げた後は少し休む
         return;
     }
     // ここから：うろうろ・近づく
@@ -492,7 +505,7 @@
     e.face = -1;
     if (e.st === 'throw') {
       if (e.ft === 10) {
-        const dx = p.x - e.x, sp = 2.6, n = Math.max(1, Math.abs(dx) / sp);
+        const dx = p.x - e.x, sp = 2.0, n = Math.max(1, Math.abs(dx) / sp);   // 書類は少しゆっくり（よけられる）
         G.pr.push({ kind: 'paper', x: e.x - 10, y: e.y, z: -26, vx: Math.sign(dx || -1) * sp, vy: clamp((p.y - e.y) / n, -1.2, 1.2), dmg: e.d.dmg, t: 0 });
         A.se('paper');
       }
@@ -504,26 +517,27 @@
       if (e.st !== 'sleep') setE(e, 'sleep');
       if (e.pt >= e.sleepLen) { e.phase = 'stir'; e.pt = 0; setE(e, 'stir'); pop('！？', e, '#f88'); A.se('chin', { vol: .6 }); }
     } else if (e.phase === 'stir') {
-      if (e.pt >= 40) {
+      if (e.pt >= 60) {   // 「！？」の合図から1秒で起きる
         e.phase = 'awake'; e.pt = 0; setE(e, 'awake');
-        if (!e.saidWake) { e.saidWake = true; A.voice('soma_wake'); }
+        if (!e.saidWake) { e.saidWake = true; A.voice('soma_wake'); msg('起きている間は、じっとして！'); }
         pop('……ん？', e, '#fff');
       }
     } else {
       if (e.punish > 0) e.punish--;
       const moving = K.l || K.r || K.u || K.d || ATTACKING.includes(p.st);
       if (Math.abs(p.x - e.x) < 140 && moving && p.st !== 'down') somaPunish(e);
-      if (e.pt >= 150) { e.phase = 'sleep'; e.pt = 0; e.sleepLen = rnd(170, 260); setE(e, 'sleep'); pop(D.TEXT.nakaSleep, e, '#fff'); A.se('snore', { vol: .4 }); }
+      if (e.pt >= 100) { e.phase = 'sleep'; e.pt = 0; e.sleepLen = rnd(290, 370);   // 寝ている時間 約5〜6秒・起きている時間 約1.7秒
+        setE(e, 'sleep'); pop(D.TEXT.nakaSleep, e, '#fff'); A.se('snore', { vol: .4 }); }
     }
     if (!e.called && e.hp <= e.max / 2) {
       e.called = true;
-      spawn('naka', G.cam - 30, 176); spawn('naka', G.cam + W + 30, 214);
+      spawn('naka', G.cam + W + 30, 196);   // 応援は1人
       pop('……おうえん、よんどこ……', e, '#fff');
     }
   }
   function somaPunish(e, hit) {
     if (e.punish > 0 && !hit) return;
-    e.punish = 55;
+    e.punish = 90;   // 書類が続けて飛んでくる間隔（1.5秒）
     if (e.phase === 'stir') { e.phase = 'awake'; e.pt = 0; }
     setE(e, 'throw');
     pop('動いたな……', e, '#f88');
@@ -746,7 +760,7 @@
     A.unlock(); A.stopBgm(200); A.se('metal_logo');
     const t = $('title'), cr = $('crumble');
     t.classList.add('pix');
-    const land = app.classList.contains('land'), cw = land ? 1280 : 390, ch = land ? 720 : 844, bs = land ? 64 : 30;
+    const land = app.classList.contains('land'), cw = land ? 1280 : 390, ch = land ? 720 : LAYOUT.port.H, bs = land ? 64 : 30;
     let html = '';
     for (let y = 0; y < ch; y += bs) for (let x = 0; x < cw; x += bs) {
       html += `<i style="left:${x}px;top:${y}px;width:${bs}px;height:${bs}px;animation-delay:${Math.round(Math.random() * 500 + (y / ch) * 300)}ms"></i>`;
@@ -991,7 +1005,7 @@
   // タイトルの火の粉（下から舞い上がる）
   const ecv = $('embers'), ectx = ecv.getContext('2d'), embers = [];
   function drawEmbers(dt) {
-    const w = app.classList.contains('land') ? 1280 : 390, h = app.classList.contains('land') ? 720 : 844;
+    const w = app.classList.contains('land') ? 1280 : 390, h = app.classList.contains('land') ? 720 : LAYOUT.port.H;
     if (ecv.width !== w || ecv.height !== h) { ecv.width = w; ecv.height = h; }
     while (embers.length < (w > 400 ? 90 : 55)) {
       embers.push({ x: Math.random() * w, y: h + Math.random() * h, r: rnd(.6, 2.4), vy: rnd(18, 60), sway: rnd(.4, 1.6), ph: Math.random() * 6, life: rnd(.5, 1) });
@@ -1003,12 +1017,19 @@
       if (e.y < -10) { e.y = h + 10; e.x = Math.random() * w; }
       const fade = Math.min(1, e.y / (h * .5)) * e.life * (.6 + .4 * Math.sin(t * 6 + e.ph));
       ectx.globalAlpha = Math.max(0, fade);
-      ectx.fillStyle = e.r > 1.8 ? '#ffb35a' : '#ff7a2a';
-      ectx.shadowColor = '#ff6a10'; ectx.shadowBlur = e.r * 6;
-      ectx.beginPath(); ectx.arc(e.x, e.y, e.r, 0, Math.PI * 2); ectx.fill();
+      const sz = e.r * 9;
+      ectx.drawImage(e.r > 1.8 ? GLOW[0] : GLOW[1], e.x - sz / 2, e.y - sz / 2, sz, sz);
     }
-    ectx.globalAlpha = 1; ectx.shadowBlur = 0;
+    ectx.globalAlpha = 1;
   }
+
+  // 火の粉の光の絵（光のにじみを毎回計算するとスマホが重いので、先に1回だけ作る）
+  const GLOW = ['#ffb35a', '#ff7a2a'].map((c) => {
+    const g = document.createElement('canvas'); g.width = g.height = 32;
+    const x = g.getContext('2d'), rg = x.createRadialGradient(16, 16, 0, 16, 16, 16);
+    rg.addColorStop(0, '#fff3d0'); rg.addColorStop(.18, c); rg.addColorStop(.45, 'rgba(255,106,16,.35)'); rg.addColorStop(1, 'rgba(255,106,16,0)');
+    x.fillStyle = rg; x.fillRect(0, 0, 32, 32); return g;
+  });
 
   // 60fps 固定で進める
   let last = performance.now(), acc = 0;
@@ -1016,7 +1037,8 @@
     const dt = Math.min(100, now - last);
     acc += dt; last = now;
     let n = 0;
-    while (acc >= 1000 / 60 && n < 4) { if (!window.GC_HOLD) step(); acc -= 1000 / 60; n++; }   // ゲーセンに戻る確認の間は止める
+    if (dt > 12 && dt < 22) { if (!window.GC_HOLD) step(); acc = 0; n = 1; }   // 60Hzの画面：1コマに1回ずつ（0回・2回が混ざる「カクッ」を防ぐ）
+    else while (acc >= 1000 / 60 && n < 4) { if (!window.GC_HOLD) step(); acc -= 1000 / 60; n++; }   // ゲーセンに戻る確認の間は止める
     if (n === 4) acc = 0;
     if (scene === 'title') drawEmbers(dt / 1000);
     draw();
