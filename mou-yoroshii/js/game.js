@@ -64,8 +64,8 @@
     se: ['tap', 'tap2', 'start', 'koto', 'hyoushigi', 'kotsudumi', 'throw', 'eat', 'correct', 'wrong', 'mokugyo',
       'chin', 'timer', 'walk', 'beep', 'snore', 'shacho', 'drunk', 'fanfare', 'cracker', 'cheer', 'ponpon', 'boyoyon',
       'ipponjime', 'rank', 'paper', 'chanchan', 'kira', 'doon'],
-    voice: ['yoroshii_bad', 'yoroshii_good', 'aretotte', 'areyaare', 'soreyagana', 'wakatteruyan', 'fanta',
-      'ebamosuru', 'saishokara', 'orenoha'],
+    voice: ['yoroshii_bad', 'yoroshii_good', 'aretotte', 'areyaare', 'soreyagana', 'wakatteruyan',
+      'saishokara', 'orenoha'],
   });
   document.addEventListener('pointerdown', () => A.unlock(), { once: true });
 
@@ -89,7 +89,7 @@
   // タイトルの江原さんを押すと、ひとこと
   $('.t-eba').addEventListener('click', () => {
     A.unlock();
-    A.voice(['aretotte', 'soreyagana', 'wakatteruyan', 'ebamosuru'][rand(4)]); A.se('boyoyon', { vol: .5 });
+    A.voice(['aretotte', 'soreyagana', 'wakatteruyan', 'areyaare'][rand(4)]); A.se('boyoyon', { vol: .5 });
     $('.t-eba').animate([{ scale: '1 1' }, { scale: '1.08 .9' }, { scale: '.96 1.06' }, { scale: '1 1' }], { duration: 450 });
   });
   $('#btnAlbum').addEventListener('click', () => { A.se('tap'); openAlbum('title'); });

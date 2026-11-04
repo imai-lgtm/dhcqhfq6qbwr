@@ -44,7 +44,7 @@
     se: ['tap', 'start', 'swing', 'hit_light', 'hit_mid', 'hit_heavy', 'harisen', 'kick_heavy', 'down', 'falldown', 'jump', 'land',
       'item_get', 'eat', 'text_impact', 'title_impact', 'hajime', 'metal_logo', 'kira', 'snore', 'throw', 'paper', 'fanfare', 'cracker',
       'cheer', 'wrong', 'levelup', 'cursor', 'chin', 'brick', 'door_open', 'rank', 'despair', 'warp', 'hyoushigi'],
-    voice: ['ryu_start', 'ryu_kiwami', 'ryu_oops', 'miya_down', 'soma_sleep', 'soma_wake', 'shacho_intro', 'shacho_noeffect', 'shacho_daruma', 'shacho_birthday'],
+    voice: ['ryu_kiwami', 'naka_onegai', 'miya_down', 'soma_sleep', 'shacho_intro', 'shacho_noeffect', 'shacho_daruma', 'shacho_birthday'],
   });
   const muteBtn = $('mute');
   const syncMute = () => muteBtn.classList.toggle('off', A.muted);
@@ -189,14 +189,14 @@
 
   // ───── 吹き出し文字・メッセージ ─────
   const pops = $('pops');
-  function pop(text, o, color = '#ffd23a') {
+  function pop(text, o, color = '#ffd23a', ms = 800, keepIn = false) {
     const el = document.createElement('div');
-    el.className = 'pop'; el.textContent = text; el.style.color = color;
-    el.style.left = Math.round(o.x - G.cam) + 'px';
+    el.className = 'pop'; el.textContent = text; el.style.color = color; el.style.animationDuration = ms / 1000 + 's';
+    el.style.left = Math.round(keepIn ? Math.max(50, Math.min(W - 50, o.x - G.cam)) : o.x - G.cam) + 'px';   // keepIn＝画面の外にいても、端に出す
     el.style.top = Math.round(o.y + (o.z || 0) - 58) + 'px';
     el.style.translate = '-50% 0';
     pops.appendChild(el);
-    setTimeout(() => el.remove(), 800);
+    setTimeout(() => el.remove(), ms);
   }
   function msg(text) { const m = $('msg'); m.textContent = text; m.classList.remove('on'); void m.offsetWidth; m.classList.add('on'); }
   function fx(kind, x, y, z) { G.fx.push({ kind, x, y, z: z || 0, t: 0 }); }
@@ -519,7 +519,7 @@
     } else if (e.phase === 'stir') {
       if (e.pt >= 60) {   // 「！？」の合図から1秒で起きる
         e.phase = 'awake'; e.pt = 0; setE(e, 'awake');
-        if (!e.saidWake) { e.saidWake = true; A.voice('soma_wake'); msg('起きている間は、じっとして！'); }
+        if (!e.saidWake) { e.saidWake = true; msg('起きている間は、じっとして！'); }
         pop('……ん？', e, '#fff');
       }
     } else {
@@ -531,8 +531,10 @@
     }
     if (!e.called && e.hp <= e.max / 2) {
       e.called = true;
-      spawn('naka', G.cam + W + 30, 196);   // 応援は1人
+      const h = spawn('naka', G.cam + W + 30, 196);   // 応援は1人（中島さんが駆けつける）
       pop('……おうえん、よんどこ……', e, '#fff');
+      setTimeout(() => { if (!G || h.dead) return; A.voice('naka_onegai'); pop('お願いします！', h, '#fff', 1300, true); }, 700);
+      setTimeout(() => { if (!G || h.dead) return; pop('やらせてください！', h, '#fff', 1500, true); }, 2100);
     }
   }
   function somaPunish(e, hit) {
@@ -605,7 +607,7 @@
   }
   async function bossIntro(e) {
     if (e.type === 'soma') {
-      await say([{ t: '颯馬「……むにゃ……あと5分……。」', v: 'soma_sleep' }, '（寝ている間しか しばけない。\n起きている時に動くと、書類が飛んでくる！）']);
+      await say([{ t: '颯馬「……マ、マ、ママー……。」', v: 'soma_sleep' }, '（寝ている間しか しばけない。\n起きている時に動くと、書類が飛んでくる！）']);
     } else if (e.type === 'shacho') {
       await say([{ t: '社長「龍……よう来たな。」', v: 'shacho_intro' }, '社長「奥さんは、この奥や。\n返してほしけりゃ、わしを しばいてみい。」']);
     } else if (e.type === 'miya') msg('焼肉の においがする……');
@@ -636,7 +638,7 @@
     await wait(1900);
     $('stageTitle').classList.remove('on');
     A.bgm(G.st.bgm);
-    if (i === 0 && first) await say([{ t: '龍之介「……しばいたる。」', v: 'ryu_start' }]);
+    if (i === 0 && first) await say(['龍之介「……しばいたる。」']);
     if (G.hint) msg(G.hint === 'daruma' ? 'ダンボール箱を しばいてみよう' : 'ロッカーを しばいてみよう');
     G.pause = null;
   }
@@ -689,7 +691,7 @@
     await say([{ t: D.TEXT.ending[0], se: 'cracker' }, D.TEXT.ending[1]]);
     E.gift = true; A.se('kira');
     await say([{ t: '社長「……誕生日、おめでとう。龍。」', v: 'shacho_birthday' }, '社長「奥さんに頼まれてな。\nみんなで準備しとったんや。」',
-      { t: '龍之介「……しばいてもうた。」', v: 'ryu_oops' }]);
+      '龍之介「……しばいてもうた。」']);
     A.se('cheer');
     E.roll = 0;
     await until(() => E.done);

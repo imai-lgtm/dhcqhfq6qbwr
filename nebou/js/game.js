@@ -37,7 +37,7 @@
   A.init({
     se: ['tap', 'start', 'jump', 'land', 'falldown', 'kira', 'doorchime', 'beep', 'spark', 'step_heavy', 'step_cute', 'door_open', 'alarm',
       'phone_ring', 'phone_pick', 'snore', 'ramen', 'speedup', 'correct', 'wrong', 'rank', 'fanfare', 'chanchan', 'boyoyon', 'hyoushigi', 'timer', 'dog'],
-    voice: [],
+    voice: ['soma_mama'],
   });
   const muteBtn = $('#mute');
   const syncMute = () => muteBtn.classList.toggle('off', A.muted);
@@ -475,13 +475,15 @@
 
   // 途中で切りかえる絵は、先に読み込んでおく（切りかえた瞬間に前の絵が一瞬出たり、消えたりしないように）
   const PRELOAD = ['assets/art/runner_1.svg', 'assets/art/runner_2.svg', 'assets/art/runner_3.svg', 'assets/art/runner_jump.svg', 'assets/art/runner_fall.svg', 'assets/art/dad.svg', 'assets/art/grandma.svg', 'assets/art/dad_shadow.svg', 'assets/art/grandma_shadow.svg', 'assets/art/item_coffee.svg', 'assets/art/obs_bike.svg', 'assets/art/obs_cone.svg', 'assets/art/obs_dog.svg', 'assets/art/obs_sign.svg', 'assets/art/obs_trash.svg', 'assets/art/bush_hide.svg', 'assets/photo/soma_awake.webp', 'assets/photo/soma_body.webp'].map((s) => { const i = new Image(); i.src = s; if (i.decode) i.decode().catch(() => { }); return i; });
-  // 見守りカメラの寝言：見えているカメラに、ときどき「らむちゃ～ん…」
+  // 見守りカメラの寝言：見えているカメラに、ときどき「らむちゃ～ん…」「マ、マ、ママー…」（声つき）
   let talkN = 0;
   setInterval(() => {
+    if (window.GC_HOLD) return;
     const cams = [...document.querySelectorAll('.cam')].filter((c) => c.offsetParent && !c.classList.contains('grandma'));
     if (!cams.length) return;
-    const line = D.LINES.sleepTalk[talkN++ % D.LINES.sleepTalk.length];
-    cams.forEach((c) => { const t = c.querySelector('.talk'); if (!t) return; t.textContent = line; t.classList.add('on'); setTimeout(() => t.classList.remove('on'), 2400); });
+    const it = D.LINES.sleepTalk[talkN++ % D.LINES.sleepTalk.length], line = it.t || it;
+    if (it.v) A.voice(it.v, { vol: .8 });
+    cams.forEach((c) => { const t = c.querySelector('.talk'); if (!t) return; t.textContent = line; t.classList.add('on'); setTimeout(() => t.classList.remove('on'), it.v ? 3900 : 2400); });
   }, 5200);
 
   fit();

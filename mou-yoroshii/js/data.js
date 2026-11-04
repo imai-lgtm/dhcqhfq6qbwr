@@ -52,7 +52,7 @@ window.DATA = (() => {
       q: [
         { say: '…ぁ…ぃす…', ans: 'ice_cream', trap: ['ice_cube'] },
         { say: '…ばなな…', ans: 'banana', trap: ['cucumber'] },
-        { say: '…ふぁんた…ぐれ…', ans: 'soda_grape', trap: ['soda_orange'], voice: 'fanta' },
+        { say: '…ふぁんた…ぐれ…', ans: 'soda_grape', trap: ['soda_orange'] },
         { say: '…ぱじゃま…とくちゅうの…', ans: 'pajama_big', trap: ['pajama_n'] },
         { say: '…たかいとこ…のれるやつ…', ans: 'kousho', trap: ['bicycle'] },
       ],
@@ -64,7 +64,7 @@ window.DATA = (() => {
       q: [
         { say: 'マイク！歌うで！', ans: 'mic', trap: ['banana'] },
         { say: 'ソーセージ、ちゃんと半分にしてな', ans: 'sausage_half', trap: ['sausage_whole'] },
-        { say: 'ガチャや！エバもする〜', ans: 'gacha', trap: ['vending'], voice: 'ebamosuru' },
+        { say: 'ガチャや！エバもする〜', ans: 'gacha', trap: ['vending'] },
         { say: 'たぬき…', ans: 'tanuki', trap: ['maneki'] },
         { say: 'とりあえず、生！', ans: 'beer', trap: ['oolong'] },
       ],
