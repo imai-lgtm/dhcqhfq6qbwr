@@ -138,7 +138,7 @@ a { color: inherit; }
 .glass img { position: absolute; left: 50%; bottom: 0; height: 100%; translate: -50% 0; opacity: 0; filter: blur(2.5px); transform-origin: 50% 100%; }
 .doorway { position: absolute; overflow: hidden; background: #3a2a1e; display: none; }
 .doorway.on { display: block; animation: bpop .25s; }
-.doorway img { position: absolute; left: 50%; bottom: 0; height: 96%; translate: -50% 0; }
+.doorway img { position: absolute; left: 50%; top: 12%; width: 150%; translate: -50% 0; }   /* お父さん・おばあちゃんの写真（胸から上） */
 .h-bush { position: absolute; display: none; }
 .h-bush.on { display: block; animation: bpop .2s; }
 .h-intercom { position: absolute; border-radius: 8px; }

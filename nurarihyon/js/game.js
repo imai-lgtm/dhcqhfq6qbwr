@@ -9,14 +9,14 @@
   const COLS = D.COLS, ROWS = D.ROWS;
 
   // ───── 画面の形 ─────
-  const LAYOUT = { port: { W: 390, H: 844, cell: 35 }, land: { W: 1280, H: 720, cell: 40 } };
+  const LAYOUT = { port: { W: 390, H: 844, cell: 30 }, land: { W: 1280, H: 720, cell: 35 } };
   let L = LAYOUT.port, scale = 1;
   const cv = $('#board'), ctx = cv.getContext('2d');
   // スマホ縦は、横幅を画面にぴったり合わせ、縦の長さは画面の形に合わせて伸び縮みさせる（680〜900）
   const portH = () => Math.round(Math.max(680, Math.min(900, innerHeight * 390 / innerWidth)));
   function fit() {
     const land = innerWidth > innerHeight * 1.05;
-    if (!land) { LAYOUT.port.H = portH(); LAYOUT.port.cell = Math.min(35, Math.floor((LAYOUT.port.H - 318) / 15)); }
+    if (!land) { LAYOUT.port.H = portH(); LAYOUT.port.cell = Math.min(32, Math.floor((LAYOUT.port.H - 318) / ROWS)); }
     L = land ? LAYOUT.land : LAYOUT.port;
     app.classList.toggle('land', land);
     app.style.width = L.W + 'px'; app.style.height = L.H + 'px'; app.style.setProperty('--H', L.H + 'px');
@@ -31,28 +31,29 @@
   }
   addEventListener('resize', fit);
 
-  // ───── 顔画像・絵 ─────
-  const F = D.FACE, PAD = 600;
-  const FACE = document.createElement('canvas');
-  const faceImg = new Image();
-  faceImg.onload = () => {
-    FACE.width = faceImg.width + PAD * 2; FACE.height = faceImg.height + PAD * 2;
-    const c = FACE.getContext('2d');
-    const g = c.createLinearGradient(0, 0, 0, FACE.height); g.addColorStop(0, '#8a5a1e'); g.addColorStop(1, '#3d2410');
-    c.fillStyle = g; c.fillRect(0, 0, FACE.width, FACE.height);
-    c.drawImage(faceImg, PAD, PAD);
-    FACE.ok = true; if (G) { draw(); drawNext(); }
+  // ───── 北村さんの頭（ブロック用） ─────
+  // 頭の切り抜きを、頭の色の地にのせた絵。落ちてくる形の大きさいっぱいに伸ばして使う（形の角も頭の色で埋まる）
+  const HD = D.HEAD;
+  const HEADC = document.createElement('canvas');
+  const headImg = new Image();
+  headImg.onload = () => {
+    HEADC.width = headImg.width; HEADC.height = headImg.height;
+    const c = HEADC.getContext('2d');
+    const g = c.createRadialGradient(HEADC.width * .58, HEADC.height * .2, 8, HEADC.width * .5, HEADC.height * .45, HEADC.height * .8);
+    g.addColorStop(0, HD.skin[0]); g.addColorStop(.45, HD.skin[1]); g.addColorStop(1, HD.skin[2]);
+    c.fillStyle = g; c.fillRect(0, 0, HEADC.width, HEADC.height);
+    c.drawImage(headImg, 0, 0);
+    HEADC.ok = true; if (G) { draw(); drawNext(); }
   };
-  faceImg.src = F.src;
-  // 形（回した後）の大きさに合わせて、顔写真のどこを切るかを決める。マス (i, j) が写す範囲を返す
+  headImg.src = HD.src;
+  // 形（回した後）の大きさいっぱいに頭を伸ばす。マス (i, j) が写す頭の範囲を、頭の絵に対する割合（0〜1）で返す
+  //   棒を縦にすると頭の長い北村さん、横にすると平たい北村さん。T字はてっぺんの坊主頭がぽこっと出る
   function faceCells(t, rot) {
     const def = D.PIECES[t];
     const cells = rotateCells(def.cells, def.size, rot);
     const xs = cells.map((c) => c[0]), ys = cells.map((c) => c[1]);
     const x0 = Math.min(...xs), y0 = Math.min(...ys), bw = Math.max(...xs) - x0 + 1, bh = Math.max(...ys) - y0 + 1;
-    const k = Math.sqrt(F.hw * F.hh / (bw * bh)) * .9;                       // 1マスに写す写真の大きさ（顔が大きく写るように）
-    const sx = F.cx - k * bw / 2 + PAD, sy = F.cy - k * bh / 2 + PAD;
-    return cells.map(([cx, cy]) => [sx + (cx - x0) * k, sy + (cy - y0) * k, k, k]);
+    return cells.map(([cx, cy]) => [(cx - x0) / bw, (cy - y0) / bh, 1 / bw, 1 / bh]);
   }
 
   // ───── 保存・画面・音 ─────
@@ -65,7 +66,7 @@
   A.init({
     se: ['tap', 'start', 'cursor', 'brick', 'land', 'correct', 'fanfare', 'kira', 'ghost', 'cup_put', 'eat', 'flash', 'levelup', 'warp', 'wrong',
       'chin', 'chanchan', 'kanpai', 'cheer', 'ipponjime', 'rank', 'despair', 'hyoushigi', 'boyoyon', 'doon'],
-    voice: [],
+    voice: ['officer'],
   });
   const muteBtn = $('#mute');
   const syncMute = () => muteBtn.classList.toggle('off', A.muted);
@@ -76,10 +77,14 @@
   // タイトル：顔ブロックと「市」「民」「税」が降ってくる
   function rain() {
     const box = $('#tRain'); box.innerHTML = '';
-    const pics = ['assets/face/kitamura_sq.jpg', 'assets/art/kanji_shi.svg', 'assets/face/kitamura_sq.jpg', 'assets/art/kanji_min.svg', 'assets/face/kitamura_sq.jpg', 'assets/art/kanji_zei.svg'];
+    const pics = ['head', 'assets/art/kanji_shi.svg', 'head', 'assets/art/kanji_min.svg', 'head', 'assets/art/kanji_zei.svg'];
+    const shapes = [[30, 92], [92, 30], [46, 46], [64, 40], [38, 70]];   // 棒・寝た棒・四角・T字・L字くらいの形に伸びた頭
     for (let i = 0; i < 14; i++) {
       const im = document.createElement('img');
-      im.src = pics[i % pics.length];
+      if (pics[i % pics.length] === 'head') {
+        const [w, h] = shapes[(i / 2 | 0) % shapes.length];
+        im.src = D.HEAD.src; im.className = 'head'; im.style.width = w + 'px'; im.style.height = h + 'px';
+      } else im.src = pics[i % pics.length];
       im.style.left = (Math.random() * (L.W - 50)) + 'px';
       im.style.animationDuration = (7 + Math.random() * 6) + 's';
       im.style.animationDelay = (-Math.random() * 12) + 's';
@@ -113,13 +118,13 @@
 
   // 7種類を1回ずつ混ぜて出す（同じ形ばかり続かない）
   function nextType() {
-    if (!G.bag.length) G.bag = shuffle(['I', 'O', 'T', 'S', 'Z', 'L', 'J']);
+    if (!G.bag.length) G.bag = shuffle(['I', 'O', 'T', 'S', 'Z', 'L', 'J', 'N']);   // N＝ぬらり型
     return G.bag.pop();
   }
   function shuffle(a) { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
   function spawn() {
     const t = G.next || nextType();
-    G.next = nextType();
+    G.next = G.kq.length ? (G.kq.shift() || nextType()) : nextType();   // 税務署員が投げ込んだ「市」「民」「税」（null＝間にはさまる普通のブロック）
     const sz = D.PIECES[t].size;
     G.cur = { t, rot: 0, x: Math.floor((COLS - sz) / 2), y: t === 'I' ? -1 : 0 };
     if (D.PIECES[t].kanji) G.cur.x = 3;
@@ -153,8 +158,9 @@
     const p = G.cur, def = D.PIECES[p.t];
     const cells = pieceCells(p);
     if (cells.some(([, y]) => y < 0)) { gameOver(); return; }
-    const src = def.kanji ? null : faceCells(p.t, p.rot);
-    cells.forEach(([x, y], i) => { G.board[y][x] = def.kanji ? { kanji: def.kanji } : { src: src[i] }; });
+    const src = def.kanji ? null : faceCells(p.t, p.rot), pid = ++G.pid;
+    cells.forEach(([x, y], i) => { G.board[y][x] = def.kanji ? { kanji: def.kanji } : { pid, src: src[i] }; });
+    if (!def.kanji) G.landFx = { pid, t: performance.now() };   // 着地で、ぷよっとつぶれる
     A.se('brick', { vol: .6 });
     G.busy = true; G.cur = null;
     await boom();
@@ -165,19 +171,20 @@
     else {
       // 税務署員は、置いたブロックの数で来る（速く遊んでも、ゆっくり遊んでも同じ）
       const lv = D.LEVELS[G.lv];
-      if (lv.tax && !def.kanji && ++G.sinceTax >= lv.tax) { G.sinceTax = 0; G.busy = true; await officerVisit(); G.busy = false; if (G.over) return; }
+      if (lv.tax && !def.kanji && !G.kq.length && ++G.sinceTax >= lv.tax) { G.sinceTax = 0; G.busy = true; await officerVisit(); G.busy = false; if (G.over) return; }
     }
     spawn(); draw();
   }
 
-  // 「市」「民」「税」が、横（左から）か縦（上から）にこの順で並んだら小爆発。まわり1マスも消えて、上のブロックが落ちる
+  // 「市」「民」「税」が縦か横に3つ並んだら（順番はバラバラでよい）小爆発。まわり1マスも消えて、上のブロックが落ちる
+  //   2026-11-05 打ち合わせ：順番どおりだと先方の社内で1回も爆発させられなかった → 順番は問わない
+  const civic3 = (a, b, c) => !!(a && b && c && a !== b && b !== c && a !== c);
   function findCivic() {
     const K = (x, y) => (G.board[y] && G.board[y][x] && G.board[y][x].kanji) || '';
     const hits = [];
     for (let y = 0; y < ROWS; y++) for (let x = 0; x < COLS; x++) {
-      if (K(x, y) !== '市') continue;
-      if (K(x + 1, y) === '民' && K(x + 2, y) === '税') hits.push([[x, y], [x + 1, y], [x + 2, y]]);
-      if (K(x, y + 1) === '民' && K(x, y + 2) === '税') hits.push([[x, y], [x, y + 1], [x, y + 2]]);
+      if (civic3(K(x, y), K(x + 1, y), K(x + 2, y))) hits.push([[x, y], [x + 1, y], [x + 2, y]]);
+      if (civic3(K(x, y), K(x, y + 1), K(x, y + 2))) hits.push([[x, y], [x, y + 1], [x, y + 2]]);
     }
     return hits;
   }
@@ -227,7 +234,8 @@
   async function officerVisit() {
     if (!G || G.over) return false;
     const off = $('#nura');
-    $('#nBubble').textContent = D.LINES.officer[G.visits % D.LINES.officer.length];
+    $('#nBubble').textContent = D.LINES.officer[0];
+    A.voice('officer');   // 税務署員の声
     $('#nuraImg').src = 'assets/art/officer_idle.webp';
     off.classList.add('on');
     A.se('ghost', { vol: .6 });
@@ -235,7 +243,10 @@
     if (!G || G.over) return true;
     $('#nuraImg').src = 'assets/art/officer_throw.webp';
     A.se('cup_put'); A.se('doon', { vol: .4 });
-    G.next = D.KANJI_ORDER[G.visits % 3]; G.visits++; G.taxTotal++;
+    // 「市」「民」「税」を3つまとめて投げ込む。順番はバラバラで、間に普通のブロックが gap 個はさまる（null）
+    const gap = D.LEVELS[G.lv].gap || 0, ks = shuffle(D.KANJI_ORDER);
+    G.kq = ks.flatMap((k, i) => (i ? [...Array(gap).fill(null), k] : [k]));
+    G.next = G.kq.shift(); G.visits++; G.taxTotal++;
     drawNext();
     const nx = $('.next'); nx.classList.remove('hit'); void nx.offsetWidth; nx.classList.add('hit');
     kitaSay();
@@ -257,7 +268,7 @@
     if (performance.now() - lastStart < 1500) return;   // ボタンの2度押しで、ゲームが2つ同時に始まらないように
     lastStart = performance.now();
     G = { board: empty(), bag: [], next: null, cur: null, lv: P.has('lv') ? Math.max(0, Math.min(4, +P.get('lv') - 1)) : 0, lines: 0, totalLines: 0, score: 0, booms: 0, taxTotal: 0,
-      sinceTax: 0, visits: 0, busy: false, over: false, paused: false, boomAt: null };
+      sinceTax: 0, visits: 0, busy: false, over: false, paused: false, boomAt: null, pid: 0, landFx: null, kq: [] };
     show('play'); fit();
     $('#nura').classList.remove('on'); $('#kitaSay').classList.remove('on');
     drawHud();
@@ -270,6 +281,7 @@
       if (!G || G.over) return;
       const dt = Math.min(.05, (t - prev) / 1000); prev = t;
       if (!G.busy && !G.paused && !window.GC_HOLD && G.cur) tick(dt);   // ゲーセンに戻る確認の間は止める
+      if (G && G.landFx && t - G.landFx.t < 300) draw();   // 着地の、ぷよっとつぶれる動き
       raf = requestAnimationFrame(loop);
     };
     raf = requestAnimationFrame(loop);
@@ -340,30 +352,52 @@
     c.font = `${Math.round(s * .66)}px Boku, serif`; c.fillText(k, x + s / 2, y + s / 2 + s * .04);
     c.restore();
   }
-  // 北村さんの顔ブロック（金色の枠に、顔写真の一部）
-  function drawCell(c, x, y, s, cell, alpha = 1) {
-    if (cell.kanji) { drawKanji(c, x, y, s, cell.kanji, alpha); return; }
-    c.save(); c.globalAlpha = alpha;
-    const r = s * .18;
-    const g = c.createLinearGradient(x, y, x + s, y + s); g.addColorStop(0, '#ffe680'); g.addColorStop(.45, '#e9b21f'); g.addColorStop(1, '#a8700c');
-    roundRect(c, x + 1, y + 1, s - 2, s - 2, r); c.fillStyle = g; c.fill();
-    c.save(); roundRect(c, x + s * .1, y + s * .1, s * .8, s * .8, r * .6); c.clip();
-    if (FACE.ok && cell.src) { const [sx, sy, sw, sh] = cell.src; c.drawImage(FACE, sx, sy, sw, sh, x + s * .1, y + s * .1, s * .8, s * .8); }
-    else { c.fillStyle = '#c98f2a'; c.fillRect(x, y, s, s); }
-    const hl = c.createLinearGradient(0, y, 0, y + s * .5); hl.addColorStop(0, 'rgba(255,255,255,.28)'); hl.addColorStop(1, 'rgba(255,255,255,0)');
-    c.fillStyle = hl; c.fillRect(x, y, s, s * .5);
-    c.restore();
-    roundRect(c, x + s * .1, y + s * .1, s * .8, s * .8, r * .6); c.lineWidth = 1.5; c.strokeStyle = 'rgba(110,70,10,.8)'; c.stroke();
-    roundRect(c, x + 1, y + 1, s - 2, s - 2, r); c.lineWidth = 2; c.strokeStyle = '#6b4308'; c.stroke();
-    c.fillStyle = 'rgba(255,255,255,.75)'; c.beginPath(); c.ellipse(x + s * .24, y + s * .17, s * .1, s * .05, -.5, 0, Math.PI * 2); c.fill();
-    c.restore();
+  function drawCell(c, x, y, s, cell, alpha = 1) { if (cell.kanji) drawKanji(c, x, y, s, cell.kanji, alpha); }
+  // 北村さんの頭ブロック：同じ形のマスは、つながった1つのかたまり（ぷよぷよのように外側の角だけ丸く、境目に線を引かない）
+  //   list＝[{x, y, cell}]（マス目の位置）。ox, oy＝描き始めの位置
+  function drawHeads(c, list, s, ox = 0, oy = 0) {
+    if (!list.length) return;
+    const at = new Map(list.map((o) => [o.x + ',' + o.y, o]));
+    const same = (o, dx, dy) => { const n = at.get((o.x + dx) + ',' + (o.y + dy)); return !!n && n.cell.pid === o.cell.pid; };
+    const R = s * .42, LW = Math.max(2.5, s * .1);
+    // 着地した直後の形は、下を支点に横へふくらんで縦につぶれる
+    const fx = G && G.landFx, now = performance.now();
+    const squash = {};
+    if (fx && now - fx.t < 260) {
+      const k = (now - fx.t) / 260, e = Math.sin(Math.PI * k) * (1 - k * .3);
+      const mine = list.filter((o) => o.cell.pid === fx.pid);
+      if (mine.length) {
+        const cx = ox + (Math.min(...mine.map((o) => o.x)) + Math.max(...mine.map((o) => o.x)) + 1) * s / 2;
+        const by = oy + (Math.max(...mine.map((o) => o.y)) + 1) * s;
+        squash[fx.pid] = { cx, by, sx: 1 + .1 * e, sy: 1 - .16 * e };
+      }
+    }
+    const shape = (o, grow) => {   // 外側の角だけ丸い四角。grow＝外側にふくらませる量
+      const up = same(o, 0, -1), dn = same(o, 0, 1), lf = same(o, -1, 0), rt = same(o, 1, 0);
+      const g = (inner) => (inner ? .7 : grow);   // つながった側は少しだけ重ねて、すき間を作らない
+      const x = ox + o.x * s - g(lf), y = oy + o.y * s - g(up), w = s + g(lf) + g(rt), h = s + g(up) + g(dn);
+      const tl = !up && !lf ? R : 0, tr = !up && !rt ? R : 0, br = !dn && !rt ? R : 0, bl = !dn && !lf ? R : 0;
+      c.beginPath(); c.moveTo(x + tl, y);
+      c.arcTo(x + w, y, x + w, y + h, tr); c.arcTo(x + w, y + h, x, y + h, br);
+      c.arcTo(x, y + h, x, y, bl); c.arcTo(x, y, x + w, y, tl); c.closePath();
+    };
+    const tf = (o) => { const q = squash[o.cell.pid]; if (q) { c.translate(q.cx, q.by); c.scale(q.sx, q.sy); c.translate(-q.cx, -q.by); } };
+    // 1回目：ふちどり（外側にふくらませて、こげ茶で塗る）
+    for (const o of list) { c.save(); tf(o); shape(o, LW * .5); c.fillStyle = '#2a1506'; c.fill(); c.restore(); }
+    // 2回目：頭の絵
+    for (const o of list) {
+      c.save(); tf(o); shape(o, -LW * .15); c.clip();
+      const x = ox + o.x * s, y = oy + o.y * s;
+      if (HEADC.ok && o.cell.src) { const [u, v, du, dv] = o.cell.src; c.drawImage(HEADC, u * HEADC.width, v * HEADC.height, du * HEADC.width, dv * HEADC.height, x - .7, y - .7, s + 1.4, s + 1.4); }
+      else { c.fillStyle = HD.skin[1]; c.fillRect(x - 1, y - 1, s + 2, s + 2); }
+      c.restore();
+    }
   }
   function pieceCellsWithFace(p, x = p.x, y = p.y) {
     const def = D.PIECES[p.t], cells = pieceCells(p, p.rot, x, y);
     const src = def.kanji ? null : faceCells(p.t, p.rot);
-    return cells.map(([cx, cy], i) => [cx, cy, def.kanji ? { kanji: def.kanji } : { src: src[i] }]);
+    return cells.map(([cx, cy], i) => [cx, cy, def.kanji ? { kanji: def.kanji } : { pid: 'cur', src: src[i] }]);
   }
-  function draw() {  }
   function draw() {
     const s = L.cell;
     ctx.clearRect(0, 0, COLS * s, ROWS * s);
@@ -373,25 +407,33 @@
     for (let x = 1; x < COLS; x++) { ctx.beginPath(); ctx.moveTo(x * s + .5, 0); ctx.lineTo(x * s + .5, ROWS * s); ctx.stroke(); }
     // 「市」「民」「税」のある列を、うっすら色づけ（そろえても消えない）
     for (let y = 0; y < ROWS; y++) if (G.board[y].some(c => c && c.kanji)) { ctx.fillStyle = 'rgba(184,53,42,.14)'; ctx.fillRect(0, y * s, COLS * s, s); }
-    for (let y = 0; y < ROWS; y++) for (let x = 0; x < COLS; x++) if (G.board[y][x]) drawCell(ctx, x * s, y * s, s, G.board[y][x]);
-    if (G.boomAt) {   // 小爆発
-      const k = Math.min(1, (performance.now() - G.boomT) / 500);
-      G.boomAt.forEach(([x, y]) => { ctx.save(); ctx.globalAlpha = 1 - k * .6; ctx.fillStyle = k < .3 ? '#fff' : '#ffcf4a'; roundRect(ctx, x * s + 1, y * s + 1, s - 2, s - 2, 6); ctx.fill(); ctx.restore(); });
+    const heads = [];
+    for (let y = 0; y < ROWS; y++) for (let x = 0; x < COLS; x++) {
+      const cell = G.board[y][x]; if (!cell) continue;
+      if (cell.kanji) drawKanji(ctx, x * s, y * s, s, cell.kanji); else heads.push({ x, y, cell });
     }
     if (G.cur) {
       const gy = ghostY(), kj = D.PIECES[G.cur.t].kanji;
       if (gy !== G.cur.y) pieceCells(G.cur, G.cur.rot, G.cur.x, gy).forEach(([x, y]) => { if (y >= 0) { ctx.save(); roundRect(ctx, x * s + 3, y * s + 3, s - 6, s - 6, 6); ctx.strokeStyle = kj ? D.KANJI_COLOR[kj] : '#e9b21f'; ctx.lineWidth = 2.5; ctx.setLineDash([5, 4]); ctx.stroke(); ctx.restore(); } });
-      pieceCellsWithFace(G.cur).forEach(([x, y, cell]) => { if (y >= 0) drawCell(ctx, x * s, y * s, s, cell); });
+      pieceCellsWithFace(G.cur).forEach(([x, y, cell]) => { if (y < 0) return; if (cell.kanji) drawKanji(ctx, x * s, y * s, s, cell.kanji); else heads.push({ x, y, cell }); });
+    }
+    drawHeads(ctx, heads, s);
+    if (G.boomAt) {   // 小爆発
+      const k = Math.min(1, (performance.now() - G.boomT) / 500);
+      G.boomAt.forEach(([x, y]) => { ctx.save(); ctx.globalAlpha = 1 - k * .6; ctx.fillStyle = k < .3 ? '#fff' : '#ffcf4a'; roundRect(ctx, x * s + 1, y * s + 1, s - 2, s - 2, 6); ctx.fill(); ctx.restore(); });
     }
   }
   function drawNext() {
+    const later = G && G.kq ? G.kq.filter(Boolean).map((k) => D.PIECES[k].kanji) : [];
+    $('#kqInfo').innerHTML = later.length ? `あとで<br><b>${later.join('<br>')}</b>` : '';   // 縦に並べる（税務署員のふきだしに重ならないように）
     const c = $('#nextCv').getContext('2d'); c.clearRect(0, 0, 120, 120);
     if (!G || !G.next) return;
     const def = D.PIECES[G.next], cells = def.cells, s = def.kanji ? 52 : 26;
     const src = def.kanji ? null : faceCells(G.next, 0);
     const xs = cells.map(a => a[0]), ys = cells.map(a => a[1]);
     const w = (Math.max(...xs) - Math.min(...xs) + 1) * s, h = (Math.max(...ys) - Math.min(...ys) + 1) * s;
-    cells.forEach(([x, y], i) => drawCell(c, (120 - w) / 2 + (x - Math.min(...xs)) * s, (120 - h) / 2 + (y - Math.min(...ys)) * s, s, def.kanji ? { kanji: def.kanji } : { src: src[i] }));
+    if (def.kanji) { drawKanji(c, (120 - w) / 2, (120 - h) / 2, s, def.kanji); return; }
+    drawHeads(c, cells.map(([x, y], i) => ({ x: x - Math.min(...xs), y: y - Math.min(...ys), cell: { pid: 'next', src: src[i] } })), s, (120 - w) / 2, (120 - h) / 2);
   }
   function drawHud() {
     $('#lvNum').textContent = G.lv + 1;
@@ -480,9 +522,11 @@
     get G() { return G; },
     faceCells: (t, rot) => faceCells(t, rot),
     draw: () => draw(),
-    best() {
+    best() { const l = this.ranked(); return l ? l[0] || null : null; },
+    // 置き方を、よい順に並べて返す（雑な自動プレイ役は、2〜4番目を選ぶこともある）
+    ranked() {
       if (!G || !G.cur || G.busy) return null;
-      const p = G.cur; let bestM = null;
+      const p = G.cur; const all = [];
       for (let r = 0; r < 4; r++) for (let x = -2; x < COLS + 1; x++) {
         if (!fits(p, r, x, p.y)) continue;
         let y = p.y; while (fits(p, r, x, y + 1)) y++;
@@ -491,23 +535,26 @@
         if (D.PIECES[p.t].kanji) pieceCells(p, r, x, y).forEach(([cx, cy]) => { if (cy >= 0) b[cy][cx] = { kanji: D.PIECES[p.t].kanji }; });
         let lines = 0, holes = 0, agg = 0, bump = 0, hs = [], civic = 0;
         const K = (xx, yy) => (b[yy] && b[yy][xx] && b[yy][xx].kanji) || '';
-        for (let yy = 0; yy < ROWS; yy++) for (let xx = 0; xx < COLS; xx++) if (K(xx, yy) === '市' && ((K(xx + 1, yy) === '民' && K(xx + 2, yy) === '税') || (K(xx, yy + 1) === '民' && K(xx, yy + 2) === '税'))) civic++;
+        for (let yy = 0; yy < ROWS; yy++) for (let xx = 0; xx < COLS; xx++) { if (civic3(K(xx, yy), K(xx + 1, yy), K(xx + 2, yy))) civic++; if (civic3(K(xx, yy), K(xx, yy + 1), K(xx, yy + 2))) civic++; }
         for (let yy = 0; yy < ROWS; yy++) if (b[yy].every(c => c) && !b[yy].some(c => c.kanji)) lines++;
         for (let xx = 0; xx < COLS; xx++) { let h = 0, seen = false; for (let yy = 0; yy < ROWS; yy++) { if (b[yy][xx]) { if (!seen) { h = ROWS - yy; seen = true; } } else if (seen) holes++; } hs.push(h); agg += h; }
         for (let xx = 1; xx < COLS; xx++) bump += Math.abs(hs[xx] - hs[xx - 1]);
         let sc = lines * 8 - holes * 6 - agg * .5 - bump * .4 + civic * 40;
-        if (D.PIECES[p.t].kanji) {   // 「市」「民」「税」は、並びをそろえやすい所（同じ漢字が並んでいる横）を少し優先
-          const [[kx, ky]] = pieceCells(p, r, x, y), k = D.PIECES[p.t].kanji, prev = { '民': '市', '税': '民' }[k];
-          if (prev && (K(kx - 1, ky) === prev || K(kx, ky - 1) === prev)) sc += 20;
+        if (D.PIECES[p.t].kanji) {   // 「市」「民」「税」は、ちがう漢字のとなりに置いて、3つそろえやすくする
+          const [[kx, ky]] = pieceCells(p, r, x, y), k = D.PIECES[p.t].kanji;
+          if ([K(kx - 1, ky), K(kx + 1, ky), K(kx, ky + 1)].some((n) => n && n !== k)) sc += 20;
+          if (K(kx, ky + 1) && K(kx, ky + 1) !== k) sc += 30;   // ちがう漢字の上に縦に積む（市→民→税の順に来るので、同じ列に積めばそろう）
+          const any = G.board.some((row) => row.some((c) => c && c.kanji));
+          if (any && ![K(kx - 1, ky), K(kx + 1, ky), K(kx, ky + 1)].some(Boolean)) sc -= 12;   // 漢字をばらばらに置かない
         }
-        if (!bestM || sc > bestM.sc) bestM = { sc, r, x };
+        all.push({ sc, r, x });
       }
-      return bestM && { rot: (bestM.r - p.rot + 4) % 4, dx: bestM.x - p.x };
+      return all.sort((a, b) => b.sc - a.sc).map((m) => ({ rot: (m.r - p.rot + 4) % 4, dx: m.x - p.x }));
     },
   };
 
   // 途中で切りかえる絵は、先に読み込んでおく（切りかえた瞬間に前の絵が一瞬出たり、消えたりしないように）
-  const PRELOAD = ['assets/art/officer_idle.webp', 'assets/art/officer_throw.webp', 'assets/art/kita_up.webp', 'assets/face/kitamura_sq.jpg'].map((s) => { const i = new Image(); i.src = s; if (i.decode) i.decode().catch(() => { }); return i; });
+  const PRELOAD = ['assets/art/officer_idle.webp', 'assets/art/officer_throw.webp', 'assets/art/kita_up.webp', 'assets/face/kitamura_sq.jpg', D.HEAD.src].map((s) => { const i = new Image(); i.src = s; if (i.decode) i.decode().catch(() => { }); return i; });
   fit();
   toTitle();
   if (P.has('play')) startGame();

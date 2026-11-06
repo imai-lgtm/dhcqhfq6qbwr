@@ -3,6 +3,7 @@
 window.DATA = {
   FLOOR: { top: 156, bottom: 228 },
   PLAYER: { hp: 16, speed: 1.25, speedY: .85 },
+  CONTINUES: 3,   // やられても「つづける」ができる回数（2026-11-05：何回でもやり直せると、ちゃんとやらなくても全クリできてしまうため）
 
   // 敵の強さ（hp：体力、dmg：攻撃の痛さ、speed：歩く速さ、reach：攻撃が届く距離）
   ENEMY: {
@@ -11,6 +12,8 @@ window.DATA = {
     miya: { hp: 24, dmg: 1, speed: .5, reach: 26, windup: 36, cool: 66, score: 1000, boss: true },   // 1面：いちばんやさしいボス
     soma: { hp: 16, dmg: 1, speed: 0, reach: 70, windup: 0, cool: 0, score: 1500, boss: true },   // 2面：1面よりは手ごわく、3面よりはやさしく
     shacho: { hp: 46, dmg: 2, speed: .65, reach: 36, windup: 34, cool: 55, score: 3000, boss: true },
+    // 瑞月さん（2026-11-06 追加）：小さくて足がめちゃくちゃ速い。端から端へ走り抜け、ぶつかると痛い。端で息切れしている間がチャンス
+    mizuki: { hp: 3, dmg: 1, speed: 3.0, reach: 12, windup: 0, cool: 0, score: 300 },
   },
   // 攻撃の強さ
   ATTACK: { punch1: 1, punch2: 1, kick: 2, jumpkick: 2, kiwami: 7 },
@@ -22,6 +25,8 @@ window.DATA = {
     miya: { name: '宮本 吉康', role: '心電通 66歳', catch: '焼肉バウンドマン', photo: 'miya' },
     soma: { name: '颯馬', role: '心電通 中部支店長', catch: 'どこでも寝る支店長', photo: 'soma' },
     shacho: { name: '山本 雅希', role: '株式会社 心電通 代表取締役', catch: '黒幕', photo: 'shacho' },
+    mizuki: { name: '瑞月', role: '心電通', catch: '足がめっちゃ速い', photo: 'mizuki' },
+    okusan: { name: '山本 幸美', role: '龍之介部長の奥さん', catch: 'さらわれた人', photo: 'okusan' },
   },
 
   // ステージ：背景・幅・敵の出てくる場所（x に来たら画面が止まって、全部倒すまで進めない）
@@ -41,7 +46,7 @@ window.DATA = {
       id: 2, name: '中部支店（名古屋）', bg: 'stage2', w: 768, bgm: 'stage2',
       waves: [
         { x: 0, enemies: [{ t: 'naka', dx: 210, y: 180 }, { t: 'dani', dx: 230, y: 210 }] },
-        { x: 220, enemies: [{ t: 'naka', dx: 220, y: 170 }, { t: 'naka', dx: 240, y: 215 }, { t: 'dani', dx: -30, y: 195 }] },
+        { x: 220, enemies: [{ t: 'naka', dx: 220, y: 170 }, { t: 'naka', dx: 240, y: 215 }, { t: 'dani', dx: -30, y: 195 }, { t: 'mizuki', dx: 250, y: 200 }] },
         { x: 440, boss: true, enemies: [{ t: 'soma', dx: 180, y: 212 }] },
       ],
       // ロッカー：1つに布施えびすの福笹
@@ -55,7 +60,7 @@ window.DATA = {
       okusan: { x: 715, y: 162 },
       waves: [
         { x: 0, enemies: [{ t: 'dani', dx: 210, y: 178 }, { t: 'dani', dx: 230, y: 214 }] },
-        { x: 240, enemies: [{ t: 'naka', dx: 220, y: 172 }, { t: 'naka', dx: -30, y: 214 }, { t: 'dani', dx: 240, y: 196 }] },
+        { x: 240, enemies: [{ t: 'naka', dx: 220, y: 172 }, { t: 'naka', dx: -30, y: 214 }, { t: 'dani', dx: 240, y: 196 }, { t: 'mizuki', dx: -20, y: 186 }] },
         { x: 512, boss: true, enemies: [{ t: 'shacho', dx: 190, y: 192 }] },
       ],
       props: [{ t: 'box', x: 420, y: 220, item: 'ramen' }],
@@ -73,12 +78,17 @@ window.DATA = {
       '決算の日。',
       '龍之介部長の奥さんが、何者かに連れ去られた。',
       '残されていたのは一枚のメモ。\n「返してほしければ、新社屋の社長室まで来い」',
+      '（うわさでは、社長は神さまに守られていて、\nふつうに しばいても 効かないらしい……）',
     ],
     nakaSleep: 'ZZZ…',
     daniPose: 'キラーン！',
     noEffect: '効かへんなぁ',
     gold: '心電通は、神頼みも本気です',
     hint: '……だるま、持ってへんやろ？',
+    // 社長戦の始め（2026-11-05：社長の倒し方が分からない → 先に言う）
+    shachoGuard: ['社長「わしはな、神さんに守られとるんや。」', '社長「安全祈願のだるまと、布施えびすの福笹……\n両方 無いと、わしには 効かへんで。」'],
+    shachoReady: '社長「……だるまと福笹か。\n神頼みまでして来たんやな。」',
+    itemsReady: 'だるまと福笹が そろった！\nこれで 社長を しばける！',
     ending: [
       '社長室の奥の扉が開いて、クラッカーの音。',
       '奥さん「龍くん、お誕生日おめでとう！」',

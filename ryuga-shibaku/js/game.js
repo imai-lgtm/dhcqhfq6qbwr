@@ -44,7 +44,7 @@
     se: ['tap', 'start', 'swing', 'hit_light', 'hit_mid', 'hit_heavy', 'harisen', 'kick_heavy', 'down', 'falldown', 'jump', 'land',
       'item_get', 'eat', 'text_impact', 'title_impact', 'hajime', 'metal_logo', 'kira', 'snore', 'throw', 'paper', 'fanfare', 'cracker',
       'cheer', 'wrong', 'levelup', 'cursor', 'chin', 'brick', 'door_open', 'rank', 'despair', 'warp', 'hyoushigi'],
-    voice: ['ryu_kiwami', 'naka_onegai', 'miya_down', 'soma_sleep', 'shacho_intro', 'shacho_noeffect', 'shacho_daruma', 'shacho_birthday'],
+    voice: ['ryu_kiwami', 'ryu_start', 'ryu_oops', 'naka_onegai', 'miya_down', 'soma_sleep', 'soma_cry', 'mizuki', 'shacho_intro', 'shacho_daruma', 'shacho_birthday', 'shacho_family'],
   });
   const muteBtn = $('mute');
   const syncMute = () => muteBtn.classList.toggle('off', A.muted);
@@ -95,7 +95,7 @@
   }
   // ドット絵がまだ無い時の代わり（体と頭の四角）
   const FB_COL = { ryu: ['#f8f8f8', '#2a1a10'], naka: ['#2858b8', '#3a2a20'], dani: ['#e0e0e0', '#101010'], miya: ['#d8a040', '#c8c8c8'],
-    soma: ['#405890', '#201810'], shacho: ['#303030', '#302018'], okusan: ['#f0a8b8', '#402818'] };
+    soma: ['#405890', '#201810'], shacho: ['#303030', '#302018'], okusan: ['#f0a8b8', '#402818'], mizuki: ['#2a2a36', '#7a4a2c'] };
   function fallback(name, x, y, face, st) {
     const [body, head] = FB_COL[name] || ['#888', '#444'];
     if (st && st.startsWith('down')) { ctx.fillStyle = body; ctx.fillRect(x - 14, y - 8, 22, 8); ctx.fillStyle = head; ctx.fillRect(x + 8 * -face - 4, y - 9, 10, 9); return; }
@@ -180,7 +180,7 @@
     return {
       t: 0, si: 0, st: null, cam: 0, wave: 0, locked: false, en: [], pr: [], drops: [], fx: [], props: [], engaged: new Set(),
       items: new Set((Q.get('items') || '').split(',').filter((k) => k in D.ITEMS)), seen: new Set(),
-      score: 0, ko: 0, combo: 0, comboT: 0, maxCombo: 0, deaths: 0, stop: 0, shake: 0, flash: 0, gold: 0,
+      score: 0, ko: 0, combo: 0, comboT: 0, maxCombo: 0, deaths: 0, credits: D.CONTINUES, stop: 0, shake: 0, flash: 0, gold: 0,
       pause: 'story', boss: null, bossT: 0, retry: false, hint: null, cleared: false, uid: 0, noEffT: 0, goldShown: false,
       p: { x: 30, y: 200, z: 0, vx: 0, vy: 0, vz: 0, face: 1, hp: D.PLAYER.hp, max: D.PLAYER.hp, gauge: 0, st: 'idle', ft: 0, inv: 0, hit: new Set(), buf: false },
     };
@@ -381,6 +381,7 @@
     const e = { type, d, x, y, z: 0, vx: 0, vz: 0, face: -1, hp: d.hp, max: d.hp, st: 'idle', ft: 0, cool: rnd(30, 80), inv: 0,
       poseCool: 60, poise: 0, slot: ++G.uid, dead: false, gone: false };
     if (type === 'soma') { e.phase = 'sleep'; e.pt = 0; e.sleepLen = 330; e.punish = 0; e.st = 'sleep'; }
+    if (type === 'mizuki') { e.mode = 'rest'; e.mt = 70; setTimeout(() => { if (G && !e.dead) A.voice('mizuki'); }, 400); }
     G.en.push(e);
     return e;
   }
@@ -420,7 +421,8 @@
   function defeated(e) {
     G.ko++; G.score += e.d.score;
     if (e.type === 'miya') { A.voice('miya_down'); pop('まだまだ、現役やで……', e, '#fff'); }
-    if (e.type === 'soma') { pop('……すぴー', e, '#fff'); G.chair = { x: e.x, y: e.y - .5 }; }
+    if (e.type === 'soma') { pop('……すぴー', e, '#fff'); G.chair = { x: e.x, y: e.y - .5 }; A.voice('soma_cry'); }
+    if (e.type === 'mizuki') pop('もう走られへん…', e, '#fcf');
     if (e.d.boss) { G.stop = 30; G.shake = 16; A.se('hit_heavy'); }
   }
   function noEffect(e) {
@@ -428,8 +430,6 @@
     pop(D.TEXT.noEffect, e, '#ccc');
     A.se('chin', { vol: .5 });
     fx('hit', e.x, e.y, e.z - 30);
-    const now = performance.now();
-    if (now - G.noEffT > 3500) { G.noEffT = now; A.voice('shacho_noeffect'); }
   }
 
   function updEnemy(e) {
@@ -453,6 +453,7 @@
     }
     if (e.st === 'hurt') { if (e.ft >= (e.stun || 14)) setE(e, 'idle'); return; }
     if (e.type === 'soma') return somaAI(e);
+    if (e.type === 'mizuki') return mizukiAI(e);
     const p = G.p, dx = p.x - e.x, dy = p.y - e.y;
     switch (e.st) {
       case 'windup': if (e.ft >= e.d.windup) { setE(e, 'attack'); A.se('swing', { vol: .4, rate: .9 }); } return;
@@ -537,6 +538,23 @@
       setTimeout(() => { if (!G || h.dead) return; pop('やらせてください！', h, '#fff', 1500, true); }, 2100);
     }
   }
+  // 瑞月さん：画面の端から端へ全力で走り抜ける（ぶつかると痛い）。端で息切れしている間がしばくチャンス
+  function mizukiAI(e) {
+    const p = G.p;
+    if (e.mode === 'rest') {
+      if (e.st !== 'idle') setE(e, 'idle');
+      e.face = p.x >= e.x ? 1 : -1;
+      if (--e.mt <= 0) { e.mode = 'dash'; e.dir = e.face; e.ty = p.y; e.hitDone = false; setE(e, 'walk'); pop('キャー！', e, '#fcf'); }
+      return;
+    }
+    e.face = e.dir;
+    e.x += e.dir * e.d.speed;
+    e.y = clamp(e.y + clamp(e.ty - e.y, -.6, .6), FT, FB);
+    const dx = p.x - e.x, dy = p.y - e.y;
+    if (!e.hitDone && Math.abs(dx) < e.d.reach && Math.abs(dy) < 8 && p.z > -18 && p.st !== 'down') { e.hitDone = true; hurtPlayer(e.d.dmg, false, e.dir); }
+    const lo = G.cam + 14, hi = G.cam + W - 14;
+    if ((e.dir > 0 && e.x >= hi) || (e.dir < 0 && e.x <= lo)) { e.x = clamp(e.x, lo, hi); e.mode = 'rest'; e.mt = rnd(60, 90); pop('ハァハァ', e, '#fff'); }
+  }
   function somaPunish(e, hit) {
     if (e.punish > 0 && !hit) return;
     e.punish = 90;   // 書類が続けて飛んでくる間隔（1.5秒）
@@ -585,7 +603,7 @@
     G.items.add(it.kind); G.score += 1000;
     if (G.hint === it.kind) G.hint = null;
     A.se('item_get');
-    say([`${D.ITEMS[it.kind].name}を 手に入れた！`, it.kind === 'daruma' ? '……なんで ダンボールに だるまが？' : '……なんで ロッカーに 福笹が？']);
+    say([`${D.ITEMS[it.kind].name}を 手に入れた！`, it.kind === 'daruma' ? '……なんで ダンボールに だるまが？' : '……なんで ロッカーに 福笹が？', ...(hasAll() ? [D.TEXT.itemsReady] : [])]);
   }
 
   // ───── カメラとウェーブ（画面が止まって、全員しばくまで進めない） ─────
@@ -610,6 +628,8 @@
       await say([{ t: '颯馬「……マ、マ、ママー……。」', v: 'soma_sleep' }, '（寝ている間しか しばけない。\n起きている時に動くと、書類が飛んでくる！）']);
     } else if (e.type === 'shacho') {
       await say([{ t: '社長「龍……よう来たな。」', v: 'shacho_intro' }, '社長「奥さんは、この奥や。\n返してほしけりゃ、わしを しばいてみい。」']);
+      if (!hasAll()) { await say(D.TEXT.shachoGuard); G.pause = 'dead'; shachoHint(true); return; }
+      await say([D.TEXT.shachoReady]);
     } else if (e.type === 'miya') msg('焼肉の においがする……');
   }
   function checkWave() {
@@ -638,7 +658,7 @@
     await wait(1900);
     $('stageTitle').classList.remove('on');
     A.bgm(G.st.bgm);
-    if (i === 0 && first) await say(['龍之介「……しばいたる。」']);
+    if (i === 0 && first) await say([{ t: '龍之介「……しばいたるんじゃ。」', v: 'ryu_start' }]);
     if (G.hint) msg(G.hint === 'daruma' ? 'ダンボール箱を しばいてみよう' : 'ロッカーを しばいてみよう');
     G.pause = null;
   }
@@ -660,15 +680,16 @@
     A.stopBgm(200);
     if (G.boss && G.boss.type === 'shacho' && !hasAll()) { shachoHint(); return; }
     A.bgm('gameover');
-    const ok = await say(['龍之介は 力つきた……', { t: 'A：つづける（このステージの最初から）\nB：あきらめる', choice: true }]);
-    if (ok) startStage(G.si); else result();
+    if (G.credits <= 0) { await say(['龍之介は 力つきた……', 'GAME OVER\n（つづけられるのは ' + D.CONTINUES + '回まで）']); result(); return; }
+    const ok = await say(['龍之介は 力つきた……', { t: `A：つづける（のこり ${G.credits}回）\nB：あきらめる`, choice: true }]);
+    if (ok) { G.credits--; startStage(G.si); } else result();
   }
   // 社長は、だるまと福笹を両方持っていないと しばけない（ここでネタばらし）
-  async function shachoHint() {
+  async function shachoHint(early) {
     const miss = ['daruma', 'fukuzasa'].filter((k) => !G.items.has(k));
     await wait(600);
     const ok = await say([
-      miss.includes('daruma') ? { t: '社長「' + D.TEXT.hint + '」', v: 'shacho_daruma' } : '社長「……福笹、持ってへんやろ？」',
+      ...(early ? [] : [miss.includes('daruma') ? { t: '社長「' + D.TEXT.hint + '」', v: 'shacho_daruma' } : '社長「……福笹、持ってへんやろ？」']),
       '社長「心電通はな、神頼みも本気なんや。」',
       ...miss.map((k) => `（${D.ITEMS[k].name}は、${D.ITEMS[k].note}にあるらしい……）`),
       { t: 'A：取りに戻る　B：あきらめる', choice: true },
@@ -680,7 +701,7 @@
 
   // ───── エンディング ─────
   const ROLL = ['りゅうが しばく', '', '― しばかれた人たち ―', '', '中島 貴久（寝る人）', 'ボリバー・ダニエル（ポーズの人）', '宮本 吉康（焼肉の人）',
-    '颯馬（寝る支店長）', '山本 雅希（黒幕・祝う人）', '', '― 祝ってくれた人 ―', '', '奥さん', '', '― しばいた人 ―', '', '龍之介', '', 'おんがく　魔王魂', '',
+    '颯馬（寝る支店長）', '瑞月（足の速い人）', '山本 雅希（黒幕・祝う人）', '', '― 祝ってくれた人 ―', '', '山本 幸美（奥さん）', '', '― しばいた人 ―', '', '龍之介', '', 'おんがく　魔王魂', '',
     'せいさく　株式会社 心電通', '', '', '龍くん、おめでとう。'];
   async function ending() {
     setScene('ending'); G.pause = 'ending'; G.cam = 0;
@@ -691,10 +712,20 @@
     await say([{ t: D.TEXT.ending[0], se: 'cracker' }, D.TEXT.ending[1]]);
     E.gift = true; A.se('kira');
     await say([{ t: '社長「……誕生日、おめでとう。龍。」', v: 'shacho_birthday' }, '社長「奥さんに頼まれてな。\nみんなで準備しとったんや。」',
-      '龍之介「……しばいてもうた。」']);
+      { t: '龍之介「……しばいてもうたんじゃ。」', v: 'ryu_oops' }]);
     A.se('cheer');
     E.roll = 0;
     await until(() => E.done);
+    // 家族の写真 → 社長「家族が一番やな」
+    const fam = $('family'), fi = $('famImg'), fc = $('famCap');
+    fam.classList.add('on');
+    for (const [src, cap] of [['fam_dino', ''], ['fam_hold', ''], ['fam_family', '']]) {
+      fi.src = `assets/photo/${src}.jpg`; fc.textContent = cap;
+      fi.classList.remove('show'); void fi.offsetWidth; fi.classList.add('show');
+      if (src === 'fam_family') { fc.textContent = '社長「……家族が、一番やな。」'; const vl = await A.voice('shacho_family'); await wait(Math.max(3200, vl + 1200)); }
+      else await wait(2300);
+    }
+    fam.classList.remove('on');
     G.cleared = true;
     result();
   }
@@ -778,7 +809,13 @@
     G = newGame(); E = null; TB = null; CARD = null;
     setScene('play'); show('play'); busy = false;
     $('textbox').classList.remove('on'); $('card').classList.remove('on'); $('go').classList.remove('on'); $('pausebox').classList.remove('on');
-    if (!skipOpening) { A.bgm(null); await say(D.TEXT.opening.map((t, i) => (i === 0 ? { t, se: 'hyoushigi' } : t))); }
+    if (!skipOpening) {
+      A.bgm(null);
+      const op = D.TEXT.opening.map((t, i) => (i === 0 ? { t, se: 'hyoushigi' } : t));
+      await say(op.slice(0, 2));
+      await card('okusan');   // 奥さんの名前テロップ
+      await say(op.slice(2));
+    }
     startStage(si, si === 0);
   }
 
@@ -920,7 +957,7 @@
       if (k === 'prop') {
         const x = Math.round(o.x - G.cam) + (o.shake ? (o.shake % 2 ? 1 : -1) : 0);
         object('props', o.broken ? (o.t === 'locker' ? 'locker_open' : 'box_broken') : (o.t === 'locker' ? 'locker_closed' : 'box'), x, Math.round(o.y));
-        if (!o.broken && o.item && o.item === G.hint) drawSparkle(x + 6, Math.round(o.y) - (o.t === 'locker' ? 48 : 24));
+        if (!o.broken && (o.item === 'daruma' || o.item === 'fukuzasa')) drawSparkle(x + 6, Math.round(o.y) - (o.t === 'locker' ? 48 : 24));   // 社長に必要な物が入っている
       } else if (k === 'drop') {
         object('items', o.kind, Math.round(o.x - G.cam), Math.round(o.y + o.z));
       } else if (k === 'pr') {
@@ -989,7 +1026,7 @@
     setHud('hp', (v) => { $('hpBar').style.width = v + '%'; }, Math.round(p.hp / p.max * 100));
     setHud('g', (v) => { $('gaugeBar').style.width = v + '%'; $('gaugeWrap').classList.toggle('full', v >= 100); $('btnK').classList.toggle('ready', v >= 100); }, Math.round(p.gauge));
     setHud('sc', (v) => { $('hScore').textContent = v; }, String(G.score).padStart(6, '0'));
-    setHud('it', (v) => { $('hItems').innerHTML = v; }, ['daruma', 'fukuzasa'].filter((k) => G.items.has(k)).map((k) => `<i class="chip ${k}">${k === 'daruma' ? 'だるま' : '福笹'}</i>`).join(''));
+    setHud('it', (v) => { $('hItems').innerHTML = v; }, ['daruma', 'fukuzasa'].map((k) => `<i class="chip ${k}${G.items.has(k) ? '' : ' none'}">${k === 'daruma' ? 'だるま' : '福笹'}</i>`).join(''));   // 持っていない物は薄く
     const b = G.boss && !G.boss.gone ? G.boss : null;
     setHud('bo', (v) => { $('bossHud').classList.toggle('on', !!v); $('nes').classList.toggle('boss-on', !!v); $('bossName').textContent = v; }, b ? D.CARDS[b.type].name : '');
     if (b) setHud('bh', (v) => { $('bossBar').style.width = v + '%'; }, Math.round(b.hp / b.max * 100));

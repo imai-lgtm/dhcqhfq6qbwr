@@ -64,8 +64,8 @@
     se: ['tap', 'tap2', 'start', 'koto', 'hyoushigi', 'kotsudumi', 'throw', 'eat', 'correct', 'wrong', 'mokugyo',
       'chin', 'timer', 'walk', 'beep', 'snore', 'shacho', 'drunk', 'fanfare', 'cracker', 'cheer', 'ponpon', 'boyoyon',
       'ipponjime', 'rank', 'paper', 'chanchan', 'kira', 'doon'],
-    voice: ['yoroshii_bad', 'yoroshii_good', 'aretotte', 'areyaare', 'soreyagana', 'wakatteruyan',
-      'saishokara', 'orenoha'],
+    voice: ['yoroshii_bad', 'yoroshii_good', 'aretotte', 'areyaare', 'soreyagana', 'wakatteruyan', 'yappashi',
+      'saishokara', 'orenoha', 'fanta', 'ebamosuru', 'ntodesune', 'dekihen', 'mawari'],
   });
   document.addEventListener('pointerdown', () => A.unlock(), { once: true });
 
@@ -89,7 +89,7 @@
   // タイトルの江原さんを押すと、ひとこと
   $('.t-eba').addEventListener('click', () => {
     A.unlock();
-    A.voice(['aretotte', 'soreyagana', 'wakatteruyan', 'areyaare'][rand(4)]); A.se('boyoyon', { vol: .5 });
+    A.voice(['aretotte', 'soreyagana', 'wakatteruyan', 'areyaare', 'ebamosuru', 'yappashi'][rand(6)]); A.se('boyoyon', { vol: .5 });
     $('.t-eba').animate([{ scale: '1 1' }, { scale: '1.08 .9' }, { scale: '.96 1.06' }, { scale: '1 1' }], { duration: 450 });
   });
   $('#btnAlbum').addEventListener('click', () => { A.se('tap'); openAlbum('title'); });
@@ -331,8 +331,10 @@
       said = say('（夢の中で、何か見ている…）', 'silent dream');
       startDream(q);
     } else {
-      if (q.voice) A.voice(q.voice);
-      said = say(q.pre ? `${q.pre}\n${q.say}` : q.say, st.sleepy ? 'sleepy' : '');
+      // 声の無いお願いの前に、ときどき「んとですね。」（練習の1問目と、眠い時はなし）
+      const umm = !q.voice && !q.pre && !practice && !st.sleepy && Math.random() < .3;
+      if (q.voice) A.voice(q.voice); else if (umm) A.voice('ntodesune');
+      said = say(q.pre ? `${q.pre}\n${q.say}` : umm ? `んとですね。\n${q.say}` : q.say, st.sleepy ? 'sleepy' : '');
     }
 
     let first;
@@ -393,7 +395,7 @@
       if (vlen > 1500) await sleep(vlen - 1500 + 200);
     } else {
       face('laugh');
-      const pr = D.PRAISE[G.praise++ % 2];
+      const pr = D.PRAISE[G.praise++ % D.PRAISE.length];
       A.voice(pr.voice);
       sayNow(practice ? `${pr.text}\n（この調子で、どんどん渡してな）` : pr.text);
       await sleep(practice ? 2000 : 1000);
@@ -455,8 +457,9 @@
     onPick = null;
     if (r !== 'wait') {
       await fly(r, L.shachoTo);
-      sayNow('社長に先に渡すんか…', 'angry');
-      await sleep(900);
+      sayNow('社長に先に渡すんか…\nもっと周りの事考えな', 'angry');
+      const ml = await A.voice('mawari');
+      await sleep(Math.max(900, ml + 200));
       sh.classList.remove('on');
       return 'shacho';
     }
@@ -548,7 +551,8 @@
   }
 
   // ───── 失敗 → 帰宅 ─────
-  const OVER_LINE = { wrong: '……', timeout: '……遅い', shacho: null, koji: null };
+  const OVER_LINE = { wrong: 'ごめん、\n俺にはできへんわ', timeout: '……遅い', shacho: null, koji: null };
+  const OVER_VOICE = { wrong: 'dekihen' };
   async function gameOver(reason) {
     G.alive = false;
     spin(false);
@@ -560,6 +564,7 @@
     face('down');
     ebaEl.classList.remove('nod', 'happy');
     if (OVER_LINE[reason]) sayNow(OVER_LINE[reason], 'angry');
+    if (OVER_VOICE[reason]) await A.voice(OVER_VOICE[reason]).then((ms) => sleep(Math.max(0, ms - 1100)));
     $('#think').classList.remove('on'); $('#gaze').classList.remove('on');
     await sleep(1300);
 
@@ -660,7 +665,7 @@
       await img.decode().catch(() => { });
       cap.textContent = s.cap;
       sl.classList.remove('show'); void sl.offsetWidth; sl.classList.add('show');
-      await sl.animate([{ opacity: 0 }, { opacity: 1, offset: .15 }, { opacity: 1, offset: .85 }, { opacity: 0 }], { duration: 2600 * FAST, fill: 'forwards' }).finished;
+      await sl.animate([{ opacity: 0 }, { opacity: 1, offset: .15 }, { opacity: 1, offset: .85 }, { opacity: 0 }], { duration: 2400 * FAST, fill: 'forwards' }).finished;
     }
     await fin.decode().catch(() => { });
     $('#eFinal').classList.add('on');

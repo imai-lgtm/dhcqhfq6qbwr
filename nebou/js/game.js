@@ -35,9 +35,9 @@
   const scene = (id) => document.querySelectorAll('.scene').forEach(s => s.classList.toggle('on', s.id === id));
 
   A.init({
-    se: ['tap', 'start', 'jump', 'land', 'falldown', 'kira', 'doorchime', 'beep', 'spark', 'step_heavy', 'step_cute', 'door_open', 'alarm',
+    se: ['harisen', 'despair', 'tap', 'start', 'jump', 'land', 'falldown', 'kira', 'doorchime', 'beep', 'spark', 'step_heavy', 'step_cute', 'door_open', 'alarm',
       'phone_ring', 'phone_pick', 'snore', 'ramen', 'speedup', 'correct', 'wrong', 'rank', 'fanfare', 'chanchan', 'boyoyon', 'hyoushigi', 'timer', 'dog'],
-    voice: ['soma_mama'],
+    voice: ['soma_mama', 'soma_cry', 'naka_go', 'naka_hai', 'naka_geshu', 'naka_ring', 'naka_ohayo', 'shacho_yasume', 'dad', 'grandma'],
   });
   const muteBtn = $('#mute');
   const syncMute = () => muteBtn.classList.toggle('off', A.muted);
@@ -113,6 +113,7 @@
     if (!R || !R.on || R.y > 0 || R.fallT > 0) return;
     R.vy = 980; R.jumps++;
     A.se('jump', { vol: .5 });
+    if (R.jumps % 2 === 1) A.voice(R.jumps % 6 === 5 ? 'naka_geshu' : 'naka_hai');   // 中島さんのかけ声（ハイ！／ハイでげす）
     if (R.hint) { R.hint = false; $('#jumpHint').classList.remove('on'); R.slow = false; }
   }
   runEl.addEventListener('pointerdown', (e) => { if (e.target.closest('.mute')) return; jump(); });
@@ -121,8 +122,9 @@
   function runPhase() {
     G.phase = 'run';
     A.bgm('run');
+    A.voice('naka_go');   // せいのー、せいのせいの
     objsEl.innerHTML = ''; $('#layPoles').innerHTML = '';
-    R = { on: true, y: 0, vy: 0, speed: 330, dist: 0, goal: 9000, nextAt: 520, objs: [], frame: 0, ft: 0, fallT: 0, hurtT: 0, hint: true, slow: true, jumps: 0, houses: 0, poles: 0, ground: 0 };
+    R = { on: true, y: 0, vy: 0, speed: 330, dist: 0, goal: D.RUN_GOAL, nextAt: 520, objs: [], frame: 0, ft: 0, fallT: 0, hurtT: 0, hint: true, slow: true, jumps: 0, houses: 0, poles: 0, ground: 0 };
     $('#runBar').style.width = '0';
     let prev = performance.now();
     return new Promise(done => {
@@ -146,7 +148,7 @@
   }
   function runStep(dt) {
     // 速さ：最初の障害物はゆっくり（ジャンプの練習）、だんだん速く
-    const target = R.slow ? 170 : Math.min(560, 330 + R.dist / 40);
+    const target = R.slow ? 170 : Math.min(590, 330 + R.dist / 45);
     R.speed += (target - R.speed) * Math.min(1, dt * 2);
     const v = R.fallT > 0 ? R.speed * .35 : R.speed;
     R.dist += v * dt;
@@ -161,7 +163,8 @@
     // 障害物を出す
     if (R.dist < R.goal - 400 && R.dist >= R.nextAt) {
       spawn();
-      R.nextAt = R.dist + rand(380, 620) * (R.speed / 400);
+      const busy = Math.min(1, R.dist / R.goal);   // 後半ほど、障害物の間がつまる（ただし、着地してから落ち着いて跳び直せる間＝約0.95秒は必ず空ける）
+      R.nextAt = R.dist + Math.max(R.speed * .95, rand(380, 620) * (1 - busy * .2) * (R.speed / 400));
       if (R.hint && R.objs.length === 1) $('#jumpHint').classList.add('on');
     }
     // 最初の障害物を越えたら（跳ばなくても）練習はおしまい
@@ -172,7 +175,7 @@
     R.fallT = Math.max(0, R.fallT - dt); R.hurtT = Math.max(0, R.hurtT - dt);
     R.ft += dt * v / 330;
     if (R.ft > .09) { R.ft = 0; R.frame = (R.frame + 1) % 3; }
-    runner.src = `assets/art/${R.fallT > 0 ? 'runner_fall' : R.y > 0 ? 'runner_jump' : 'runner_' + (R.frame + 1)}.svg`;
+    runner.src = `assets/art/${R.fallT > 0 ? 'naka_run_fall' : R.y > 0 ? 'naka_run_jump' : 'naka_run_' + (R.frame + 1)}.webp`;   // 走る人＝中島さん
     runner.style.transform = `translateY(${-R.y}px)`;
     // 動かす・当たり判定
     const rx1 = L.runX + 22, rx2 = L.runX + L.runH * .62;
@@ -325,6 +328,7 @@
       const a = await waitDoor(['ring']);
       if (G.over) return;
       A.se('doorchime');
+      if (G.rings === 1) A.voice('naka_ring');   // 颯馬くん、いらっしゃいますでしょうか？
       // 誰が来るか：順番待ちの列の先頭。うまくさばけた時だけ次の人へ進む（運ではなく腕で進む）
       const who = G.queue[0];
       G.who = who; G.hidden = false;
@@ -343,23 +347,23 @@
       btns(false, true);
       G.decide = true;
       const tOpen = performance.now();
-      const r = await Promise.race([waitDoor(['hide']), sleep(1700).then(() => 'open')]);
+      const r = await Promise.race([waitDoor(['hide']), sleep(D.DECIDE).then(() => 'open')]);
       G.decide = false;
       doorAct = null;
       clearInterval(stepTimer);
       steps.classList.remove('on');
-      if (r === 'hide') { G.hidden = true; $('#bushMe').classList.add('on'); A.se('tap'); await sleep(Math.max(0, 1700 - (performance.now() - tOpen) / FAST)); }
+      if (r === 'hide') { G.hidden = true; $('#bushMe').classList.add('on'); A.se('tap'); await sleep(Math.max(0, D.DECIDE - (performance.now() - tOpen) / FAST)); }
       btns(false, false);
       if (G.over) return;
       // ドアが開く
       A.se('door_open', { vol: .6 });
       sh.getAnimations().forEach(x => x.cancel()); sh.style.opacity = 0;
-      $('#person').src = `assets/art/${who}.svg`;
+      $('#person').src = `assets/photo/${who}.webp`;   // 颯馬さんのお父さん・おばあちゃん（写真）
       $('#doorway').classList.add('on');
-      if (who === 'dad' && !G.hidden) { bubble(D.LINES.dadSeen, true); timeChange(-D.PENALTY.dadSeen); }
+      if (who === 'dad' && !G.hidden) { bubble(D.LINES.dadSeen); const dl = await A.voice('dad'); await sleep(Math.max(1700, dl + 200)); return fail('dad'); }   // お父さんは「起こしとくわ」と言うだけ → アウト
       else if (who === 'dad') { bubble(D.LINES.dadHidden); G.queue.shift(); }
       else if (G.hidden) { bubble(D.LINES.grandmaMiss); timeChange(-D.PENALTY.grandmaMiss); }
-      else { guide(''); bubble(D.LINES.grandmaOk); await sleep(1600); return clear(); }
+      else { guide(''); bubble(D.LINES.grandmaOk); const gl = await A.voice('grandma'); await sleep(Math.max(1600, gl + 200)); return clear(); }
       if (G.rings === 1) guide('');
       await sleep(1600);
       $('#doorway').classList.remove('on'); $('#bushMe').classList.remove('on'); bubbleOff();
@@ -376,13 +380,13 @@
     bubble(D.LINES.wake);
     A.se('alarm', { vol: .7 });
     await sleep(900);
-    cam.classList.add('shake');
+    cam.classList.add('shake'); bubble(D.LINES.wake2, true); A.se('harisen', { vol: .8 });   // おばあちゃんは、叩いて起こす
     await sleep(900);
     A.stopSe('alarm');
     G.over = true;
     show('end'); $('#end').classList.remove('fail');
     ['eNaka', 'eRamen', 'ePhone', 'eCam', 'eBubble', 'eTelop'].forEach(id => $('#' + id).classList.remove('on'));
-    $('#eNaka').classList.add('on'); A.se('boyoyon');
+    $('#eNaka').classList.add('on'); A.se('boyoyon'); A.voice('naka_ohayo');   // 中島さん「颯馬、おはようございます」
     await sleep(300);
     $('#eBubble').textContent = D.LINES.sorry; $('#eBubble').classList.add('on');
     await sleep(1900);
@@ -397,17 +401,22 @@
   }
 
   // ═════ 時間切れ（失敗） ═════
-  async function fail() {
+  async function fail(why) {
     if (G.over) return;
     G.over = true;
     doorAct = null; if (R) R.on = false;
     A.stopBgm(0);
+    if (why === 'dad') {   // お父さんに見つかった：ドアが閉まって、誰も来ない
+      $('#doorway').classList.remove('on'); bubbleOff();
+      telop(D.LINES.dadLie); A.se('despair', { vol: .5 });
+      await sleep(2600);
+    }
     show('end'); $('#end').classList.add('fail');
     ['eNaka', 'eRamen', 'ePhone', 'eCam', 'eBubble', 'eTelop'].forEach(id => $('#' + id).classList.remove('on'));
     $('#ePhone').classList.add('on');
     A.se('phone_ring');
     await sleep(1900);
-    A.stopSe('phone_ring'); A.se('phone_pick');
+    A.stopSe('phone_ring'); A.se('phone_pick'); A.voice('shacho_yasume');
     $('#eBubble').textContent = D.LINES.shacho; $('#eBubble').classList.add('on');
     await sleep(2300);
     $('#ePhone').classList.remove('on'); $('#eBubble').classList.remove('on');
@@ -470,12 +479,12 @@
   window.NEBOU = {
     get G() { return G; },
     // 道中：いちばん近い障害物・缶コーヒーまでの距離
-    next() { if (!R || !R.on) return null; const o = R.objs.filter(o => !o.done && o.x + o.w > L.runX).sort((a, b) => a.x - b.x)[0]; return o ? { dx: o.x - L.runX, coffee: !!o.coffee, y: o.y, onGround: R.y <= 0 } : null; },
+    next() { if (!R || !R.on) return null; const o = R.objs.filter(o => !o.done && o.x + o.w > L.runX).sort((a, b) => a.x - b.x)[0]; return o ? { dx: o.x - L.runX, coffee: !!o.coffee, y: o.y, onGround: R.y <= 0, v: R.speed } : null; },
   };
 
   // 途中で切りかえる絵は、先に読み込んでおく（切りかえた瞬間に前の絵が一瞬出たり、消えたりしないように）
-  const PRELOAD = ['assets/art/runner_1.svg', 'assets/art/runner_2.svg', 'assets/art/runner_3.svg', 'assets/art/runner_jump.svg', 'assets/art/runner_fall.svg', 'assets/art/dad.svg', 'assets/art/grandma.svg', 'assets/art/dad_shadow.svg', 'assets/art/grandma_shadow.svg', 'assets/art/item_coffee.svg', 'assets/art/obs_bike.svg', 'assets/art/obs_cone.svg', 'assets/art/obs_dog.svg', 'assets/art/obs_sign.svg', 'assets/art/obs_trash.svg', 'assets/art/bush_hide.svg', 'assets/photo/soma_awake.webp', 'assets/photo/soma_body.webp'].map((s) => { const i = new Image(); i.src = s; if (i.decode) i.decode().catch(() => { }); return i; });
-  // 見守りカメラの寝言：見えているカメラに、ときどき「らむちゃ～ん…」「マ、マ、ママー…」（声つき）
+  const PRELOAD = ['assets/art/naka_run_1.webp', 'assets/art/naka_run_2.webp', 'assets/art/naka_run_3.webp', 'assets/art/naka_run_jump.webp', 'assets/art/naka_run_fall.webp', 'assets/photo/dad.webp', 'assets/photo/grandma.webp', 'assets/photo/shacho2.webp', 'assets/art/dad_shadow.svg', 'assets/art/grandma_shadow.svg', 'assets/art/item_coffee.svg', 'assets/art/obs_bike.svg', 'assets/art/obs_cone.svg', 'assets/art/obs_dog.svg', 'assets/art/obs_sign.svg', 'assets/art/obs_trash.svg', 'assets/art/bush_hide.svg', 'assets/photo/soma_awake.webp', 'assets/photo/soma_body.webp'].map((s) => { const i = new Image(); i.src = s; if (i.decode) i.decode().catch(() => { }); return i; });
+  // 見守りカメラの寝言：見えているカメラに、ときどき「マ、マ、ママー…」（声つき）「むにゃ…」
   let talkN = 0;
   setInterval(() => {
     if (window.GC_HOLD) return;

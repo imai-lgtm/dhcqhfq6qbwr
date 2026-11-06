@@ -52,7 +52,7 @@ window.DATA = (() => {
       q: [
         { say: '…ぁ…ぃす…', ans: 'ice_cream', trap: ['ice_cube'] },
         { say: '…ばなな…', ans: 'banana', trap: ['cucumber'] },
-        { say: '…ふぁんた…ぐれ…', ans: 'soda_grape', trap: ['soda_orange'] },
+        { say: '…ふぁんた…ぐれ…', ans: 'soda_grape', trap: ['soda_orange'], voice: 'fanta' },
         { say: '…ぱじゃま…とくちゅうの…', ans: 'pajama_big', trap: ['pajama_n'] },
         { say: '…たかいとこ…のれるやつ…', ans: 'kousho', trap: ['bicycle'] },
       ],
@@ -64,7 +64,7 @@ window.DATA = (() => {
       q: [
         { say: 'マイク！歌うで！', ans: 'mic', trap: ['banana'] },
         { say: 'ソーセージ、ちゃんと半分にしてな', ans: 'sausage_half', trap: ['sausage_whole'] },
-        { say: 'ガチャや！エバもする〜', ans: 'gacha', trap: ['vending'] },
+        { say: 'ガチャや！エバもする〜', ans: 'gacha', trap: ['vending'], voice: 'ebamosuru' },
         { say: 'たぬき…', ans: 'tanuki', trap: ['maneki'] },
         { say: 'とりあえず、生！', ans: 'beer', trap: ['oolong'] },
       ],
@@ -83,10 +83,11 @@ window.DATA = (() => {
     },
   ];
 
-  // 正解したときの一言（声は2種類を交互に）
+  // 正解したときの一言（声は3種類を順番に）
   const PRAISE = [
     { text: 'それやがな〜', voice: 'soreyagana' },
     { text: 'わかってるやん', voice: 'wakatteruyan' },
+    { text: 'やっぱし〜', voice: 'yappashi' },
   ];
   const PRAISE_TEXT_ONLY = ['これこれ', 'ええやん', 'ほんまそれ', 'さすがやな', 'ようわかっとる'];
 
@@ -141,6 +142,15 @@ window.DATA = (() => {
     { img: 'wanko', cap: 'わんこそば' },
     { img: 'end_laugh', cap: 'エバとお昼' },
     { img: 'end_nigaoe', cap: '東京タワーで描いてもらった似顔絵' },
+    // 2026-11-06 先方から届いた写真（江原さんの記念になるように）
+    { img: 'end2_nigaoe', cap: 'もう一枚、似顔絵のエバ' },
+    { img: 'end2_bowtie', cap: '蝶ネクタイでキメた日' },
+    { img: 'end2_crab', cap: 'カニの帽子で、カンパイ' },
+    { img: 'end2_mic', cap: '赤い帽子で、熱唱' },
+    { img: 'end2_handai', cap: '大阪大学（？）のエバ' },
+    { img: 'end2_eyes', cap: '目が光るエバ' },
+    { img: 'end2_slap', cap: 'ビンタ！？' },
+    { img: 'end2_laugh', cap: 'エバ、大笑い' },
   ];
 
   return { ITEMS, STAGES, PRAISE, PRAISE_TEXT_ONLY, RANKS, CARDS, ENDING };

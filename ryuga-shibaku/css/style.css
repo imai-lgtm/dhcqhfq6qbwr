@@ -89,6 +89,7 @@ a { color: inherit; }
 .h-items { margin-left: 4px; display: flex; gap: 2px; }
 .h-items .chip { font-style: normal; font-size: 7px; padding: 0 2px; border: 1px solid #ffd23a; background: #a01810; color: #fff; }
 .h-items .chip.fukuzasa { background: #1c7a2c; }
+.h-items .chip.none { background: transparent; border-style: dashed; border-color: rgba(255,255,255,.45); color: rgba(255,255,255,.45); }   /* まだ持っていない */
 .h-score { margin-left: auto; color: #fff; }
 .boss { position: absolute; left: 4px; right: 4px; top: 18px; display: none; align-items: center; gap: 4px; }
 .boss.on { display: flex; }
@@ -122,6 +123,13 @@ a { color: inherit; }
 .stage-title.on { display: block; }
 .stage-title p:first-child { margin: 0; font-size: 16px; color: #ffd23a; letter-spacing: .2em; }
 .stage-title p:last-child { margin: 8px 0 0; font-size: 12px; }
+/* エンディングの家族の写真（ファミコン画面の中に、急に本物の写真） */
+.family { position: absolute; inset: 0; background: #000; display: none; z-index: 6; }
+.family.on { display: block; }
+.family img { position: absolute; left: 8px; right: 8px; top: 14px; width: calc(100% - 16px); height: 172px; object-fit: cover; opacity: 0; }
+.family img.show { animation: famin .6s ease-out forwards; }
+@keyframes famin { from { opacity: 0; transform: scale(1.06); } to { opacity: 1; transform: none; } }
+.family p { position: absolute; left: 0; right: 0; top: 196px; margin: 0; text-align: center; font-size: 10px; color: #fff; }
 .kiwami { position: absolute; left: 0; right: 0; top: 60px; text-align: center; font-family: 'Boku', serif; font-size: 90px; color: #ffd23a; text-shadow: 0 0 10px #ff6a00, 3px 3px 0 #600; opacity: 0; pointer-events: none; }
 .kiwami.on { animation: kiwami 1s ease-out both; }
 @keyframes kiwami { 0% { opacity: 0; transform: scale(3); } 20% { opacity: 1; transform: scale(1); } 80% { opacity: 1; } 100% { opacity: 0; transform: scale(1.2); } }
@@ -129,6 +137,7 @@ a { color: inherit; }
 .nes.ending .hud, .nes.ending .boss, .nes.ending .ov::before { display: none; }
 
 /* 操作ボタン：ファミコン風のコントローラー（スマホ） */
+.pad, .pad * { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }   /* 長押しでスマホのメニューが出ないように */
 .pad { position: absolute; left: 8px; right: 8px; bottom: 16px; height: var(--padH, 372px); touch-action: none; border-radius: 26px;
   background: linear-gradient(170deg, #f3ead6 0%, #e2d6bb 55%, #cbbd9f 100%); border: 3px solid #6e1212;
   box-shadow: inset 0 2px 0 rgba(255,255,255,.7), inset 0 -4px 0 rgba(0,0,0,.18), 0 8px 18px rgba(0,0,0,.6); }

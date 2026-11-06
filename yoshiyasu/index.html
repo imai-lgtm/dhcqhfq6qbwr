@@ -22,7 +22,7 @@
       <span class="t-big">よしやす</span>
       <div class="hanko"><span>宮本</span></div>
     </div>
-    <p class="t-sub">〜 宮本さんと、二文字しりとり 〜</p>
+    <p class="t-sub">〜 宮本さんと、寿司ネタしりとり 〜</p>
     <button class="btn-main" id="btnStart"><span>しりとりしよか</span></button>
     <button class="btn-sub" id="btnAlbum">宮本さん図鑑 <b id="albumCount"></b></button>
     <p class="t-best" id="best"></p>
@@ -33,11 +33,11 @@
   <section id="howto" class="screen modal-bg">
     <div class="card howto-card">
       <img class="h-miya" src="assets/photo/miya_peace.webp" alt="">
-      <p class="h-lead">宮本さんと<b>60秒 二文字しりとり</b>。<br><small>宮本さんは二文字で話します。</small></p>
+      <p class="h-lead">宮本さんと<b>60秒 寿司ネタしりとり</b>。<br><small>使えるのは寿司ネタだけ（2〜3文字）。</small></p>
       <ol class="h-steps">
-        <li><b>1</b><span>宮本さんの言葉の<em class="red">最後の文字</em>から始まる<em class="red">2文字</em>の言葉を選ぶ</span></li>
-        <li><b>2</b><span>宮本さんがルールをやぶったら（「ん」で終わる・長い言葉など）<br><em class="akan-chip">アカン！</em>を押す</span></li>
-        <li><b>3</b><span>「ガリ」だけは、なぜかOK</span></li>
+        <li><b>1</b><span>宮本さんの言葉の<em class="red">最後の文字</em>から始まる<em class="red">寿司ネタ</em>を選ぶ<br><small>つながっても、寿司ネタじゃなければダメ</small></span></li>
+        <li><b>2</b><span>宮本さんがルールをやぶったら（寿司ちゃう・「ん」で終わる・長いネタなど）<br><em class="akan-chip">アカン！</em>を押す</span></li>
+        <li><b>3</b><span>「ガリ」「あがり」は、なぜかOK。次は寿司ネタならなんでも<br><small>つながるネタが無い時は、あなたも「ガリ」で飛ばせる</small></span></li>
       </ol>
       <p class="h-note">まちがえると5秒へります。最初は練習から。</p>
       <button class="btn-main small" id="btnHowtoOk"><span>わかった</span></button>
@@ -49,7 +49,7 @@
     <div class="bg" id="bg"></div>
     <div class="sway" id="sway">
       <header class="hud">
-        <div class="st-pill" id="mode">二文字しりとり</div>
+        <div class="st-pill" id="mode">寿司ネタしりとり</div>
         <div class="score"><span id="score">0</span><small>点</small></div>
       </header>
       <div class="timer" id="timer"><div class="t-bar"><i id="timeBar"></i></div><b id="timeNum">60</b></div>
@@ -62,6 +62,7 @@
         <img data-f="eat" src="assets/photo/miya_eat.webp" alt="">
         <img data-f="tipsy" src="assets/photo/miya_tipsy.webp" alt="">
         <img data-f="statue" src="assets/photo/statue.webp" alt="">
+        <img data-f="fun" id="funImg" src="assets/photo/fun_wig.webp" alt="">
         <div class="fx" id="fx"></div>
       </div>
       <div class="history" id="history"></div>
@@ -130,7 +131,7 @@
 </div>
 
 <script src="js/data.js"></script>
-<script src="js/bg.js"></script>
+<script src="../shared/js/nozoom.js"></script>
 <script src="../shared/js/audio.js"></script>
 <script src="../shared/js/home.js"></script>
 <script src="js/game.js"></script>

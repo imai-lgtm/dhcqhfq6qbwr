@@ -1,4 +1,4 @@
-// よしやす — 宮本さんと60秒の二文字しりとり
+// よしやす — 宮本さんと60秒の寿司ネタしりとり（2026-11-05 打ち合わせで、二文字しりとりから変更）
 (() => {
   const D = window.DATA, A = window.AUDIO, X = D.dict();
   const $ = (s) => document.querySelector(s);
@@ -27,7 +27,8 @@
     app.style.width = L.W + 'px'; app.style.height = L.H + 'px'; app.style.setProperty('--H', L.H + 'px');
     scale = Math.min(innerWidth / L.W, innerHeight / L.H);
     app.style.setProperty('--s', scale);
-    if (changed || !$('#bg').innerHTML) $('#bg').innerHTML = window.BG.izakaya(L.W, L.H);
+    // 背景：寿司屋のカウンター（Codex の絵。dev/yoshiyasu/make_sushiya.py で木札にネタの名前を入れる）
+    if (changed || !$('#bg').innerHTML) $('#bg').innerHTML = `<img src="assets/bg/sushiya_${land ? 'land' : 'port'}.webp" alt="">`;
     // スマホ縦：カードが3枚の時でも「アカン！」に重ならないように、縦の長さからカード・写真の位置を決める
     if (!land) {
       const H = L.H, short = H < 760;
@@ -56,7 +57,7 @@
   A.init({
     se: ['tap', 'tap2', 'start', 'hyoushigi', 'kotsudumi', 'correct', 'wrong', 'beep', 'harisen', 'tsukkomi', 'card_deal', 'card_put',
       'collapse', 'flash', 'kanpai', 'gong', 'despair', 'rank', 'paper', 'kira', 'fanfare', 'cracker', 'chanchan', 'boyoyon', 'timer', 'doon', 'drunk'],
-    voice: ['start', 'gari', 'gari_ok', 'n_oops', 'nanyattakke', 'sukiyanen', 'seyaseya', 'akanyatsu', 'wasureta', 'oi'],
+    voice: ['start', 'gari', 'agari', 'gari_ok', 'n_oops', 'nanyattakke', 'sukiyanen', 'seyaseya', 'akanyatsu', 'wasureta', 'oi', 'spurt'],
   });
   const muteBtn = $('#mute');
   const syncMute = () => muteBtn.classList.toggle('off', A.muted);
@@ -92,16 +93,21 @@
   const miyaEl = $('#miya'), bubble = $('#bubble'), sayEl = $('#say'), cardsEl = $('#cards'), akanBtn = $('#akan');
   let baseFace = 'grin';
   const face = (f) => miyaEl.querySelectorAll('img').forEach(i => i.classList.toggle('on', i.dataset.f === f));
+  // 宮本さんの面白写真（2026-11-06 先方から）：宮本さんが言葉を言うたびに入れ替わる
+  const FUN = ['fun_wig', 'fun_goggle', 'fun_swollen', 'fun_car', 'fun_bandage', 'fun_green'];
+  let funN = 0;
+  function funFace() { $('#funImg').src = `assets/photo/${FUN[funN++ % FUN.length]}.webp`; face('fun'); }
+  const RESCUE_LABEL = { 'がり': 'ガリ', 'あがり': 'あがり' };
   function sayWord(w, cls = '') {
     bubble.className = 'bubble pop ' + cls;
-    sayEl.innerHTML = w === 'がり' ? '<span class="gari">……ガリ</span>' : `${w.slice(0, -1)}<span class="end">${w.slice(-1)}</span>`;
+    sayEl.innerHTML = X.rescue.has(w) ? `<span class="gari">……${RESCUE_LABEL[w]}</span>` : `${w.slice(0, -1)}<span class="end">${w.slice(-1)}</span>`;
   }
   function sayText(t, cls = '') { bubble.className = 'bubble pop small ' + cls; sayEl.textContent = t; }
   function hop(cls = 'hop') { miyaEl.classList.remove('hop', 'hit'); void miyaEl.offsetWidth; miyaEl.classList.add(cls); }
   function history(w, who) {
     const h = $('#history');
     const s = document.createElement('span');
-    s.textContent = w === 'がり' ? 'ガリ' : w;
+    s.textContent = RESCUE_LABEL[w] || w;
     if (who === 'miya') s.className = 'me';
     h.appendChild(s);
     while (h.children.length > 14) h.firstChild.remove();
@@ -128,10 +134,12 @@
 
   // ───── 言葉の選び方 ─────
   const left = (c, used) => (X.byStart[c] || []).filter(w => !used.has(w)).length;
-  // c から始まる、まだ使っていない言葉のうち、次に続けやすいもの（上位半分）からランダム
-  function pickValid(c, used, preferMiya) {
-    let cand = (X.byStart[c] || []).filter(w => !used.has(w));
+  // c から始まる、まだ使っていない寿司ネタのうち、次に続けやすいもの（上位半分）からランダム。c が無い＝なんでもよい
+  //   始めのうちは2文字のネタ、だんだん3文字のネタ（two＝2文字を優先する）
+  function pickValid(c, used, preferMiya, two = false) {
+    let cand = (c ? (X.byStart[c] || []) : X.usable).filter(w => !used.has(w));
     if (!cand.length) return null;
+    if (two) { const t2 = cand.filter(w => X.two.has(w)); if (t2.length) cand = t2; }
     cand.sort((a, b) => left(X.last(b), used) - left(X.last(a), used));
     let top = cand.slice(0, Math.max(1, Math.ceil(cand.length / 2))).filter(w => left(X.last(w), new Set([...used, w])) > 0);
     if (!top.length) top = cand.slice(0, 1);
@@ -139,23 +147,29 @@
       const card = top.filter(w => D.CARDS.some(k => k.word === w && !save.cards.includes(k.id)));
       if (card.length && Math.random() < .7) return pick(card);
       const fav = top.filter(w => X.miya.has(w));
-      if (fav.length && Math.random() < .75) return pick(fav);
+      if (fav.length && Math.random() < .6) return pick(fav);
     }
     return pick(top);
   }
-  // カード：正解1枚＋罠（濁点ちがい・「ん」で終わる・もう使った）
+  // カード：正解1枚＋罠。正解は「つながる寿司ネタ」。つながる寿司ネタが無い時だけ「ガリ」が正解（救済）
+  //   罠＝寿司じゃない言葉（しりとりはつながる）・つながらない寿司ネタ・「ん」で終わる・長いネタ・もう出たネタ・まだあるのに「ガリ」
   function buildCards(c, n, used, exclude = '') {
-    const ok = pickValid(c, used, false);
+    const ok = pickValid(c, used, false, elapsed() < 20) || 'がり';
     const traps = [];
-    const sib = X.siblings(c).flatMap(s => [...(X.byStart[s] || []), ...(X.nByStart[s] || [])]).filter(w => !used.has(w));
-    const nw = (X.nByStart[c] || []);
-    const usedSame = [...used].filter(w => X.first(w) === c && w !== ok);
-    const long = (X.longByStart[c] || []);   // 二文字しりとりなので、長い言葉は罠
-    const pools = shuffle([sib, nw, usedSame, long, long].filter(p => p.length));
-    for (const p of pools) { if (traps.length >= n - 1) break; const w = pick(p); if (w !== ok && w !== exclude && !traps.includes(w)) traps.push(w); }
-    while (traps.length < n - 1) {   // 足りなければ、ほかの文字から始まる言葉
-      const w = pick(X.usable);
-      if (X.first(w) !== c && w !== ok && w !== exclude && !traps.includes(w)) traps.push(w);
+    const not = c ? (X.notByStart[c] || []) : X.notSushi;
+    const otherSushi = X.usable.filter(w => (!c || X.first(w) !== c) && !used.has(w));
+    const sibSushi = c ? X.siblings(c).flatMap(s => X.byStart[s] || []).filter(w => !used.has(w)) : [];
+    const nw = c ? (X.nByStart[c] || []) : [];
+    const long = c ? (X.longByStart[c] || []) : X.long;
+    const usedSame = [...used].filter(w => !X.rescue.has(w) && (!c || X.first(w) === c) && w !== ok);
+    const gari = ok !== 'がり' && Math.random() < .3 ? ['がり'] : [];
+    // 寿司じゃない言葉を一番多く。ほかの罠は、まざるように
+    const pools = [not, ...shuffle([c ? (sibSushi.length ? sibSushi : otherSushi) : [], nw, long, usedSame, gari, not].filter(p => p.length))];
+    for (const pl of pools) { if (traps.length >= n - 1) break; const w = pick(pl); if (w !== ok && w !== exclude && !traps.includes(w)) traps.push(w); }
+    let guard = 0;
+    while (traps.length < n - 1 && guard++ < 50) {   // 足りなければ、寿司じゃない言葉
+      const w = pick(X.notSushi);
+      if (w !== ok && w !== exclude && !traps.includes(w)) traps.push(w);
     }
     return shuffle([{ w: ok, ok: true }, ...traps.map(w => ({ w, ok: false }))]);
   }
@@ -171,7 +185,7 @@
       b.className = 'wcard deal';
       b.style.animationDelay = (i * 60 * FAST) + 'ms';
       b.dataset.w = c.w; b.dataset.ok = c.ok ? '1' : '';
-      b.innerHTML = `${c.w}${X.comm.has(c.w) ? '<span class="comm">⚡通信</span>' : ''}`;
+      b.innerHTML = `${RESCUE_LABEL[c.w] || c.w}${X.premium.has(c.w) ? '<span class="comm">高級</span>' : ''}`;
       cardsEl.appendChild(b);
     });
     A.se('card_deal', { vol: .5 });
@@ -230,38 +244,37 @@
     await loop();
   }
 
-  // ───── 練習（時間なし）：ふつう → 「ん」のうっかり → ガリ ─────
+  // ───── 練習（時間なし）：寿司ネタを選ぶ → 寿司じゃない言葉にアカン → ガリ ─────
   async function practice() {
     const banner = $('#practice');
     const fingerOn = (el) => { document.querySelectorAll('.finger').forEach(f => f.remove()); const f = document.createElement('div'); f.className = 'finger'; f.textContent = '👆'; el.appendChild(f); };
     const used = new Set();
     // 1. ふつう
     G.lastTurn = 'p_ok';
-    let w = 'いか'; used.add(w); history(w, 'miya'); sayWord(w); face('grin');
-    banner.innerHTML = '練習①　<b style="color:#d8361b">「か」から始まる2文字の言葉</b>を<br>タップ！'; banner.classList.add('on');
-    let cards = buildCards('か', 2, used); showCards(cards); await sleep(300);
+    let w = 'たい'; used.add(w); history(w, 'miya'); sayWord(w); face('grin');
+    banner.innerHTML = '練習①　<b style="color:#d8361b">「い」から始まる寿司ネタ</b>を<br>タップ！'; banner.classList.add('on');
+    let cards = shuffle([{ w: 'いか', ok: true }, { w: 'いす', ok: false }]); showCards(cards); await sleep(300);
     fingerOn(cardsEl.querySelector('[data-ok="1"]'));
     let ans;
     while (true) { ans = await waitAct(); if (ans.kind === 'card' && ans.ok) break; A.se('beep'); sayText('ちゃうちゃう、\n指のところのやつ'); }
     ans.el.classList.add('right'); A.se('correct', { vol: .6 }); A.voice('seyaseya'); history(ans.w, 'me'); used.add(ans.w); hop();
     await sleep(900);
-    // 2. 「ん」で終わるうっかり
-    const c2 = X.last(ans.w);
-    w = (X.nByStart[c2] || []).find(x => D.MIYA_N.includes(x)) || (X.nByStart[c2] || [])[0] || 'めん';
+    // 2. 寿司じゃない言葉のうっかり（しりとりはつながっている）
+    w = 'かさ';
     G.lastTurn = 'p_n';
     sayWord(w); history(w, 'miya');
-    banner.innerHTML = '練習②　「ん」で終わった！ルール違反です。<br><b style="color:#d8361b">アカン！</b>を押してツッコもう';
-    showCards(buildCards(c2, 2, used), { dim: true }); await sleep(300);
+    banner.innerHTML = '練習②　「かさ」は寿司ネタちゃう！<br><b style="color:#d8361b">アカン！</b>を押してツッコもう';
+    showCards(shuffle([{ w: 'かつお', ok: true }, { w: 'かめ', ok: false }]), { dim: true }); await sleep(300);
     fingerOn(akanBtn);
     while (true) { ans = await waitAct(); if (ans.kind === 'akan') break; A.se('beep'); sayText('ちゃうちゃう、\nアカン！ボタンや'); }
-    A.se('harisen'); hop('hit'); face('blank'); A.voice('n_oops'); sayText('…あ、ほんまや');
+    A.se('harisen'); hop('hit'); face('blank'); A.voice('n_oops'); sayText('…すし？');
     $('#history').lastChild.className = 'bad';
     await sleep(1300);
     // 3. ガリ
     G.lastTurn = 'p_gari';
     face('eat'); sayWord('がり'); history('がり', 'miya'); A.voice('gari');
-    banner.innerHTML = '練習③　「ガリ」だけは、なぜかOK！<br>ツッコまずに<b style="color:#d8361b">「り」</b>から続けよう';
-    showCards(buildCards('り', 2, used)); await sleep(300);
+    banner.innerHTML = '練習③　「ガリ」「あがり」は、なぜかOK！<br>次は<b style="color:#d8361b">寿司ネタならなんでも</b>';
+    showCards(shuffle([{ w: 'まぐろ', ok: true }, { w: 'まくら', ok: false }])); await sleep(300);
     fingerOn(cardsEl.querySelector('[data-ok="1"]'));
     while (true) { ans = await waitAct(); if (ans.kind === 'card' && ans.ok) break; A.se('beep'); sayText(ans.kind === 'akan' ? 'ガリはええねん' : 'ちゃうちゃう、\n指のところのやつ'); if (ans.kind === 'akan') A.voice('gari_ok'); }
     ans.el.classList.add('right'); A.se('correct', { vol: .6 }); face('grin'); hop();
@@ -299,7 +312,7 @@
   function lastSpurt() {
     G.spurt = true;
     telop('ラストスパート！\n点数2倍');
-    A.bgmSpeed(1.3); A.se('drunk', { vol: .6 });
+    A.bgmSpeed(1.3); A.se('drunk', { vol: .6 }); A.voice('spurt');   // 酔ってお腹をポンポン
     $('#play').classList.add('tipsy');
     baseFace = 'tipsy';
   }
@@ -313,27 +326,35 @@
   }
 
   // ───── 宮本さんの番 → プレイヤーの番、をくり返す ─────
+  // 寿司ネタは58語しかないので、残りが少なくなったら、だいぶ前に出たネタからまた使えるようにする（直近12個はまだ使えない）
+  function freshen() {
+    if (X.usable.filter(w => !G.used.has(w)).length >= 10) return;
+    G.used = new Set([...G.used].slice(-12));
+    G.miyaSaid = G.miyaSaid.filter(w => G.used.has(w));
+  }
   function planMiya() {
+    freshen();
     const t = elapsed();
     if (!G.statue && t > 22 && t < 45 && Math.random() < .15) return { type: 'statue' };
-    const bugRate = t < 15 ? 0 : t < 35 ? .33 : .5;
-    if (G.need && G.gari < 3 && t > 15 && Math.random() < .14 && left('り', G.used) > 0) return { type: 'gari', w: 'がり' };
+    const bugRate = t < 12 ? .12 : t < 35 ? .34 : .48;
     if (G.need && Math.random() < bugRate) {
-      const kinds = ['n', 'disconnect'];
+      // うっかり：寿司じゃない言葉（いちばん多い）・「ん」・長いネタ・つながらない・同じ言葉
+      const kinds = ['notsushi', 'notsushi', 'disconnect'];
+      if ((X.notByStart[G.need] || []).length) kinds.push('notsushi');
       if (G.miyaSaid.length) kinds.push('repeat');
-      if ((X.longByStart[G.need] || []).length) kinds.push('long', 'long');   // 二文字のはずが、うっかり長い言葉
+      if ((X.longByStart[G.need] || []).length) kinds.push('long');
+      if ((X.nByStart[G.need] || []).length) kinds.push('n');
       const k = pick(kinds);
+      if (k === 'notsushi' && (X.notByStart[G.need] || []).length) return { type: 'notsushi', w: pick(X.notByStart[G.need]) };
       if (k === 'long') return { type: 'long', w: pick(X.longByStart[G.need]) };
-      if (k === 'n') {
-        const same = (X.nByStart[G.need] || []);
-        return { type: 'n', w: pick(same.filter(w => D.MIYA_N.includes(w)).concat(same).slice(0, 4).concat(same.length ? [] : D.MIYA_N)) };
-      }
+      if (k === 'n') { const same = X.nByStart[G.need]; return { type: 'n', w: pick(same.filter(w => D.MIYA_N.includes(w)).concat(same).slice(0, 4)) }; }
       if (k === 'repeat') return { type: 'repeat', w: pick(G.miyaSaid) };
-      const cand = [...X.miya].filter(w => X.usable.includes(w) && X.first(w) !== G.need && !G.used.has(w));
+      const cand = X.usable.filter(w => X.first(w) !== G.need && !G.used.has(w));
       return { type: 'disconnect', w: pick(cand.length ? cand : X.usable.filter(w => X.first(w) !== G.need)) };
     }
-    const w = G.need ? pickValid(G.need, G.used, true) : pick([...X.miya].filter(w => X.usable.includes(w)));
-    if (!w) return left('り', G.used) ? { type: 'gari', w: 'がり' } : { type: 'end' };
+    // ふつう：つながる寿司ネタ。無ければ「ガリ」「あがり」で救済（次はなんでもよい）
+    const w = pickValid(G.need, G.used, true, t < 20);
+    if (!w || (G.need && t > 15 && Math.random() < .06)) return { type: 'gari', w: pick(['がり', 'がり', 'あがり']) };
     return { type: 'ok', w };
   }
 
@@ -351,17 +372,17 @@
   async function miyaTurn(turn) {
     G.lastTurn = turn.type;
     const w = turn.w;
-    const isBug = ['n', 'disconnect', 'repeat', 'long'].includes(turn.type);
-    face(turn.type === 'gari' ? 'eat' : baseFace);
+    const isBug = ['n', 'disconnect', 'repeat', 'long', 'notsushi'].includes(turn.type);
+    if (turn.type === 'gari') face('eat'); else if (baseFace === 'grin') funFace(); else face(baseFace);
     sayWord(w);
     const hs = history(w, 'miya');
     D.CARDS.forEach(c => { if (c.word === w) unlock(c.id); });
-    if (turn.type === 'gari') { A.voice('gari'); G.gari++; }
+    if (turn.type === 'gari') { A.voice(w === 'あがり' ? 'agari' : 'gari'); G.gari++; }   // あがり＝お茶をゴキュゴキュ
     if (turn.type === 'ok') { G.used.add(w); G.miyaSaid.push(w); }
-    // 次に始める文字（うっかりの時は、それっぽい文字でカードを出して迷わせる）
-    const base = turn.type === 'ok' ? X.last(w) : turn.type === 'gari' ? 'り' : (turn.type === 'n' || turn.type === 'long') ? G.need : X.last(w);
-    const nCards = elapsed() < 15 ? 2 : 3;
-    const cards = buildCards((X.byStart[base] || []).length ? base : G.need, nCards, G.used, w);
+    // 次に始める文字（ガリの次は、なんでもよい＝null。うっかりの時は、それっぽい文字でカードを出して迷わせる）
+    const base = turn.type === 'ok' ? X.last(w) : turn.type === 'gari' ? null : ['n', 'long', 'notsushi'].includes(turn.type) ? G.need : X.last(w);
+    const nCards = elapsed() < 12 ? 2 : 3;
+    const cards = buildCards(base, nCards, G.used, w);
     await sleep(160);
     showCards(cards);
 
@@ -376,7 +397,7 @@
           addScore(2, akanBtn, 'ツッコミ');
           hs.className = 'bad';
           bubble.classList.add('strike');
-          const v = { n: 'n_oops', disconnect: 'nanyattakke', repeat: 'sukiyanen', long: 'sukiyanen' }[turn.type];
+          const v = { n: 'n_oops', disconnect: 'nanyattakke', repeat: 'sukiyanen', long: 'sukiyanen', notsushi: 'n_oops' }[turn.type];
           A.voice(v);
           await sleep(500);
           sayText(pick(D.EXCUSE[turn.type]), 'angry');
@@ -396,8 +417,8 @@
       if (act.kind === 'akan') {
         penalty();
         face('smug');
-        if (turn.type === 'gari') { A.voice('gari_ok'); sayText('ガリはええねん', 'angry'); }
-        else { A.voice('akanyatsu'); sayText('それアカンやつや', 'angry'); }
+        if (turn.type === 'gari') { A.voice('gari_ok'); sayText(w === 'あがり' ? 'あがりはええねん' : 'ガリはええねん', 'angry'); }
+        else { A.voice('akanyatsu'); sayText(`「${w}」は\n寿司ネタやで`, 'angry'); }   // なぜ間違いかを言う（なじみの薄いネタもあるので）
         await sleep(900);
         sayWord(w);   // もう一度、カードから選んでもらう
         face(turn.type === 'gari' ? 'eat' : baseFace);
@@ -406,10 +427,10 @@
       if (act.ok) {
         act.el.classList.add('right');
         A.se('card_put'); A.se('correct', { vol: .5 });
-        const comm = X.comm.has(act.w);
-        addScore((comm ? 3 : 1) + (turn.type === 'gari' ? 1 : 0), act.el, comm ? '⚡現場' : turn.type === 'gari' ? 'ガリ見逃し' : '');
-        if (comm) A.se('kira', { vol: .6 });
-        G.used.add(act.w); G.chain++; G.need = X.last(act.w);
+        const prem = X.premium.has(act.w), myGari = X.rescue.has(act.w);
+        addScore((prem ? 3 : 1) + (turn.type === 'gari' ? 1 : 0), act.el, prem ? '高級ネタ' : turn.type === 'gari' ? 'ガリ見逃し' : myGari ? 'ガリで救済' : '');
+        if (prem) A.se('kira', { vol: .6 });
+        G.used.add(act.w); G.chain++; G.need = myGari ? null : X.last(act.w);
         history(act.w, 'me');
         face('peace'); hop();
         if (G.chain % 3 === 1) A.voice('seyaseya');
@@ -423,10 +444,13 @@
       const right = cardsEl.querySelector('[data-ok="1"]');
       if (right) right.classList.add('show');
       face('smug'); A.voice('akanyatsu');
-      const why = !X.first(act.w).startsWith(X.first(right.dataset.w)) ? `「${X.first(right.dataset.w)}」からやで` : act.w.length !== 2 ? '二文字やで' : X.last(act.w) === 'ん' ? '「ん」で終わっとる' : 'それ、さっき出たで';
+      const rw = right.dataset.w, need = turn.type === 'gari' ? null : base;
+      const why = X.rescue.has(act.w) ? 'まだ あるやん' : X.last(act.w) === 'ん' ? '「ん」で終わっとる'
+        : X.long.includes(act.w) ? '長いで（3文字まで）' : !X.usable.includes(act.w) ? '寿司ちゃうやん'
+        : need && X.first(act.w) !== need ? `「${need}」からやで` : 'それ、さっき出たで';
       sayText(why, 'angry');
       await sleep(1300);
-      G.used.add(right.dataset.w); G.chain++; G.need = X.last(right.dataset.w);
+      G.used.add(rw); G.chain++; G.need = X.rescue.has(rw) ? null : X.last(rw);
       history(right.dataset.w, 'me');
       face(baseFace);
       return 'ok';
@@ -573,7 +597,7 @@
     expect() {
       if (!G || !onAct) return null;
       const t = G.lastTurn;
-      if (['n', 'disconnect', 'repeat', 'long', 'p_n'].includes(t)) return 'akan';
+      if (['n', 'disconnect', 'repeat', 'long', 'notsushi', 'p_n'].includes(t)) return 'akan';
       if (t === 'statue') return 'wait';
       const ok = cardsEl.querySelector('[data-ok="1"]');
       return ok ? ok.dataset.w : null;
@@ -581,7 +605,7 @@
   };
 
   // 途中で切りかえる絵は、先に読み込んでおく（切りかえた瞬間に前の絵が一瞬出たり、消えたりしないように）
-  const PRELOAD = ['assets/photo/miya_peace.webp', 'assets/photo/miya_grin.webp', 'assets/photo/miya_blank.webp'].map((s) => { const i = new Image(); i.src = s; if (i.decode) i.decode().catch(() => { }); return i; });
+  const PRELOAD = ['assets/photo/fun_wig.webp', 'assets/photo/fun_goggle.webp', 'assets/photo/fun_swollen.webp', 'assets/photo/fun_car.webp', 'assets/photo/fun_bandage.webp', 'assets/photo/fun_green.webp', 'assets/bg/sushiya_port.webp', 'assets/bg/sushiya_land.webp', 'assets/photo/miya_peace.webp', 'assets/photo/miya_grin.webp', 'assets/photo/miya_blank.webp'].map((s) => { const i = new Image(); i.src = s; if (i.decode) i.decode().catch(() => { }); return i; });
   fit();
   toTitle();
   if (P.has('play')) startGame();

@@ -30,8 +30,8 @@
       <p class="h-lead">北村さんブロックを積んで、<br><b>横1列そろえて消そう。</b></p>
       <ol class="h-steps">
         <li><b>1</b><span>ボタンで動かす・回す・落とす<br><small>PC：← → 移動／↑ 回転／スペース すとん</small></span></li>
-        <li><b>2</b><span>税務署員が<img class="ic" src="assets/art/kanji_shi.svg" alt="市"><img class="ic" src="assets/art/kanji_min.svg" alt="民"><img class="ic" src="assets/art/kanji_zei.svg" alt="税">を投げ込んでくる。<br>これがある列は、そろえても消えない</span></li>
-        <li><b>3</b><span>「<em>市・民・税</em>」の順に並べると<em>小爆発</em>！<br>まわりのブロックも消える<br><small>（横は左から、縦は上から）</small></span></li>
+        <li><b>2</b><span>税務署員が<img class="ic" src="assets/art/kanji_shi.svg" alt="市"><img class="ic" src="assets/art/kanji_min.svg" alt="民"><img class="ic" src="assets/art/kanji_zei.svg" alt="税">を3つ投げ込んでくる（あいだに普通のブロックもはさまる）。<br>これがある列は、そろえても消えない</span></li>
+        <li><b>3</b><span>「<em>市・民・税</em>」を縦か横に3つ並べると<em>小爆発</em>！<br>まわりのブロックも消える<br><small>（並ぶ順番はバラバラでOK。置き場所を空けておこう）</small></span></li>
       </ol>
       <p class="h-note">全5レベル。レベル1は税務署員の来ない練習です。</p>
       <button class="btn-main small" id="btnHowtoOk"><span>わかった</span></button>
@@ -46,7 +46,7 @@
       <div class="goal"><span>のこり</span><b id="goalNum">4</b><small>列</small></div>
       <div class="score"><span id="score">0</span><small>点</small></div>
     </header>
-    <div class="next"><span>つぎ</span><canvas id="nextCv" width="120" height="120"></canvas></div>
+    <div class="next"><span>つぎ</span><canvas id="nextCv" width="120" height="120"></canvas><p class="kq" id="kqInfo"></p></div>
     <div class="board-wrap" id="boardWrap">
       <div class="rack l"></div><div class="rack r"></div>
       <canvas id="board"></canvas>
@@ -111,7 +111,7 @@
         <dt>写真</dt><dd>株式会社 心電通 ご提供</dd>
         <dt>音楽</dt><dd>魔王魂</dd>
       </dl>
-      <p class="c-note">このゲームはフィクションです。「ぬらりひょん」は北村さんの異名です。税務署員は架空の人物で、実在の人物・団体とは関係ありません。</p>
+      <p class="c-note">このゲームはフィクションです。「ぬらりひょん」は北村さんの異名です。税務署員は心電通の社員さんの似顔絵で、実在の税務署とは関係ありません。</p>
       <button class="btn-main small" id="btnCreditsOk"><span>とじる</span></button>
     </div>
   </section>
@@ -121,6 +121,7 @@
 </div>
 
 <script src="js/data.js"></script>
+<script src="../shared/js/nozoom.js"></script>
 <script src="../shared/js/audio.js"></script>
 <script src="../shared/js/home.js"></script>
 <script src="js/game.js"></script>

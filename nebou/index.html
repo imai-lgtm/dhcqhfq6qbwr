@@ -31,9 +31,9 @@
       <ol class="h-steps">
         <li><b>1</b><span>タップでジャンプして、颯馬さんの家まで走る</span></li>
         <li><b>2</b><span>壊れたインターホンを直す<br>（端子の色を覚えて、同じ色の線とつなぐ）</span></li>
-        <li><b>3</b><span>ドアの影を見て<br><em>お父さん</em>なら隠れる／<em>おばあちゃん</em>なら待つ</span></li>
+        <li><b>3</b><span>ドアの影を見て<br><em>お父さん</em>なら隠れる／<em>おばあちゃん</em>なら待つ<br><small>お父さんは「起こしとくわ」と言うだけ。見つかったらアウト！</small></span></li>
       </ol>
-      <p class="h-note">持ち時間は90秒。ぶつかったり、まちがえると減ります。</p>
+      <p class="h-note">持ち時間は100秒。ぶつかったり、まちがえると減ります。</p>
       <button class="btn-main small" id="btnHowtoOk"><span>わかった</span></button>
     </div>
   </section>
@@ -47,7 +47,7 @@
       <div class="r-layer r-poles" id="layPoles"></div>
       <div class="r-ground"></div>
       <div class="r-objs" id="objs"></div>
-      <img class="runner" id="runner" src="assets/art/runner_1.svg" alt="">
+      <img class="runner" id="runner" src="assets/art/naka_run_1.webp" alt="">
       <div class="r-progress"><span>颯馬家まで</span><div class="rp-bar"><i id="runBar"></i></div><img src="assets/art/house_front.svg" alt=""></div>
       <div class="hint" id="jumpHint">タップでジャンプ！</div>
     </div>
@@ -92,7 +92,7 @@
     <div class="e-bg" id="eBg"></div>
     <img class="e-naka" id="eNaka" src="assets/photo/soma_awake.webp" alt="">
     <img class="e-ramen" id="eRamen" src="assets/art/ramen.svg" alt="">
-    <div class="e-phone" id="ePhone"><img class="e-ring" src="assets/art/phone_ring.svg" alt=""><img class="e-shacho" src="assets/photo/shacho.webp" alt=""></div>
+    <div class="e-phone" id="ePhone"><img class="e-ring" src="assets/art/phone_ring.svg" alt=""><img class="e-shacho" src="assets/photo/shacho2.webp" alt=""></div>
     <div class="cam e-cam" id="eCam"><img src="assets/photo/cam_sleep.jpg" alt=""><div class="cam-ui"><b>● REC</b><span>颯馬家　寝室</span><i class="cam-time">12:00</i></div><div class="talk"></div><div class="zzz"><span>Z</span><span>z</span><span>z</span></div></div>
     <div class="e-bubble" id="eBubble"></div>
     <div class="e-telop" id="eTelop"></div>
@@ -137,6 +137,7 @@
 </div>
 
 <script src="js/data.js"></script>
+<script src="../shared/js/nozoom.js"></script>
 <script src="../shared/js/audio.js"></script>
 <script src="../shared/js/home.js"></script>
 <script src="js/game.js"></script>

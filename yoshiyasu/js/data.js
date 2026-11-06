@@ -1,7 +1,33 @@
 // よしやす — しりとりの言葉・宮本さんの言葉・図鑑・称号
-// 二文字しりとり：正解の言葉はすべてひらがな2文字。「ん」で終わる言葉・3文字以上の言葉は罠に使う
+// 寿司ネタしりとり（2026-11-05 打ち合わせ）：正解は「寿司ネタ」の2〜3文字だけ。
+//   しりとりがつながっていても、寿司ネタでなければアカン。4文字以上の長いネタ・「ん」で終わる言葉もアカン。
+//   「ガリ」「あがり（お茶）」は救済：なぜかOKで、その次は寿司ネタならなんでもよい。つながるネタが無い時は、こちらも「ガリ」で飛ばせる
 window.DATA = (() => {
-  // ふつうの言葉（プレイヤーのカードと、宮本さんの返しに使う）
+  // 寿司ネタ（正解に使う）。2文字 → 3文字の順に、だんだん出てくる
+  const SUSHI2 = `
+えび いか たこ うに ぶり あじ さば たい かに とろ あゆ ふぐ ます さけ きす のり げそ はも かき
+`.trim().split(/\s+/);
+  const SUSHI3 = `
+あわび いわし まぐろ はまち かつお いくら うなぎ あなご ひらめ かれい さんま すずき たまご ほたて ほっき ほっけ
+いさき こはだ さより しらす てっか かっぱ いなり ちらし てまき さわら まだい とびこ すじこ たらこ しらこ ずわい
+けがに たらば しゃこ かじき あかみ しゃけ きんめ
+`.trim().split(/\s+/);
+  // 4文字以上の長いネタ（宮本さんは長いのを言えない。カードの罠と、宮本さんの「うっかり長い」に使う）
+  const SUSHI_LONG = `
+あかがい あまえび えんがわ かんぱち しまあじ とりがい ねぎとろ のどぐろ はまぐり ひらまさ みるがい かずのこ ままかり
+ばってら あおやぎ しめさば あいなめ あんきも おおとろ ちゅうとろ ぼたんえび しらうお ほたるいか
+`.trim().split(/\s+/);
+  // 高級ネタ（選ぶと点数が多め）
+  const PREMIUM = ['とろ', 'うに', 'いくら', 'あわび', 'ずわい', 'たらば', 'ほたて'];
+  // 救済の言葉（なぜかOK。次は寿司ネタならなんでもよい）
+  const RESCUE = ['がり', 'あがり'];
+  // 寿司ネタかどうか、人によって意見が分かれそうな言葉（正解にもひっかけにも使わない）
+  const AMBIG = `
+すし さかな しじみ さざえ わかめ ちくわ なっとう きゅうり うめ しそ ごま しお めし さめ たら こい うお あさり かい
+わさび くじら つぶ ばい ほや くえ むつ めばる きんき ぎょく にしん かまぼこ たまごやき しゃり ねた がり あがり おちゃ
+`.trim().split(/\s+/);
+
+  // 寿司ネタではない、ふつうの言葉（ひっかけ：しりとりはつながるのに、寿司ネタじゃない）
   const WORDS = `
 あい あお あか あき あさ あし あせ あな あに あね あぶ あみ あめ あゆ あり あわ
 いえ いか いけ いし いす いと いど いぬ いね いも いわ
@@ -67,28 +93,23 @@ window.DATA = (() => {
 ぼう ぼく ぼけ ぼろ
 `.trim().split(/\s+/);
 
-  // 「ん」で終わる言葉（プレイヤーのカードの罠に使う）
+  // 「ん」で終わる言葉（カードの罠と、宮本さんの「ん」のうっかりに使う）
   const N_WORDS = `
 あん いん うん えん おん かん きん けん こん さん しん せん そん たん てん とん なん ねん はん ひん ふん へん ほん まん もん らん りん わん
 がん ぎん ぐん げん じん ぜん だん どん ばん びん ぶん ぼん ぱん ぴん ぺん めん
 `.trim().split(/\s+/);
 
-  // 通信工事の言葉（プレイヤーが選ぶと＋ボーナス）
-  const COMM = `
-ねじ かべ くい ゆか とい わく いた ひも はり みぞ あな
-`.trim().split(/\s+/);
-
-  // 宮本さんの好きな言葉（なるべくこれを言う）。ブログの好物・お酒まわり
+  // 宮本さんの好きなネタ（なるべくこれを言う）。ブログの好物・お酒まわり
   const MIYA = `
-にく すし さけ いか たこ えび かに うに のり さば ぶり たい とり かき あゆ めし つゆ たれ うり えき かし
+さけ たこ えび いか うに とろ いくら まぐろ たまご かに ぶり はまち
 `.trim().split(/\s+/);
 
-  // 宮本さんの「ん」で終わるうっかり（ブログに出てくるものが中心）
+  // 宮本さんの「ん」で終わるうっかり（ブログに出てくるものが中心）。「に」の時は、ニシン
   const MIYA_N = `
-めん かん どん ぱん てん
+にしん めん かん どん ぱん てん
 `.trim().split(/\s+/).filter(w => w.endsWith('ん'));
 
-  // 3文字以上の言葉（2文字しりとりでは使えない。カードの罠と、宮本さんの「うっかり長い」に使う）
+  // 寿司ネタではない、3文字の言葉（ひっかけ）
   const LONG = `
 あさがお あめ あり あしか あいす あたま あさひ あくび あみど あまぐり
 いちご いか いす いのしし いるか いと いわし いちょう いちじく
@@ -152,7 +173,7 @@ window.DATA = (() => {
 やきにく すし からあげ すいか たこやき おこのみやき えんか さけ やきとり いざかや ほっけ えだまめ
 おちょこ とっくり からおけ かんぱい しゅっちょう えんかい てんぷら くしかつ ちくわ せんべい さしみ まぐろ
 しめさば とんかつ めんたいこ ぎょうざ ずわいがに ひやしちゅうか こぶし おしぼり つまみ
-`.trim().split(/\s+/).filter(w => w.length >= 3 && !w.endsWith('ん'));
+`.trim().split(/\s+/).filter(w => w.length === 3 && !w.endsWith('ん'));
 
   // 言い訳（文字だけ。宮本さんは二文字で話す）
   const EXCUSE = {
@@ -160,6 +181,7 @@ window.DATA = (() => {
     disconnect: ['…え？', 'はて', 'どこ？'],
     repeat: ['すき', 'また', 'ええ'],
     long: ['…あ', 'ながっ', 'すまん'],
+    notsushi: ['…へ？', 'うまい', 'すし？'],
   };
 
   const RANKS = [
@@ -170,15 +192,15 @@ window.DATA = (() => {
     { min: 40, name: 'スーパージーサン級', note: '宮本さん以上に、宮本さんをわかっています。' },
   ];
 
-  // 宮本さん図鑑：宮本さんがその言葉を言うと手に入る（word）／条件で手に入る（hidden）
+  // 宮本さん図鑑：宮本さんがそのネタを言うと手に入る（word）／条件で手に入る（hidden）。さけ＝鮭とお酒、たい＝めでたい
   const CARDS = [
-    { id: 'yakiniku', word: 'にく', name: '焼肉バウンドマン', note: '心電通七不思議①（2022）。焼肉では、最初から最後まで2時間、ご飯に肉をバウンドさせるだけ。' },
-    { id: 'karaage', word: 'とり', name: 'からあげくんプレミア', note: '「ごきげん吉康！」（2021）。朝からローソンのからあげくんで、プレミア顔付き唐揚げが当たってご機嫌。' },
-    { id: 'suika', word: 'うり', name: 'スイカ頭', note: '「スイカ頭な吉康君」（2025）。沖縄みやげのスイカのキャップを「毎日被ります！」…と言っていたが。' },
-    { id: 'shinkansen', word: 'えき', name: '新幹線で駅弁', note: '「久しぶりの東京遠征！」（2022）。社長と新幹線で駅弁＆ビールでルンルン。' },
+    { id: 'yakiniku', word: 'まぐろ', name: '焼肉バウンドマン', note: '心電通七不思議①（2022）。焼肉では、最初から最後まで2時間、ご飯に肉をバウンドさせるだけ。' },
+    { id: 'karaage', word: 'たまご', name: 'からあげくんプレミア', note: '「ごきげん吉康！」（2021）。朝からローソンのからあげくんで、プレミア顔付き唐揚げが当たってご機嫌。' },
+    { id: 'suika', word: 'うに', name: 'スイカ頭', note: '「スイカ頭な吉康君」（2025）。沖縄みやげのスイカのキャップを「毎日被ります！」…と言っていたが。' },
+    { id: 'shinkansen', word: 'えび', name: '新幹線で駅弁', note: '「久しぶりの東京遠征！」（2022）。社長と新幹線で駅弁＆ビールでルンルン。' },
     { id: 'kyoukan', word: 'さけ', name: 'お酒大好き宮もっちゃん', note: '「CR宮本」（2019）。案外仲間意識が強く、東京に行けばお酒を飲むのが楽しみ。出張では「宮本教官」。' },
-    { id: 'cheese', word: 'ぱん', name: 'つまみ食い', note: '「俺のチーズバーガーが・・・」（2026）。運転中に、人のチーズバーガーをモシャモシャ。' },
-    { id: 'birthday', word: 'かし', name: '3月12日の誕生日会', note: '塩田さんと誕生日が同じ日。毎年ふたりで仲良く誕生日会（2023〜）。' },
+    { id: 'cheese', word: 'いくら', name: 'つまみ食い', note: '「俺のチーズバーガーが・・・」（2026）。運転中に、人のチーズバーガーをモシャモシャ。' },
+    { id: 'birthday', word: 'たい', name: '3月12日の誕生日会', note: '塩田さんと誕生日が同じ日。毎年ふたりで仲良く誕生日会（2023〜）。' },
     { id: 'statue', hidden: 'statue', name: 'こんちわ吉康くん', note: '「こんちわ吉康くん！」（2024）。社長がアウトレットで見つけた、宮本さんそっくりのオブジェ。即決で27万円。' },
     { id: 'oi', hidden: 'score40', name: 'オイ！', note: '「結婚のご報告」（2025）。66歳で初婚。家では奥さんを「オイ！」と呼ぶらしい。' },
   ];
@@ -190,27 +212,22 @@ window.DATA = (() => {
   const first = (w) => w[0];
   const last = (w) => w[w.length - 1];
   function dict() {
-    const all = [...new Set([...WORDS, ...COMM, ...MIYA, ...N_WORDS])];
     const isN = (w) => last(w) === 'ん';
     const okEnd = (w) => !isN(w) && !SMALL.includes(last(w));
-    // 続けられる言葉が少ない文字（る・ぬ など）で終わる言葉は、行き止まりになるので使わない
-    let usable = all.filter(okEnd);
-    for (let i = 0; i < 5; i++) {
-      const starts = {};
-      usable.forEach(w => { starts[first(w)] = (starts[first(w)] || 0) + 1; });
-      usable = usable.filter(w => (starts[last(w)] || 0) >= 3);
-    }
-    const nWords = all.filter(isN);
-    const byStart = {};
-    usable.forEach(w => (byStart[first(w)] = byStart[first(w)] || []).push(w));
-    const nByStart = {};
-    nWords.forEach(w => (nByStart[first(w)] = nByStart[first(w)] || []).push(w));
+    const sushi = [...new Set([...SUSHI2, ...SUSHI3])].filter(okEnd);
+    const sushiSet = new Set([...sushi, ...SUSHI_LONG]);
+    const ambig = new Set(AMBIG);
+    // ひっかけ：寿司ネタでも、意見が分かれそうな言葉でもない、2〜3文字のふつうの言葉
+    const notSushi = [...new Set([...WORDS, ...LONG])].filter(w => okEnd(w) && w.length <= 3 && !sushiSet.has(w) && !ambig.has(w));
+    const group = (list) => { const m = {}; list.forEach(w => (m[first(w)] = m[first(w)] || []).push(w)); return m; };
     const siblings = (c) => (SIB.find(g => g.includes(c)) || [c]).filter(x => x !== c);
-    const dropped = all.filter(w => !usable.includes(w) && !isN(w));
-    const longByStart = {};
-    LONG.forEach(w => (longByStart[first(w)] = longByStart[first(w)] || []).push(w));
-    return { usable, byStart, nByStart, longByStart, siblings, dropped, comm: new Set(COMM), miya: new Set(MIYA), first, last };
+    return {
+      usable: sushi, byStart: group(sushi), two: new Set(SUSHI2),
+      notSushi, notByStart: group(notSushi),
+      nByStart: group(N_WORDS), longByStart: group(SUSHI_LONG), long: SUSHI_LONG,
+      premium: new Set(PREMIUM), rescue: new Set(RESCUE), miya: new Set(MIYA), siblings, first, last,
+    };
   }
 
-  return { WORDS, COMM, MIYA, MIYA_N, N_WORDS, LONG, EXCUSE, RANKS, CARDS, dict };
+  return { SUSHI2, SUSHI3, SUSHI_LONG, PREMIUM, RESCUE, AMBIG, WORDS, MIYA, MIYA_N, N_WORDS, LONG, EXCUSE, RANKS, CARDS, dict };
 })();

@@ -79,7 +79,8 @@ a { color: inherit; }
 
 /* ───────── しりとり ───────── */
 #play { background: #2a160c; }
-.bg, .bg svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.bg, .bg img { position: absolute; inset: 0; width: 100%; height: 100%; }
+.bg img { object-fit: cover; object-position: center 30%; }
 .sway { position: absolute; inset: 0; }
 #play.tipsy .sway { animation: sway 2.4s ease-in-out infinite; }
 #play.tipsy .miya img { filter: drop-shadow(0 8px 10px rgba(0,0,0,.3)) saturate(1.3) sepia(.15) hue-rotate(-10deg); }
