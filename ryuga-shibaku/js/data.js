@@ -26,7 +26,7 @@ window.DATA = {
     soma: { name: '颯馬', role: '心電通 中部支店長', catch: 'どこでも寝る支店長', photo: 'soma' },
     shacho: { name: '山本 雅希', role: '株式会社 心電通 代表取締役', catch: '黒幕', photo: 'shacho' },
     mizuki: { name: '瑞月', role: '心電通', catch: '足がめっちゃ速い', photo: 'mizuki' },
-    okusan: { name: '山本 幸美', role: '龍之介部長の奥さん', catch: 'さらわれた人', photo: 'okusan' },
+    okusan: { name: '山本 香海', role: '龍之介部長の奥さん', catch: 'さらわれた人', photo: 'okusan' },
   },
 
   // ステージ：背景・幅・敵の出てくる場所（x に来たら画面が止まって、全部倒すまで進めない）

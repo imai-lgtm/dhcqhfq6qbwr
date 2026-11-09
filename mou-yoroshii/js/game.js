@@ -783,7 +783,7 @@
   };
 
   // 途中で切りかえる絵は、先に読み込んでおく（切りかえた瞬間に前の絵が一瞬出たり、消えたりしないように）
-  const PRELOAD = ['assets/photo/eba_laugh.webp', 'assets/photo/eba_smile.webp', 'assets/photo/eba_down.webp', 'assets/album/end_tower.jpg'].map((s) => { const i = new Image(); i.src = s; if (i.decode) i.decode().catch(() => { }); return i; });
+  const PRELOAD = ['assets/photo/eba_work.webp', 'assets/photo/eba_laugh.webp', 'assets/photo/eba_smile.webp', 'assets/photo/eba_down.webp', 'assets/album/end_tower.jpg'].map((s) => { const i = new Image(); i.src = s; if (i.decode) i.decode().catch(() => { }); return i; });
   fit();
   toTitle();
   if (P.has('play')) startGame();

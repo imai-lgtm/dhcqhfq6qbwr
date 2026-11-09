@@ -21,7 +21,7 @@ window.DATA = (() => {
   const STAGES = [
     {
       id: 1, name: '朝の現場', sub: '東大阪の工事現場', bgm: 'stage1', time: 9, ring: 5,
-      intro: '江原部長が「あれ取って」と言います。言われた品物をタップして渡そう。', mood: 'smile',
+      intro: '江原部長が「あれ取って」と言います。言われた品物をタップして渡そう。', mood: 'work',   // work＝作業着の江原さん（2026-11-09 先方の写真）
       q: [
         { say: 'ニッパー取って', ans: 'nipper', trap: ['pliers'] },
         { say: 'LANの圧着のやつ', ans: 'crimper', trap: ['pliers', 'nipper'] },

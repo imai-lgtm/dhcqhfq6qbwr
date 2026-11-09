@@ -27,7 +27,6 @@ window.AUDIO = (() => {
   const buf = {};        // 名前 → 読み込んだ音（Web Audio）
   const els = {};        // 名前 → audio タグ（file:// の時の代わり）
   const playing = {};    // 名前 → 鳴っている効果音（止める時用）
-  const bgms = {};
   let bgmNow = null, bgmName = '', unlocked = false;
 
   function mk(src, vol) { const a = new Audio(); a.preload = 'auto'; a.src = src; a.volume = vol; return a; }
@@ -52,14 +51,27 @@ window.AUDIO = (() => {
   }
 
   // スマホは最初のタップの中でないと音が出ないので、その時に無音を1回鳴らして起こす
+  //   BGM の audio タグ2つも、ここで一度鳴らしておく（iPhone で、あとからタップの外でも曲を流せるように）
+  //   断られて止まっている BGM は、タップのたびに鳴らし直す
   function unlock() {
-    if (unlocked || !useWA) { unlocked = true; return; }
-    unlocked = true;
-    try {
-      if (ctx.state !== 'running') ctx.resume();
-      const s = ctx.createBufferSource(); s.buffer = ctx.createBuffer(1, 1, 22050); s.connect(ctx.destination); s.start(0);
-    } catch (_) { }
+    if (!unlocked) {
+      unlocked = true;
+      if (useWA) {
+        try {
+          if (ctx.state !== 'running') ctx.resume();
+          const s = ctx.createBufferSource(); s.buffer = ctx.createBuffer(1, 1, 22050); s.connect(ctx.destination); s.start(0);
+        } catch (_) { }
+      }
+      for (const i of [0, 1]) {
+        const t = poolTrack(i);
+        if (t === bgmNow) continue;
+        if (!t.url) t.a.src = SILENT;
+        try { const p = t.a.play(); if (p && p.then) p.then(() => { if (t !== bgmNow) t.a.pause(); }, () => { }); } catch (_) { }
+      }
+    } else if (useWA && ctx.state !== 'running') ctx.resume();
+    if (bgmWaiting && bgmNow && !muted) playBgmEl(bgmNow);
   }
+  for (const ev of ['pointerdown', 'touchend', 'keydown']) document.addEventListener(ev, () => unlock(), true);
   // 画面を切りかえて戻ってきた時に止まっていたら、起こし直す
   document.addEventListener('visibilitychange', () => { if (useWA && !document.hidden && unlocked && ctx.state !== 'running') ctx.resume(); });
 
@@ -102,14 +114,30 @@ window.AUDIO = (() => {
   }
   function hasVoice(name) { return useWA ? !!buf['v:' + name] : (!!els['v:' + name] && els['v:' + name].readyState > 0); }
 
-  // BGM：audio タグで流す。音量は Web Audio の「つまみ」で変える
-  function bgmTrack(name) {
-    let t = bgms[name];
-    if (t) return t;
-    const a = mk(`${cfg.bgmBase}${name}.mp3`, useWA ? 1 : 0); a.loop = true;
-    t = { a, g: null };
+  // BGM：audio タグ2つを交互に使い回す。音量は Web Audio の「つまみ」で変える
+  //   iPhone は「タップの中で一度鳴らした audio タグ」でないと、あとから鳴らせない。
+  //   曲ごとに新しい audio タグを作ると、タップの外で始まる曲（タイトル・エンディングなど）が鳴らなかった（2026-11-09 先方の iPhone で発覚）
+  //   → タグは2つだけ（前の曲が小さくなっていく間に、もう片方で次の曲）。最初のタップで2つとも鳴らせる状態にしておく
+  const SILENT = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
+  const pool = [];
+  let poolIx = 0, bgmWaiting = false;   // bgmWaiting＝鳴らすのを断られた（次のタップで鳴らし直す）
+  function poolTrack(i) {
+    if (pool[i]) return pool[i];
+    const a = new Audio(); a.preload = 'auto'; a.loop = true; a.volume = useWA ? 1 : 0;
+    const t = { a, g: null, url: '' };
     if (useWA) { try { const src = ctx.createMediaElementSource(a); t.g = ctx.createGain(); t.g.gain.value = 0; src.connect(t.g); t.g.connect(bgmBus); } catch (_) { t.g = null; } }
-    return (bgms[name] = t);
+    return (pool[i] = t);
+  }
+  function bgmTrack(name) {
+    poolIx = 1 - poolIx;
+    const t = poolTrack(poolIx), url = `${cfg.bgmBase}${name}.mp3`;
+    if (t.url !== url) { t.a.src = url; t.url = url; }
+    return t;
+  }
+  function playBgmEl(t) {
+    const p = t.a.play();
+    bgmWaiting = false;
+    if (p && p.catch) p.catch(() => { if (bgmNow === t) bgmWaiting = true; });
   }
   function setVol(t, to, ms, done) {
     if (t.g) {
@@ -134,7 +162,7 @@ window.AUDIO = (() => {
     bgmNow = t;
     if (muted) return;
     if (useWA && ctx.state !== 'running') ctx.resume();
-    t.a.play().catch(() => { });
+    playBgmEl(t);
     setVol(t, VOL.bgm * (opt.vol ?? 1), 500);
   }
   // BGM の速さ（ラストスパートで速くする時など）
@@ -153,7 +181,7 @@ window.AUDIO = (() => {
     try { localStorage.setItem(MUTE_KEY, m ? '1' : '0'); } catch (_) { }
     if (master) master.gain.value = m ? 0 : 1;
     if (m) { if (bgmNow) bgmNow.a.pause(); for (const n of Object.keys(playing)) stopSe(n); if (voiceNow) { try { voiceNow.stop ? voiceNow.stop() : voiceNow.pause(); } catch (_) { } } }
-    else if (bgmNow) { if (useWA && ctx.state !== 'running') ctx.resume(); bgmNow.a.play().catch(() => { }); setVol(bgmNow, VOL.bgm, 300); }
+    else if (bgmNow) { if (useWA && ctx.state !== 'running') ctx.resume(); playBgmEl(bgmNow); setVol(bgmNow, VOL.bgm, 300); }
   }
 
   return { init, unlock, se, stopSe, voice, hasVoice, bgm, bgmSpeed, stopBgm, setMuted, get muted() { return muted; } };
