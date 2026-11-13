@@ -32,28 +32,68 @@
   addEventListener('resize', fit);
 
   // ───── 北村さんの頭（ブロック用） ─────
-  // 頭の切り抜きを、頭の色の地にのせた絵。落ちてくる形の大きさいっぱいに伸ばして使う（形の角も頭の色で埋まる）
+  // 頭の切り抜きを、頭の色の地にのせた絵。まわりに頭の色の余白（頭の大きさの半分ずつ）を付けて、形に合わせて伸ばして使う
   const HD = D.HEAD;
   const HEADC = document.createElement('canvas');
   const headImg = new Image();
   headImg.onload = () => {
-    HEADC.width = headImg.width; HEADC.height = headImg.height;
+    const w = headImg.width, h = headImg.height;
+    HEADC.width = w * 2; HEADC.height = h * 2; HEADC.hw = w; HEADC.hh = h;
     const c = HEADC.getContext('2d');
-    const g = c.createRadialGradient(HEADC.width * .58, HEADC.height * .2, 8, HEADC.width * .5, HEADC.height * .45, HEADC.height * .8);
+    const g = c.createRadialGradient(w * 1.08, h * .7, 8, w, h * .95, h * 1.1);
     g.addColorStop(0, HD.skin[0]); g.addColorStop(.45, HD.skin[1]); g.addColorStop(1, HD.skin[2]);
     c.fillStyle = g; c.fillRect(0, 0, HEADC.width, HEADC.height);
-    c.drawImage(headImg, 0, 0);
+    c.drawImage(headImg, w / 2, h / 2);
     HEADC.ok = true; if (G) { draw(); drawNext(); }
   };
   headImg.src = HD.src;
-  // 形（回した後）の大きさいっぱいに頭を伸ばす。マス (i, j) が写す頭の範囲を、頭の絵に対する割合（0〜1）で返す
+  // 顔（目・メガネ・口のあたり）が、頭の絵のどこにあるか（割合）。ここがブロックのあるマスに乗るように貼る
+  const FACE_BOX = { x0: .12, x1: .78, y0: .6, y1: .92 };
+  // マスの集まり cells（[x, y] の並び）に、北村さんの頭を1つ貼る。返すのは、各マスが写す頭の範囲 [u, v, du, dv]（頭の絵に対する割合）
+  //   形の外枠の中から「顔がブロックのあるマスに乗る」いちばん大きな四角を選び、そこに頭を伸ばして貼る（四角の外のマスは頭の色）
   //   棒を縦にすると頭の長い北村さん、横にすると平たい北村さん。T字はてっぺんの坊主頭がぽこっと出る
-  function faceCells(t, rot) {
-    const def = D.PIECES[t];
-    const cells = rotateCells(def.cells, def.size, rot);
+  //   2026-11-13 先方「たまにブロックに顔が表示されない」：外枠いっぱいに貼っていたので、L字・J字などの向きによっては顔が空きマスに落ちていた
+  function headMap(cells) {
     const xs = cells.map((c) => c[0]), ys = cells.map((c) => c[1]);
     const x0 = Math.min(...xs), y0 = Math.min(...ys), bw = Math.max(...xs) - x0 + 1, bh = Math.max(...ys) - y0 + 1;
-    return cells.map(([cx, cy]) => [(cx - x0) / bw, (cy - y0) / bh, 1 / bw, 1 / bh]);
+    const filled = new Set(cells.map(([x, y]) => (x - x0) + ',' + (y - y0)));
+    let best = null;
+    for (let rx = 0; rx < bw; rx++) for (let ry = 0; ry < bh; ry++) for (let rw = 1; rx + rw <= bw; rw++) for (let rh = 1; ry + rh <= bh; rh++) {
+      let hit = 0, n = 0;
+      for (let i = 0; i <= 6; i++) for (let j = 0; j <= 4; j++) {
+        const fx = rx + (FACE_BOX.x0 + (FACE_BOX.x1 - FACE_BOX.x0) * i / 6) * rw, fy = ry + (FACE_BOX.y0 + (FACE_BOX.y1 - FACE_BOX.y0) * j / 4) * rh;
+        n++; if (filled.has(Math.floor(fx) + ',' + Math.floor(fy))) hit++;
+      }
+      // 顔が8割近く乗る四角の中で、いちばん大きいもの（同じ大きさなら、頭の形に近い縦長）
+      //   8割で十分なら外枠いっぱいに伸ばす（ぬらり型の、てっぺんまで続く長い頭を残すため）
+      const key = [Math.min(hit / n, .78), rw * rh, -Math.abs(rw / rh - .75)];
+      const better = !best || key[0] > best.key[0] || (key[0] === best.key[0] && (key[1] > best.key[1] || (key[1] === best.key[1] && key[2] > best.key[2])));
+      if (better) best = { key, rx, ry, rw, rh };
+    }
+    const { rx, ry, rw, rh } = best;
+    return cells.map(([cx, cy]) => [(cx - x0 - rx) / rw, (cy - y0 - ry) / rh, 1 / rw, 1 / rh]);
+  }
+  function faceCells(t, rot) { const def = D.PIECES[t]; return headMap(rotateCells(def.cells, def.size, rot)); }
+  // 盤の上の頭ブロックを、つながったかたまりごとに貼り直す（列が消えたり小爆発したりして残ったかけらにも、必ず顔が出るように）
+  //   同じ形が2つに分かれたら、それぞれに顔を1つずつ
+  function remapHeads() {
+    const seen = new Set(), used = new Set();
+    for (let y = 0; y < ROWS; y++) for (let x = 0; x < COLS; x++) {
+      const c = G.board[y][x];
+      if (!c || c.kanji || seen.has(x + ',' + y)) continue;
+      const comp = [], q = [[x, y]];
+      seen.add(x + ',' + y);
+      while (q.length) {
+        const [cx, cy] = q.pop(); comp.push([cx, cy]);
+        for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+          const nx = cx + dx, ny = cy + dy, k = nx + ',' + ny, nb = G.board[ny] && G.board[ny][nx];
+          if (nb && !nb.kanji && nb.pid === c.pid && !seen.has(k)) { seen.add(k); q.push([nx, ny]); }
+        }
+      }
+      const pid = used.has(c.pid) ? ++G.pid : c.pid; used.add(pid);
+      const src = headMap(comp);
+      comp.forEach(([cx, cy], i) => { G.board[cy][cx] = { pid, src: src[i] }; });
+    }
   }
 
   // ───── 保存・画面・音 ─────
@@ -204,6 +244,7 @@
         const stack = []; for (let y = ROWS - 1; y >= 0; y--) if (G.board[y][x]) stack.push(G.board[y][x]);
         for (let y = ROWS - 1, i = 0; y >= 0; y--, i++) G.board[y][x] = stack[i] || null;
       }
+      remapHeads();
       G.booms += hits.length; G.score += D.BOOM * (G.lv + 1) * hits.length;
       drawHud(); draw(); await sleep(260);
       hits = findCivic();
@@ -224,6 +265,7 @@
     await sleep(320);
     G.board = G.board.filter((_, y) => !full.includes(y));
     while (G.board.length < ROWS) G.board.unshift(Array(COLS).fill(null));
+    remapHeads();
     G.lines += full.length; G.totalLines += full.length;
     G.score += D.POINTS[Math.min(4, full.length)] * (G.lv + 1);
     fr.innerHTML = '';
@@ -388,7 +430,12 @@
     for (const o of list) {
       c.save(); tf(o); shape(o, -LW * .15); c.clip();
       const x = ox + o.x * s, y = oy + o.y * s;
-      if (HEADC.ok && o.cell.src) { const [u, v, du, dv] = o.cell.src; c.drawImage(HEADC, u * HEADC.width, v * HEADC.height, du * HEADC.width, dv * HEADC.height, x - .7, y - .7, s + 1.4, s + 1.4); }
+      const far = o.cell.src && (o.cell.src[0] + o.cell.src[2] <= 0 || o.cell.src[0] >= 1 || o.cell.src[1] + o.cell.src[3] <= 0 || o.cell.src[1] >= 1);
+      if (HEADC.ok && o.cell.src && !far) {
+        const [u, v, du, dv] = o.cell.src, W0 = HEADC.hw, H0 = HEADC.hh;
+        const su = Math.max(-.5, Math.min(1.5 - du, u)), sv = Math.max(-.5, Math.min(1.5 - dv, v));
+        c.drawImage(HEADC, W0 * (.5 + su), H0 * (.5 + sv), du * W0, dv * H0, x - .7, y - .7, s + 1.4, s + 1.4);
+      }   // 頭の絵にかからないマスは、無地の頭の色（頭のふちの線が並ばないように）
       else { c.fillStyle = HD.skin[1]; c.fillRect(x - 1, y - 1, s + 2, s + 2); }
       c.restore();
     }
@@ -521,6 +568,9 @@
   window.NURA = {
     get G() { return G; },
     faceCells: (t, rot) => faceCells(t, rot),
+    headMap: (cells) => headMap(cells),
+    remapHeads: () => remapHeads(),
+    drawHeads: (...a) => drawHeads(...a),
     draw: () => draw(),
     best() { const l = this.ranked(); return l ? l[0] || null : null; },
     // 置き方を、よい順に並べて返す（雑な自動プレイ役は、2〜4番目を選ぶこともある）

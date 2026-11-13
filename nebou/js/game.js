@@ -483,7 +483,7 @@
   };
 
   // 途中で切りかえる絵は、先に読み込んでおく（切りかえた瞬間に前の絵が一瞬出たり、消えたりしないように）
-  const PRELOAD = ['assets/art/naka_run_1.webp', 'assets/art/naka_run_2.webp', 'assets/art/naka_run_3.webp', 'assets/art/naka_run_jump.webp', 'assets/art/naka_run_fall.webp', 'assets/photo/dad.webp', 'assets/photo/grandma.webp', 'assets/photo/shacho2.webp', 'assets/art/dad_shadow.svg', 'assets/art/grandma_shadow.svg', 'assets/art/item_coffee.svg', 'assets/art/obs_bike.svg', 'assets/art/obs_cone.svg', 'assets/art/obs_dog.svg', 'assets/art/obs_sign.svg', 'assets/art/obs_trash.svg', 'assets/art/bush_hide.svg', 'assets/photo/soma_awake.webp', 'assets/photo/soma_body.webp'].map((s) => { const i = new Image(); i.src = s; if (i.decode) i.decode().catch(() => { }); return i; });
+  const PRELOAD = ['assets/art/naka_run_1.webp', 'assets/art/naka_run_2.webp', 'assets/art/naka_run_3.webp', 'assets/art/naka_run_jump.webp', 'assets/art/naka_run_fall.webp', 'assets/photo/dad.webp', 'assets/photo/grandma.webp', 'assets/photo/shacho2.webp', 'assets/art/dad_shadow.svg', 'assets/art/grandma_shadow.svg', 'assets/art/item_coffee.svg', 'assets/art/obs_bike.svg', 'assets/art/obs_cone.svg', 'assets/art/obs_dog.svg', 'assets/art/obs_sign.svg', 'assets/art/obs_trash.svg', 'assets/art/bush_naka.webp', 'assets/photo/soma_awake.webp', 'assets/photo/soma_body.webp'].map((s) => { const i = new Image(); i.src = s; if (i.decode) i.decode().catch(() => { }); return i; });
   // 見守りカメラの寝言：見えているカメラに、ときどき「マ、マ、ママー…」（声つき）「むにゃ…」
   let talkN = 0;
   setInterval(() => {
