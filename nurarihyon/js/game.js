@@ -35,18 +35,49 @@
   // 頭の切り抜きを、頭の色の地にのせた絵。まわりに頭の色の余白（頭の大きさの半分ずつ）を付けて、形に合わせて伸ばして使う
   const HD = D.HEAD;
   const HEADC = document.createElement('canvas');
-  const headImg = new Image();
-  headImg.onload = () => {
-    const w = headImg.width, h = headImg.height;
+  //   2026-11-16 先方「入った直後は顔が出ず茶色のブロック。入り直すと出る」（スマホ）：
+  //   画像の読み込みが1回失敗すると、取り直さずにずっと茶色のままだった → 失敗したら少し待って取り直す。
+  //   読み込み済みの別の画像（先読み分）があればそれも使い、ゲーム開始時・描くたびに「まだなら作る」
+  let headImg = null, headTries = 0, headRetry = 0;
+  function buildHead(im) {
+    if (HEADC.ok || !im || !im.complete || !im.naturalWidth) return false;
+    const w = im.naturalWidth, h = im.naturalHeight;
     HEADC.width = w * 2; HEADC.height = h * 2; HEADC.hw = w; HEADC.hh = h;
     const c = HEADC.getContext('2d');
     const g = c.createRadialGradient(w * 1.08, h * .7, 8, w, h * .95, h * 1.1);
     g.addColorStop(0, HD.skin[0]); g.addColorStop(.45, HD.skin[1]); g.addColorStop(1, HD.skin[2]);
     c.fillStyle = g; c.fillRect(0, 0, HEADC.width, HEADC.height);
-    c.drawImage(headImg, w / 2, h / 2);
-    HEADC.ok = true; if (G) { draw(); drawNext(); }
-  };
-  headImg.src = HD.src;
+    c.drawImage(im, w / 2, h / 2);
+    HEADC.ok = true; clearTimeout(headRetry);
+    if (G) { draw(); drawNext(); }
+    return true;
+  }
+  function loadHead() {
+    if (HEADC.ok) return;
+    headRetry = 0;
+    const im = new Image();
+    im.onload = () => { if (!buildHead(im)) im.decode && im.decode().then(() => buildHead(im)).catch(() => { }); };
+    im.onerror = () => { if (headImg === im && headTries < 40) { clearTimeout(headRetry); headRetry = setTimeout(loadHead, Math.min(400 * headTries, 3000)); } };
+    headImg = im; headImg.t0 = performance.now();
+    im.src = HD.src + (headTries++ ? '?r=' + headTries : '');   // 2回目からは、失敗した結果を使い回さないように別の名前で
+  }
+  // まだ顔の絵が無ければ作る（読み込みが失敗したままなら、取り直す）
+  //   now＝true（ゲーム開始時）なら、失敗したままの時に待たずにすぐ取り直す
+  function ensureHead(now) {
+    if (HEADC.ok) return;
+    if (buildHead(headImg)) return;
+    try { if (PRELOAD.some((im) => im.src.indexOf(HD.src) >= 0 && buildHead(im))) return; } catch (e) { }
+    if (now && headImg && headImg.complete && !headImg.naturalWidth) { clearTimeout(headRetry); loadHead(); }
+  }
+  loadHead();
+  // 見張り：顔の絵ができるまで2秒ごとに確かめる。失敗のまま・6秒たっても読み込みが終わらない時は取り直す
+  const headWatch = setInterval(() => {
+    if (HEADC.ok) { clearInterval(headWatch); return; }
+    ensureHead();
+    if (HEADC.ok || headTries >= 40) return;
+    const im = headImg, stalled = im && !im.complete && performance.now() - im.t0 > 6000, failed = im && im.complete && !im.naturalWidth;
+    if (stalled || (failed && !headRetry)) { clearTimeout(headRetry); loadHead(); }
+  }, 2000);
   // 顔（目・メガネ・口のあたり）が、頭の絵のどこにあるか（割合）。ここがブロックのあるマスに乗るように貼る
   const FACE_BOX = { x0: .12, x1: .78, y0: .6, y1: .92 };
   // マスの集まり cells（[x, y] の並び）に、北村さんの頭を1つ貼る。返すのは、各マスが写す頭の範囲 [u, v, du, dv]（頭の絵に対する割合）
@@ -309,6 +340,7 @@
   function startGame() {
     if (performance.now() - lastStart < 1500) return;   // ボタンの2度押しで、ゲームが2つ同時に始まらないように
     lastStart = performance.now();
+    ensureHead(true);
     G = { board: empty(), bag: [], next: null, cur: null, lv: P.has('lv') ? Math.max(0, Math.min(4, +P.get('lv') - 1)) : 0, lines: 0, totalLines: 0, score: 0, booms: 0, taxTotal: 0,
       sinceTax: 0, visits: 0, busy: false, over: false, paused: false, boomAt: null, pid: 0, landFx: null, kq: [] };
     show('play'); fit();
@@ -446,6 +478,7 @@
     return cells.map(([cx, cy], i) => [cx, cy, def.kanji ? { kanji: def.kanji } : { pid: 'cur', src: src[i] }]);
   }
   function draw() {
+    if (!HEADC.ok) ensureHead();
     const s = L.cell;
     ctx.clearRect(0, 0, COLS * s, ROWS * s);
     // ラックの段（ガイドの線）
