@@ -25,7 +25,7 @@ window.DATA = {
     miya: { name: '宮本 吉康', role: '心電通 66歳', catch: '焼肉バウンドマン', photo: 'miya' },
     soma: { name: '颯馬', role: '心電通 中部支店長', catch: 'どこでも寝る支店長', photo: 'soma' },
     shacho: { name: '山本 雅希', role: '株式会社 心電通 代表取締役', catch: '黒幕', photo: 'shacho' },
-    mizuki: { name: '瑞月', role: '心電通', catch: '足がめっちゃ速い', photo: 'mizuki' },
+    mizuki: { name: '嶋田 瑞月', role: '心電通', catch: '足がめっちゃ速い', photo: 'mizuki' },
     okusan: { name: '山本 香海', role: '龍之介部長の奥さん', catch: 'さらわれた人', photo: 'okusan' },
   },
 
