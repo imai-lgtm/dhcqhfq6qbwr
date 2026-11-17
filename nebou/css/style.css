@@ -87,9 +87,9 @@ a { color: inherit; }
 .scene { position: absolute; inset: 0; display: none; }
 .scene.on { display: block; }
 .hud { position: absolute; left: 58px; top: 12px; z-index: 20; }
-.clock { display: flex; align-items: baseline; gap: 4px; background: var(--navy); color: #fff; padding: 6px 14px 8px; border-radius: 16px; box-shadow: 0 4px 0 var(--red); }
+.clock { display: flex; align-items: baseline; gap: 3px; background: var(--navy); color: #fff; padding: 6px 10px 8px; border-radius: 16px; box-shadow: 0 4px 0 var(--red); }
 .clock span { font-size: 12px; }
-.clock b { font-family: 'Dela', sans-serif; font-weight: 400; font-size: 34px; line-height: 1; min-width: 48px; text-align: right; }
+.clock b { font-family: 'Dela', sans-serif; font-weight: 400; font-size: 28px; line-height: 1; min-width: 40px; text-align: right; }   /* 縦画面：「100秒」が右上のカメラの窓に隠れない大きさ */
 .clock small { font-size: 13px; }
 .clock.hurry { background: var(--red); box-shadow: 0 4px 0 #8f1610; animation: pulse .5s infinite; }
 .p-cam { right: 54px; top: 10px; width: 118px; height: 89px; z-index: 20; }

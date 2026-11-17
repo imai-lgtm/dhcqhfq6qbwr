@@ -1,4 +1,4 @@
-// 5本共通：どの画面からでも「心電通ゲームセンター」のトップに戻れるボタン（左上の🏠。右上の音ボタンと対）
+// 5本共通：どの画面からでも「心電通ゲームセンター」の店内（1本ずつの入口から来た時はその入口）に戻れるボタン（左上の🏠。右上の音ボタンと対）
 // 遊んでいる途中は確認を出し、その間は window.GC_HOLD = true（各ゲームはこの間、時間を止める）
 (() => {
   const app = document.getElementById('app') || document.body;
@@ -19,16 +19,24 @@
 .gc-no { background: #2c3e8f; box-shadow: 0 4px 0 #141f52; }`;
   document.head.appendChild(css);
 
+  // 戻り先：ふだんはゲーセンの店内（../index.html#floor）。1本ずつの入口（../play-フォルダ名.html）から ?from=solo で来た時は、その入口へ
+  //   （QRはLINEなどのアプリの中のブラウザで開かれ、途中で別のブラウザに移ることがあるので、端末に覚えさせずURLに持たせる）
+  const dir = location.pathname.split('/').slice(-2)[0] || '';
+  const SOLO = new URLSearchParams(location.search).get('from') === 'solo' && /^[a-z-]+$/.test(dir);
+  const HOME = SOLO ? `../play-${dir}.html` : '../index.html#floor';
+  const WHERE = SOLO ? 'ゲーム機の前' : 'ゲームセンター';
+  document.querySelectorAll('a[href="../index.html#floor"]').forEach((a) => { a.href = HOME; if (SOLO) a.textContent = '← もどる'; });
+
   const btn = document.createElement('button');
   btn.className = 'gc-home';
-  btn.setAttribute('aria-label', 'ゲームセンターに戻る');
+  btn.setAttribute('aria-label', WHERE + 'に戻る');
   btn.textContent = '🏠';
-  btn.title = 'ゲームセンターに戻る';
+  btn.title = WHERE + 'に戻る';
   const mute = document.getElementById('mute');   // 右上の音ボタンと同じ見た目にそろえる
   if (mute) { const cs = getComputedStyle(mute); btn.style.background = cs.background; btn.style.border = cs.border; btn.style.boxShadow = cs.boxShadow; }
   const modal = document.createElement('div');
   modal.className = 'gc-modal';
-  modal.innerHTML = '<div class="gc-card"><p class="gc-t">ゲームセンターに戻る？</p><p class="gc-s">遊んでいるとちゅうの分は<br>記録されません。</p>'
+  modal.innerHTML = '<div class="gc-card"><p class="gc-t">' + WHERE + 'に戻る？</p><p class="gc-s">遊んでいるとちゅうの分は<br>記録されません。</p>'
     + '<div class="gc-row"><button class="gc-yes">もどる</button><button class="gc-no">つづける</button></div></div>';
   app.append(btn, modal);
 
@@ -37,7 +45,7 @@
   addEventListener('keydown', (e) => { if (window.GC_HOLD) { e.stopImmediatePropagation(); if (e.code === 'Escape') close(); } }, true);
 
   const visible = (id) => { const s = document.getElementById(id); return !!(s && s.classList.contains('on')); };
-  const goHome = () => { location.href = '../#floor'; };   // ゲーセンの店内（ゲーム選択）へ
+  const goHome = () => { location.href = HOME; };
   function close() { modal.classList.remove('on'); window.GC_HOLD = false; }
   btn.addEventListener('click', () => {
     try { window.AUDIO && AUDIO.se('tap'); } catch (_) { }

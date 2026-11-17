@@ -99,6 +99,7 @@
       if (better) best = { key, rx, ry, rw, rh };
     }
     const { rx, ry, rw, rh } = best;
+    // 四角の外のでっぱりは、頭の絵のまわり（頭のふちを外へ引き伸ばした肌。dev/nurarihyon/make_head_jpg.js）を写す
     return cells.map(([cx, cy]) => [(cx - x0 - rx) / rw, (cy - y0 - ry) / rh, 1 / rw, 1 / rh]);
   }
   function faceCells(t, rot) { const def = D.PIECES[t]; return headMap(rotateCells(def.cells, def.size, rot)); }
@@ -133,7 +134,7 @@
   const overlay = (id, on) => $('#' + id).classList.toggle('on', on);
   A.init({
     se: ['tap', 'start', 'cursor', 'brick', 'land', 'correct', 'fanfare', 'kira', 'ghost', 'cup_put', 'eat', 'flash', 'levelup', 'warp', 'wrong',
-      'chin', 'chanchan', 'kanpai', 'cheer', 'ipponjime', 'rank', 'despair', 'hyoushigi', 'boyoyon', 'doon'],
+      'chin', 'chanchan', 'kanpai', 'cheer', 'ipponjime', 'rank', 'despair', 'hyoushigi', 'boyoyon', 'doon', 'collapse'],
     voice: ['officer'],
   });
   const muteBtn = $('#mute');
@@ -215,7 +216,7 @@
     if (!G || G.busy) return;
     const p = G.cur; let n = 0;
     while (fits(p, p.rot, p.x, p.y + 1)) { p.y++; n++; }
-    G.score += n * 2;
+    G.score += n * 2; drawHud();   // 一気に落とした分の点も、すぐ画面に出す
     lock();
   }
   const ghostY = () => { const p = G.cur; let y = p.y; while (fits(p, p.rot, p.x, y + 1)) y++; return y; };
@@ -458,8 +459,9 @@
     for (const o of list) {
       c.save(); tf(o); shape(o, -LW * .15); c.clip();
       const x = ox + o.x * s, y = oy + o.y * s;
-      const far = o.cell.src && (o.cell.src[0] + o.cell.src[2] <= 0 || o.cell.src[0] >= 1 || o.cell.src[1] + o.cell.src[3] <= 0 || o.cell.src[1] >= 1);
-      if (HEADC.ok && o.cell.src && !far) {
+      // 2026-11-17 先方（山本社長）「形によっては半分が茶色。画像を引き伸ばして茶色をなくしてほしい」
+      //   頭の四角から外れたマスも無地で塗らず、頭の絵のまわり（頭を外へ引き伸ばした肌）を写す。頭から遠いマスは、いちばん外側を引き伸ばす
+      if (HEADC.ok && o.cell.src) {
         const [u, v, du, dv] = o.cell.src, W0 = HEADC.hw, H0 = HEADC.hh;
         const su = Math.max(-.5, Math.min(1.5 - du, u)), sv = Math.max(-.5, Math.min(1.5 - dv, v));
         // 切り出す範囲が絵の外に少しでもはみ出すと描かないブラウザがあるので、絵の中におさめる

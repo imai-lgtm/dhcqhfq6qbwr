@@ -64,7 +64,7 @@
   const SPR = {};   // キャラ名 → { img, w, h, idx: {フレーム名: 番号} }
   (function loadSprites() {
     const s = document.createElement('script');
-    s.src = 'assets/sprites/sprites.js';
+    s.src = 'assets/sprites/sprites.js?v=20261117c';
     s.onload = () => {
       for (const [name, m] of Object.entries(window.SPRITES || {})) {
         const idx = {};
@@ -1003,8 +1003,13 @@
     const party = E && E.party;
     const cast = [['shacho', 146, 172, -1, E && E.gift ? 'gift' : 'down'], ['ryu', 100, 173, 1, E && E.roll >= 0 ? 'win' : 'idle']];
     if (party) cast.push(['naka', 30, 163, 1, 'idle'], ['soma', 58, 160, 1, 'sleep'], ['okusan', 188, 168, -1, 'cheer'], ['dani', 220, 162, -1, 'pose'], ['miya', 242, 172, -1, 'idle']);
+    // 2026-11-17 先方（山本社長）：瑞月さんは、子どもみたいに走り回らせる（画面の端から端まで行ったり来たり・ぴょこぴょこ跳ねながら、手前と奥にもふらふら）
+    if (party) {
+      const T = t % 300, go = T < 150;
+      cast.push(['mizuki', 18 + (go ? T : 300 - T) * 1.47, 170 + Math.sin(t / 11) * 7, go ? 1 : -1, 'walk', -Math.abs(Math.sin(t / 4.5)) * 5, t * 2]);
+    }
     cast.sort((a, b) => a[2] - b[2]);
-    for (const [n, x, y, f, st] of cast) { const o = { x, y, z: 0, face: f }; shadow(o); drawChar(n, o, st, st === 'down' ? 99 : t); }
+    for (const [n, x, y, f, st, z = 0, ft = t] of cast) { const o = { x, y, z, face: f }; shadow(o); drawChar(n, o, st, st === 'down' ? 99 : ft); }
     if (E && E.roll >= 0) {
       ctx.fillStyle = 'rgba(0,0,0,.8)'; ctx.fillRect(0, 0, W, H);
       ctx.font = '8px Dot, monospace'; ctx.textAlign = 'center';

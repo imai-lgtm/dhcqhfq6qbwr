@@ -375,7 +375,7 @@ img { -webkit-user-drag: none; user-select: none; }
 .land .t-foot { left: 690px; right: 50px; }
 
 /* ゲーム */
-.land .hud { right: auto; left: 64px; top: 18px; width: 330px; }
+.land .hud { right: auto; left: 64px; top: 18px; width: 300px; }   /* 吹き出し（left: 380px）に得点が隠れないように */
 .land .score { font-size: 22px; }
 .land .st-pill, .land .qnum { font-size: 15px; }
 

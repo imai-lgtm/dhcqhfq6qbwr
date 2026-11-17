@@ -36,7 +36,7 @@
 
   A.init({
     se: ['harisen', 'despair', 'tap', 'start', 'jump', 'land', 'falldown', 'kira', 'doorchime', 'beep', 'spark', 'step_heavy', 'step_cute', 'door_open', 'alarm',
-      'phone_ring', 'phone_pick', 'snore', 'ramen', 'speedup', 'correct', 'wrong', 'rank', 'fanfare', 'chanchan', 'boyoyon', 'hyoushigi', 'timer', 'dog'],
+      'phone_ring', 'phone_pick', 'snore', 'ramen', 'speedup', 'correct', 'wrong', 'rank', 'fanfare', 'chanchan', 'boyoyon', 'hyoushigi', 'timer', 'dog', 'paper'],
     voice: ['soma_mama', 'soma_cry', 'naka_go', 'naka_hai', 'naka_geshu', 'naka_ring', 'naka_ohayo', 'shacho_yasume', 'dad', 'grandma'],
   });
   const muteBtn = $('#mute');
@@ -93,7 +93,7 @@
     cancelAnimationFrame(clockRaf);
     const tick = (t) => {
       if (!G || G.over) return;
-      const dt = Math.min(.1, (t - prev) / 1000); prev = t;
+      const dt = Math.min(.05, (t - prev) / 1000); prev = t;   // 走る動きと同じ上限（動きの遅いスマホで、時計だけ先に進まないように）
       if (!G.paused && !window.GC_HOLD) {   // ゲーセンに戻る確認の間は止める
         G.left = Math.max(0, G.left - dt);
         drawClock();

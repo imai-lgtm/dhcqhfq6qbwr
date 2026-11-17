@@ -129,6 +129,14 @@ a.cab:active .play { transform: translateY(3px); box-shadow: 0 1px 0 color-mix(i
 footer { max-width: 1180px; margin: 30px auto 0; padding: 0 16px 40px; text-align: center; font-size: 12px; color: #a59cc0; line-height: 1.9; text-shadow: 0 1px 4px #000; }
 footer b { font-family: 'Dela', sans-serif; font-weight: 400; letter-spacing: .15em; color: #e3dcf5; }
 
+/* 1本ずつの入口（play-*.html）：店内に、そのゲームの筐体を1台だけ置く */
+body.solo #outside, body.solo #btnOut, body.solo .changer { display: none !important; }
+body.solo .bar { justify-content: flex-end; }
+body.solo .floor { grid-template-columns: minmax(0, 300px); justify-content: center; max-width: none; margin-top: 26px; }
+body.solo .pop { margin-left: 0; margin-right: 0; }
+body.solo .desc { font-size: 13px; }
+@media (max-width: 700px) { body.solo .floor { grid-template-columns: minmax(0, min(260px, 72vw)); } }
+
 @media (max-width: 1100px) { .floor { grid-template-columns: repeat(3, 1fr); max-width: 760px; } .changer { display: block; } }
 @media (max-width: 700px) {
   .top { padding-top: 54px; }
@@ -178,7 +186,7 @@ footer b { font-family: 'Dela', sans-serif; font-weight: 400; letter-spacing: .1
   <div class="ticker"><p>★ 全5タイトル 稼働中 ★ 1プレイ 0円 ★ スマホでもPCでも遊べます ★ 出演は全て弊社の社員です ★ ゲームはフィクションです。社員のみんなは実際には仲良しです ★ 本日も安全第一でお遊びください ★</p></div>
 
   <main class="floor">
-    <a class="cab c1" href="mou-yoroshii/" data-key="eba_save_v1" data-m="mou">
+    <a class="cab c1" href="mou-yoroshii/index.html" data-key="eba_save_v1" data-m="mou">
       <div class="stand"><div class="machine">
         <div class="scr"><img src="top/mou-yoroshii.webp" alt="もうよろしいですわ の画面"><em>PRESS START</em></div>
         <img class="body" src="top/cab_mou.webp" alt="">
@@ -192,7 +200,7 @@ footer b { font-family: 'Dela', sans-serif; font-weight: 400; letter-spacing: .1
         <div class="foot"><div class="coin"><span>1PLAY</span><b>¥0</b></div><span class="play">あそぶ ▶</span></div>
       </div>
     </a>
-    <a class="cab c2" href="yoshiyasu/" data-key="yoshi_save_v1" data-m="yoshi">
+    <a class="cab c2" href="yoshiyasu/index.html" data-key="yoshi_save_v1" data-m="yoshi">
       <div class="stand"><div class="machine">
         <div class="scr"><img src="top/yoshiyasu.webp" alt="よしやす の画面"><em>PRESS START</em></div>
         <img class="body" src="top/cab_yoshi.webp" alt="">
@@ -206,7 +214,7 @@ footer b { font-family: 'Dela', sans-serif; font-weight: 400; letter-spacing: .1
         <div class="foot"><div class="coin"><span>1PLAY</span><b>¥0</b></div><span class="play">あそぶ ▶</span></div>
       </div>
     </a>
-    <a class="cab c3" href="nebou/" data-key="nebou_save_v1" data-unit="sec" data-m="nebou">
+    <a class="cab c3" href="nebou/index.html" data-key="nebou_save_v1" data-unit="sec" data-m="nebou">
       <div class="stand"><div class="machine">
         <div class="scr"><img src="top/nebou.webp" alt="寝坊 の画面"><em>PRESS START</em></div>
         <img class="body" src="top/cab_nebou.webp" alt="">
@@ -220,7 +228,7 @@ footer b { font-family: 'Dela', sans-serif; font-weight: 400; letter-spacing: .1
         <div class="foot"><div class="coin"><span>1PLAY</span><b>¥0</b></div><span class="play">あそぶ ▶</span></div>
       </div>
     </a>
-    <a class="cab c4" href="nurarihyon/" data-key="nura_save_v1" data-m="nura">
+    <a class="cab c4" href="nurarihyon/index.html" data-key="nura_save_v1" data-m="nura">
       <div class="stand"><div class="machine">
         <div class="scr"><img src="top/nurarihyon.webp" alt="ぬらりひょん の画面"><em>PRESS START</em></div>
         <img class="body" src="top/cab_nura.webp" alt="">
@@ -234,7 +242,7 @@ footer b { font-family: 'Dela', sans-serif; font-weight: 400; letter-spacing: .1
         <div class="foot"><div class="coin"><span>1PLAY</span><b>¥0</b></div><span class="play">あそぶ ▶</span></div>
       </div>
     </a>
-    <a class="cab c5" href="ryuga-shibaku/" data-key="ryuga_save_v1" data-m="ryu">
+    <a class="cab c5" href="ryuga-shibaku/index.html" data-key="ryuga_save_v1" data-m="ryu">
       <div class="stand"><div class="machine">
         <div class="scr"><img src="top/ryuga-shibaku.webp" alt="龍がしばく の画面"><em>PRESS START</em></div>
         <img class="body" src="top/cab_ryu.webp" alt="">
@@ -276,15 +284,26 @@ footer b { font-family: 'Dela', sans-serif; font-weight: 400; letter-spacing: .1
 </section>
 <div class="flash"></div>
 
-<script src="top/layout.js?v=20261117"></script>
-<script src="shared/js/nozoom.js?v=20261117"></script>
-<script src="shared/js/audio.js?v=20261117"></script>
+<script src="top/layout.js?v=20261117c"></script>
+<script src="shared/js/nozoom.js?v=20261117c"></script>
+<script src="shared/js/audio.js?v=20261117c"></script>
 <script>
 (() => {
   const $ = (id) => document.getElementById(id);
   const LAY = window.TOP_LAYOUT || {};
   const A = window.AUDIO;
   A.init({ se: ['doorchime', 'chin', 'tap', 'cursor'], seBase: 'shared/se/', bgmBase: 'top/bgm/' });
+
+  // ── 1本ずつの入口（play-*.html。dev/top/make_solo.js がこのページから作る）：店の外は出さず、店内にそのゲームの筐体を1台だけ置く ──
+  //   make_solo.js が最初からその形で書き出す（読み込みの遅いスマホで、一瞬でも店の外や5台が見えないように）。ここは念のため
+  //   ゲームへは ?from=solo を付けて行く → ゲームの🏠・「← もどる」で、この入口に帰ってくる（shared/js/home.js）
+  const SOLO = window.GC_SOLO || '';
+  if (SOLO) {
+    document.body.classList.add('solo');
+    document.querySelectorAll('[data-m]').forEach((c) => { if (c.dataset.m !== SOLO) c.remove(); });
+    document.querySelectorAll('a.cab').forEach((c) => { const h = c.getAttribute('href'); if (!h.includes('from=solo')) c.setAttribute('href', h + '?from=solo'); });
+    document.querySelector('.ticker p').textContent = '★ 1プレイ 0円 ★ スマホでもPCでも遊べます ★ 出演は全て弊社の社員です ★ ゲームはフィクションです。社員のみんなは実際には仲良しです ★ 本日も安全第一でお遊びください ★';
+  }
 
   // ── 店の外：絵を画面いっぱいに（はみ出す分は切る）し、看板の板にネオンの店名をはめ込む ──
   const ext = $('ext'), extImg = $('extImg'), slot = $('slot');
@@ -299,8 +318,7 @@ footer b { font-family: 'Dela', sans-serif; font-weight: 400; letter-spacing: .1
     const [x, y, sw, sh] = L.sign;
     Object.assign(slot.style, { left: x + '%', top: y + '%', width: sw + '%', height: sh + '%' });
   }
-  addEventListener('resize', placeExt);
-  placeExt();
+  if (!SOLO) { addEventListener('resize', placeExt); placeExt(); }
 
   // ── 雨：1粒ずつ描く（奥は細く薄く遅い、手前は長く濃く速い）。地面には小さな波紋 ──
   const rc = $('rain'), rx = rc.getContext('2d');
@@ -378,7 +396,7 @@ footer b { font-family: 'Dela', sans-serif; font-weight: 400; letter-spacing: .1
     fitMarquee();
   }
   let entering = false;
-  $('btnEnter').addEventListener('click', () => {
+  if (!SOLO) $('btnEnter').addEventListener('click', () => {
     if (entering) return; entering = true;
     A.unlock(); A.se('doorchime'); A.bgm('lobby');
     document.body.classList.add('entering');
@@ -390,13 +408,14 @@ footer b { font-family: 'Dela', sans-serif; font-weight: 400; letter-spacing: .1
     ext.style.animation = 'none'; void ext.offsetWidth; ext.style.animation = '';
   });
   // ゲームから戻ってきた時（#floor）は店内から。BGM は最初にどこかを触った時に流す（ブラウザの決まりで、自動では鳴らせない）
-  if (location.hash === '#floor') {
-    showInside(false);
+  if (location.hash === '#floor' || SOLO) {
+    if (SOLO) document.body.className = 'in solo'; else showInside(false);
+    fitMarquee();
     const start = () => { A.unlock(); if (!A.muted) A.bgm('lobby'); removeEventListener('pointerdown', start, true); removeEventListener('keydown', start, true); };
     addEventListener('pointerdown', start, true); addEventListener('keydown', start, true);
   }
 
-  addEventListener('hashchange', () => { if (location.hash === '#floor' && !document.body.classList.contains('in')) showInside(false); });
+  if (!SOLO) addEventListener('hashchange', () => { if (location.hash === '#floor' && !document.body.classList.contains('in')) showInside(false); });
 
   // ── 自己ベスト（各ゲームがこの端末に保存したもの） ──
   document.querySelectorAll('a.cab').forEach((c) => {
@@ -431,7 +450,7 @@ footer b { font-family: 'Dela', sans-serif; font-weight: 400; letter-spacing: .1
     setTimeout(() => { location.href = c.getAttribute('href'); }, 380);
   }));
   // 両替機：押すとひとこと
-  const ch = $('changer');
+  const ch = $('changer') || document.createElement('div');
   const talk = () => { A.unlock(); A.se('cursor'); ch.classList.add('talk'); clearTimeout(ch._t); ch._t = setTimeout(() => ch.classList.remove('talk'), 1600); };
   ch.addEventListener('click', talk);
   ch.addEventListener('keydown', (e) => { if (e.key === 'Enter') talk(); });
