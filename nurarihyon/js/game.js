@@ -34,50 +34,47 @@
   // ───── 北村さんの頭（ブロック用） ─────
   // 頭の切り抜きを、頭の色の地にのせた絵。まわりに頭の色の余白（頭の大きさの半分ずつ）を付けて、形に合わせて伸ばして使う
   const HD = D.HEAD;
-  const HEADC = document.createElement('canvas');
-  //   2026-11-16 先方「入った直後は顔が出ず茶色のブロック。入り直すと出る」（スマホ）：
-  //   画像の読み込みが1回失敗すると、取り直さずにずっと茶色のままだった → 失敗したら少し待って取り直す。
-  //   読み込み済みの別の画像（先読み分）があればそれも使い、ゲーム開始時・描くたびに「まだなら作る」
+  //   2026-11-16 先方「入った直後は顔が出ず茶色のブロック。入り直すと出る」：読み込みに失敗したら取り直すようにした（Androidはこれで直った）
+  //   2026-11-17 先方：iPhone 17（iOS 27.2）の Safari でも、まだ茶色のまま
+  //   → スマホの中で絵を組み立てる（見えない下書き用の画面に、頭の切り抜きを頭の色の地とかさねる）のをやめ、
+  //     あらかじめ組み立てたJPEG（dev/nurarihyon/make_head_jpg.js で作る）を、そのままブロックに描く。
+  //     絵はプログラムの中（js/head_img.js）に入れてあるので、画像を取りに行く通信もない。だめなら同じ絵のファイルを取りに行く
+  const HEADC = { ok: false, im: null, w: 0, h: 0, hw: 0, hh: 0, from: '', err: '' };
+  const HEAD_SRCS = [window.NURA_HEAD_JPG, HD.jpg].filter(Boolean);
   let headImg = null, headTries = 0, headRetry = 0;
-  function buildHead(im) {
+  function useHead(im) {
     if (HEADC.ok || !im || !im.complete || !im.naturalWidth) return false;
-    const w = im.naturalWidth, h = im.naturalHeight;
-    HEADC.width = w * 2; HEADC.height = h * 2; HEADC.hw = w; HEADC.hh = h;
-    const c = HEADC.getContext('2d');
-    const g = c.createRadialGradient(w * 1.08, h * .7, 8, w, h * .95, h * 1.1);
-    g.addColorStop(0, HD.skin[0]); g.addColorStop(.45, HD.skin[1]); g.addColorStop(1, HD.skin[2]);
-    c.fillStyle = g; c.fillRect(0, 0, HEADC.width, HEADC.height);
-    c.drawImage(im, w / 2, h / 2);
+    HEADC.im = im; HEADC.w = im.naturalWidth; HEADC.h = im.naturalHeight; HEADC.hw = HEADC.w / 2; HEADC.hh = HEADC.h / 2;
+    HEADC.from = im.src.slice(0, 5) === 'data:' ? 'プログラム内' : 'ファイル';
     HEADC.ok = true; clearTimeout(headRetry);
     if (G) { draw(); drawNext(); }
     return true;
   }
   function loadHead() {
-    if (HEADC.ok) return;
+    if (HEADC.ok || !HEAD_SRCS.length) return;
     headRetry = 0;
+    const n = headTries++, src0 = HEAD_SRCS[n % HEAD_SRCS.length];
     const im = new Image();
-    im.onload = () => { if (!buildHead(im)) im.decode && im.decode().then(() => buildHead(im)).catch(() => { }); };
-    im.onerror = () => { if (headImg === im && headTries < 40) { clearTimeout(headRetry); headRetry = setTimeout(loadHead, Math.min(400 * headTries, 3000)); } };
-    headImg = im; headImg.t0 = performance.now();
-    im.src = HD.src + (headTries++ ? '?r=' + headTries : '');   // 2回目からは、失敗した結果を使い回さないように別の名前で
+    im.onload = () => { if (!useHead(im) && im.decode) im.decode().then(() => useHead(im)).catch(() => { }); };
+    im.onerror = () => { HEADC.err = '読み込み失敗 ' + (n + 1) + '回目'; if (headImg === im && headTries < 40) { clearTimeout(headRetry); headRetry = setTimeout(loadHead, Math.min(300 * headTries, 3000)); } };
+    headImg = im; im.t0 = performance.now();
+    // ファイルの2回目からは、失敗した結果を使い回さないように別の名前で
+    im.src = src0.slice(0, 5) === 'data:' || n < HEAD_SRCS.length ? src0 : src0 + '?r=' + n;
   }
-  // まだ顔の絵が無ければ作る（読み込みが失敗したままなら、取り直す）
-  //   now＝true（ゲーム開始時）なら、失敗したままの時に待たずにすぐ取り直す
+  // まだ顔の絵が使えなければ使えるようにする。now＝true（ゲーム開始時）なら、失敗したままの時にすぐ取り直す
   function ensureHead(now) {
-    if (HEADC.ok) return;
-    if (buildHead(headImg)) return;
-    try { if (PRELOAD.some((im) => im.src.indexOf(HD.src) >= 0 && buildHead(im))) return; } catch (e) { }
+    if (HEADC.ok || useHead(headImg)) return;
     if (now && headImg && headImg.complete && !headImg.naturalWidth) { clearTimeout(headRetry); loadHead(); }
   }
   loadHead();
-  // 見張り：顔の絵ができるまで2秒ごとに確かめる。失敗のまま・6秒たっても読み込みが終わらない時は取り直す
+  // 見張り：顔の絵が使えるまで1秒ごとに確かめる。失敗のまま・5秒たっても読み込みが終わらない時は、次の取り方で取り直す
   const headWatch = setInterval(() => {
     if (HEADC.ok) { clearInterval(headWatch); return; }
     ensureHead();
     if (HEADC.ok || headTries >= 40) return;
-    const im = headImg, stalled = im && !im.complete && performance.now() - im.t0 > 6000, failed = im && im.complete && !im.naturalWidth;
+    const im = headImg, stalled = im && !im.complete && performance.now() - im.t0 > 5000, failed = im && im.complete && !im.naturalWidth;
     if (stalled || (failed && !headRetry)) { clearTimeout(headRetry); loadHead(); }
-  }, 2000);
+  }, 1000);
   // 顔（目・メガネ・口のあたり）が、頭の絵のどこにあるか（割合）。ここがブロックのあるマスに乗るように貼る
   const FACE_BOX = { x0: .12, x1: .78, y0: .6, y1: .92 };
   // マスの集まり cells（[x, y] の並び）に、北村さんの頭を1つ貼る。返すのは、各マスが写す頭の範囲 [u, v, du, dv]（頭の絵に対する割合）
@@ -169,8 +166,7 @@
   }
   $('#btnStart').addEventListener('click', async () => {
     A.unlock(); A.se('start');
-    if (!save.howto) { overlay('howto', true); return; }
-    await sleep(400); startGame();
+    overlay('howto', true);   // 2026-11-17 先方：ルール説明は毎回出す（いろいろな人が同じ端末で遊ぶため）。「わかった」で始まる
   });
   $('#btnHowtoOk').addEventListener('click', () => { A.se('tap'); save.howto = true; store(); overlay('howto', false); startGame(); });
   $('#btnCredits').addEventListener('click', () => { A.se('tap'); overlay('credits', true); });
@@ -466,7 +462,10 @@
       if (HEADC.ok && o.cell.src && !far) {
         const [u, v, du, dv] = o.cell.src, W0 = HEADC.hw, H0 = HEADC.hh;
         const su = Math.max(-.5, Math.min(1.5 - du, u)), sv = Math.max(-.5, Math.min(1.5 - dv, v));
-        c.drawImage(HEADC, W0 * (.5 + su), H0 * (.5 + sv), du * W0, dv * H0, x - .7, y - .7, s + 1.4, s + 1.4);
+        // 切り出す範囲が絵の外に少しでもはみ出すと描かないブラウザがあるので、絵の中におさめる
+        const sx = Math.max(0, W0 * (.5 + su)), sy = Math.max(0, H0 * (.5 + sv)), sw = Math.min(du * W0, HEADC.w - sx), sh = Math.min(dv * H0, HEADC.h - sy);
+        try { c.drawImage(HEADC.im, sx, sy, sw, sh, x - .7, y - .7, s + 1.4, s + 1.4); }
+        catch (e) { HEADC.err = '描けない: ' + e.message; c.fillStyle = HD.skin[1]; c.fillRect(x - 1, y - 1, s + 2, s + 2); }
       }   // 頭の絵にかからないマスは、無地の頭の色（頭のふちの線が並ばないように）
       else { c.fillStyle = HD.skin[1]; c.fillRect(x - 1, y - 1, s + 2, s + 2); }
       c.restore();
@@ -605,6 +604,7 @@
     remapHeads: () => remapHeads(),
     drawHeads: (...a) => drawHeads(...a),
     draw: () => draw(),
+    head: () => ({ ok: HEADC.ok, from: HEADC.from, w: HEADC.w, tries: headTries, err: HEADC.err }),
     best() { const l = this.ranked(); return l ? l[0] || null : null; },
     // 置き方を、よい順に並べて返す（雑な自動プレイ役は、2〜4番目を選ぶこともある）
     ranked() {
@@ -641,4 +641,19 @@
   fit();
   toTitle();
   if (P.has('play')) startGame();
+
+  // 確認用（URLの最後に ?check を付けて開く）：画面の上に、顔の絵の状態を出す。iPhoneで直らない時に、スクショで原因を見るため
+  if (P.has('check')) {
+    const box = document.createElement('div');
+    box.style.cssText = 'position:fixed;left:4px;bottom:4px;z-index:9999;max-width:96vw;padding:4px 8px;border-radius:6px;background:rgba(0,0,0,.75);color:#fff;font:11px/1.4 sans-serif;pointer-events:none;white-space:pre-wrap';
+    document.body.appendChild(box);
+    const errs = [];
+    addEventListener('error', (e) => errs.push((e.message || (e.target && e.target.src) || 'error').slice(0, 80)), true);
+    const tick = () => {
+      box.textContent = `版 2026-11-17　顔の絵：${HEADC.ok ? 'OK（' + HEADC.from + ' ' + HEADC.w + '×' + HEADC.h + '）' : 'まだ'}　読み込み ${headTries} 回`
+        + (HEADC.err ? '\n' + HEADC.err : '') + (errs.length ? '\nエラー：' + errs.slice(-2).join(' / ') : '')
+        + '\n' + navigator.userAgent.replace(/^Mozilla\/5\.0 /, '').slice(0, 120);
+    };
+    tick(); setInterval(tick, 1000);
+  }
 })();

@@ -75,9 +75,7 @@
   }
   $('#btnStart').addEventListener('click', async () => {
     A.unlock(); A.se('start'); A.voice('start');
-    if (!save.howto) { overlay('howto', true); return; }
-    await sleep(500);
-    startGame();
+    overlay('howto', true);   // 2026-11-17 先方：ルール説明は毎回出す（いろいろな人が同じ端末で遊ぶため）。「わかった」で始まる
   });
   $('#btnHowtoOk').addEventListener('click', () => { A.se('tap'); save.howto = true; store(); overlay('howto', false); startGame(); });
   $('.t-miya').addEventListener('click', () => {

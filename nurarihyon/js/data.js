@@ -23,7 +23,7 @@ window.DATA = {
   KANJI_ORDER: ['SHI', 'MIN', 'ZEI'],   // 1回に3つまとめて投げ込む（順番はバラバラ。間に普通のブロックがはさまる）
   KANJI_COLOR: { '市': '#2f62b8', '民': '#2a8f55', '税': '#b8352a' },
   // ブロック用の北村さんの頭（切り抜き。dev/nurarihyon/make_head.py で作る）。skin＝形の角を埋める頭の色
-  HEAD: { src: 'assets/face/kitamura_head.webp', skin: ['#ecb586', '#df9f6c', '#c08050'] },
+  HEAD: { src: 'assets/face/kitamura_head.webp', jpg: 'assets/face/kitamura_head_bg.jpg', skin: ['#ecb586', '#df9f6c', '#c08050'] },
 
   // レベル：必要な列・落ちる速さ（1段の秒数）・税務署員が来る間隔（置いたブロックの数、0＝来ない）
   //   2026-11-05 打ち合わせ「レベル3くらいでアップアップ」→ 全体にゆっくり・税務署員の間隔も少し空ける
